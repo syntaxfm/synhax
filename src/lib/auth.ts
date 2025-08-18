@@ -1,5 +1,5 @@
 import { betterAuth } from 'better-auth';
-import { admin } from 'better-auth/plugins';
+import { admin, jwt } from 'better-auth/plugins';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 
 import { db } from '../db';
@@ -17,5 +17,5 @@ export const auth = betterAuth({
 			clientSecret: GITHUB_CLIENT_SECRET
 		}
 	},
-	plugins: [admin()]
+	plugins: [admin(), jwt()]
 });

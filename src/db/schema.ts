@@ -1,4 +1,3 @@
-import type { email } from 'better-auth';
 import { sql } from 'drizzle-orm';
 import {
 	pgTable,
@@ -11,10 +10,6 @@ import {
 	index,
 	uniqueIndex,
 	check,
-	foreignKey,
-	index,
-	uniqueIndex,
-	uniqueIndex,
 	index
 } from 'drizzle-orm/pg-core';
 
@@ -151,10 +146,10 @@ export const targets = pgTable(
 		created_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
 		updated_at: timestamp({ withTimezone: true }).notNull().defaultNow()
 	},
-	(t) => ({
-		targets_active_idx: index('targets_is_active_idx').on(t.is_active),
-		targets_archived_idx: index('targets_archived_at_idx').on(t.archived_at)
-	})
+	(t) => [
+		index('targets_is_active_idx').on(t.is_active),
+		index('targets_archived_at_idx').on(t.archived_at)
+	]
 );
 
 /* =========================
@@ -345,3 +340,10 @@ export const awards = pgTable(
 		awards_battle_idx: index('awards_battle_idx').on(t.battle_id)
 	})
 );
+
+export const jwks = pgTable('jwks', {
+	id: text('id').primaryKey(),
+	publicKey: text('public_key').notNull(),
+	privateKey: text('private_key').notNull(),
+	createdAt: timestamp('created_at').notNull()
+});
