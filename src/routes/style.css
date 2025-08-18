@@ -1,0 +1,37 @@
+:root {
+	--white: #fff;
+	--grey: #ddd;
+	--border: 1px solid var(--grey);
+
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+body {
+	height: 100vh;
+}
+
+iframe {
+	padding: 0.75rem;
+	background: var(--white);
+	width: 100%;
+	height: 100%;
+	border: var(--border);
+	border-radius: 0.5rem;
+}
+
+.stack {
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	gap: var(--stack-gap, 10px);
+	> * {
+		margin: 0;
+	}
+}
+
+button {
+	border: var(--border);
+	background: transparent;
+	border-radius: 4px;
+	font-size: 14px;
+}
