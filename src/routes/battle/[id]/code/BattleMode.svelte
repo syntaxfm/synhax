@@ -8,7 +8,7 @@
 <!-- 3.2 iFrame of output -->
 <!-- 3.3 iFrame could be broken out into it's own window -->
 <!-- 3.4 Timer -->
-<script>
+<script lang="ts">
 	import Highlight from 'svelte-highlight';
 	import css from 'svelte-highlight/languages/css';
 	import xml from 'svelte-highlight/languages/xml';
@@ -18,8 +18,11 @@
 	import Debug from '$lib/Debug.svelte';
 	import { UserState } from '$lib/state/UserState.svelte';
 	import { Pane, Splitpanes } from 'svelte-splitpanes';
+	import type { Battle } from '$sync/schema';
 
 	let size = $state(20);
+
+	let { battle }: { battle: Battle } = $props();
 
 	const user = new UserState();
 	$effect(() => {
@@ -52,10 +55,20 @@
 			</Splitpanes>
 		</Pane>
 		<Pane minSize={20}>
-			<div class="output stack">
-				<h2>App</h2>
-				<AppFrame {user} />
-			</div>
+			<Splitpanes horizontal={true}>
+				<Pane minSize={15}>
+					<div class="output stack">
+						<h2>Target</h2>
+						<img src={battle?.target?.image} alt="Battle Image" width="100%" />
+					</div>
+				</Pane>
+				<Pane>
+					<div class="output stack">
+						<h2>App</h2>
+						<AppFrame {user} />
+					</div>
+				</Pane>
+			</Splitpanes>
 		</Pane>
 	</Splitpanes>
 

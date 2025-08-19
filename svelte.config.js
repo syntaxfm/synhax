@@ -22,7 +22,8 @@ const config = {
 			$routes: 'src/routes',
 			$sync: 'src/sync',
 			$db: 'src/db',
-			$utils: 'src/utils'
+			$utils: 'src/utils',
+			$const: 'src/constants'
 		}
 	}
 };

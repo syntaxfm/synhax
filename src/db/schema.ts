@@ -28,11 +28,7 @@ export const participant_status_enum = pgEnum('participant_status', [
 	'FINISHED'
 ]);
 
-export const user_award_enum = pgEnum('user_award', [
-	'MOST_ACCURATE',
-	'REAL_WORLD',
-	'BEST_OVERALL'
-]);
+export const user_award_enum = pgEnum('user_award', ['MOST_ACCURATE', 'REAL_WORLD', 'BEST_FEEL']);
 export const award_outcome_enum = pgEnum('award_outcome', ['AWARDED', 'VOID_TIE', 'VOID_OTHER']);
 export const hax_type_enum = pgEnum('hax_type', ['BATTLE', 'SOLO']);
 
@@ -344,6 +340,33 @@ export const jwks = pgTable('jwks', {
 	createdAt: timestamp('created_at').notNull()
 });
 
+export const images = pgTable(
+	'images',
+	{
+		id: uuid('id').primaryKey().defaultRandom(),
+		// R2 object key, e.g. "uploads/uuid-filename.jpg"
+		key: text('key').notNull(),
+		// owner
+		user_id: text('user_id')
+			.notNull()
+			.references(() => user.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+
+		created_at: timestamp('created_at', { withTimezone: true }).defaultNow()
+	},
+	(t) => [
+		index('images_user_created_at_idx').on(t.user_id, t.created_at),
+		index('images_key_idx').on(t.key)
+	]
+);
+
+// Optional: relations helper (nice for typed joins)
+export const images_relations = relations(images, ({ one }) => ({
+	user: one(user, {
+		fields: [images.user_id],
+		references: [user.id]
+	})
+}));
+
 // User → Session, Account, Relationship, BattleParticipant, Hax
 export const user_relations = relations(user, ({ many }) => ({
 	relationships: many(user_relationships, { relationName: 'fromUser' }),
@@ -406,4 +429,23 @@ export const hax_relations = relations(hax, ({ one }) => ({
 		fields: [hax.target_id],
 		references: [targets.id]
 	})
+}));
+
+// --- Ratings relations
+export const ratings_relations = relations(ratings, ({ one }) => ({
+	user: one(user, {
+		fields: [ratings.user_id],
+		references: [user.id]
+	}),
+	target: one(targets, {
+		fields: [ratings.target_id],
+		references: [targets.id]
+	})
+}));
+
+// --- Targets relations (add ratings backref)
+export const targets_relations = relations(targets, ({ many }) => ({
+	hax: many(hax),
+	ratings: many(ratings),
+	battles: many(battles)
 }));

@@ -12,6 +12,8 @@ export { schema, type Schema };
 export type User = Row<typeof schema.tables.user>;
 export type Target = Row<typeof schema.tables.targets>;
 export type Rating = Row<typeof schema.tables.ratings>;
+export type Battle = Row<typeof schema.tables.battles>;
+export type Participants = Row<typeof schema.tables.battle_participants>;
 
 type AuthData = {
 	// The logged-in user.

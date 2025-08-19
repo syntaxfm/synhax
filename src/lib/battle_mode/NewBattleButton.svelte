@@ -18,7 +18,7 @@
 			overtime_seconds: 0,
 			referee_id: z.current.userID
 		});
-		goto(`/battle/${id}/init`);
+		goto(`/battle/${id}/ref`);
 	}
 </script>
 

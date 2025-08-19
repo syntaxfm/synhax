@@ -1,5 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import Countdown from '$lib/battle_mode/Countdown.svelte';
+	import ShareLinks from '$lib/battle_mode/ShareLinks.svelte';
+	import ToggleButton from '$lib/ui/ToggleButton.svelte';
 	import { z } from '$sync/client';
 	import { Query } from 'zero-svelte';
 
@@ -11,11 +14,73 @@
 			.related('participants', (q) => q.related('user'))
 			.related('target')
 	);
+	let over_status: 'ACTIVE' | 'OVER' = $state('ACTIVE');
 
 	async function start() {
-		await z.current.mutate.battles.update({
+		if (!battle.current) return;
+
+		const now = Date.now();
+		const updates: any = {
 			id: page.params.id,
-			status: 'ACTIVE' as const
+			status: 'ACTIVE' as const,
+			starts_at: now
+		};
+
+		// Set ends_at based on battle type
+		if (battle.current.type === 'TIME_TRIAL') {
+			updates.ends_at = null;
+		} else if (battle.current.type === 'TIMED_MATCH') {
+			updates.ends_at = now + battle.current.total_time_seconds * 1000;
+		}
+
+		await z.current.mutate.battles.update(updates);
+	}
+
+	async function toggle_privacy() {
+		if (!battle.current) return;
+		const new_visibility = battle.current.visibility === 'PUBLIC' ? 'PRIVATE' : 'PUBLIC';
+		await z.current.mutate.battles.update({
+			id: battle.current.id,
+			visibility: new_visibility
+		});
+	}
+	async function toggle_type() {
+		if (!battle.current) return;
+		const new_type = battle.current.type === 'TIME_TRIAL' ? 'TIMED_MATCH' : 'TIME_TRIAL';
+		await z.current.mutate.battles.update({
+			id: battle.current.id,
+			type: new_type
+		});
+	}
+
+	async function add_overtime(ot: number) {
+		if (!battle.current) return;
+
+		await z.current.mutate.battles.update({
+			id: battle.current.id,
+			overtime_seconds: ot * 60,
+			ends_at: battle.current.ends_at + ot * 60 * 1000
+		});
+	}
+
+	function update_time_limit(event: Event) {
+		if (!battle.current) return;
+		const input = event.target as HTMLInputElement;
+		const new_time = parseFloat(input.value);
+		if (!isNaN(new_time)) {
+			z.current.mutate.battles.update({
+				id: battle.current.id,
+				total_time_seconds: new_time * 60
+			});
+		}
+	}
+
+	function finish_battle() {
+		if (!battle.current) return;
+
+		z.current.mutate.battles.update({
+			id: battle.current.id,
+			status: 'COMPLETED'
 		});
 	}
 </script>
@@ -30,42 +95,71 @@
 
 	<p>Today's Referee: {battle?.current?.referee?.name}</p>
 
-	<div>
-		<button>Public</button>
-		<button>Private</button>
-	</div>
+	<ToggleButton
+		toggle={battle.current.visibility === 'PUBLIC'}
+		ontoggle={toggle_privacy}
+		on_text="Public"
+		off_text="Private"
+	/>
 
-	<div>
-		<label for="join-link">Join Link</label>
-		<input readonly id="join-link" value="http://localhost:5173/battle/{battle.current.id}/lobby" />
-		<button>Copy</button>
-	</div>
+	<ShareLinks battle={battle.current} />
 
-	<div disabled={battle.current.visibility !== 'PUBLIC'}>
-		<label for="watch-link">Watch Link</label>
-		<input
-			readonly
-			id="watch-link"
-			value="http://localhost:5173/battle/{battle.current.zero_room_id}/watch"
-		/>
-		<button>Copy</button>
-	</div>
-	<label for="overtime">Overtime</label>
-	<select>
-		<option value="5">5</option>
-		<option value="10">10</option>
-		<option value="15">15</option>
-		<option value="20">20</option>
-	</select>
-	<button>Add Overtime</button>
+	<ToggleButton
+		disabled={battle.current?.status === 'ACTIVE'}
+		toggle={battle.current.type === 'TIME_TRIAL'}
+		ontoggle={toggle_type}
+		on_text="Time Trial"
+		off_text="Timed Match"
+	/>
+
+	{#if battle.current?.type === 'TIMED_MATCH'}
+		<div>
+			<label for="time-limit">Time Limit</label>
+			<input
+				defaultValue={battle.current.total_time_seconds / 60 || 10}
+				id="time-limit"
+				type="number"
+				placeholder="Enter time limit"
+				required
+				step="any"
+				onchange={update_time_limit}
+			/>minutes
+		</div>
+
+		<Countdown battle={battle.current} bind:status={over_status} view="REF" />
+
+		{#if battle.current.status === 'ACTIVE' && over_status === 'OVER'}
+			<h3>Time's Up!</h3>
+			<button
+				disabled={battle.current?.status !== 'ACTIVE' && over_status !== 'OVER'}
+				onclick={finish_battle}>Finish Battle</button
+			>
+
+			<hr />
+			<p>Need more time?</p>
+			<label for="overtime">Add Overtime (minutes)</label>
+			<button onclick={() => add_overtime(5)}>5</button>
+			<button onclick={() => add_overtime(10)}>10</button>
+			<button onclick={() => add_overtime(15)}>15</button>
+			<button onclick={() => add_overtime(20)}>20</button>
+		{/if}
+	{/if}
+
+	{#each battle.current?.participants as participant}
+		<div>
+			<img src={participant.user?.image} alt="" />
+			<p>{participant.user.name}</p>
+			<p>{participant.status}</p>
+		</div>
+	{/each}
+
+	{#if battle.current?.status === 'PENDING'}
+		<button
+			disabled={battle.current.type === 'TIMED_MATCH' && battle.current?.total_time_seconds === 0}
+			onclick={start}>Start</button
+		>
+	{/if}
 {/if}
 
-{#each battle.current?.participants as participant}
-	<div>
-		<p>{participant.user_id}</p>
-		<p>{participant.status}</p>
-	</div>
-{/each}
-<button onclick={start}>Start</button>
-
+<!-- TODO add battlers from this screen -->
 <!-- TODO add battlers from this screen -->

@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import Countdown from '$lib/battle_mode/Countdown.svelte';
+	import Participants from '$lib/battle_mode/Participants.svelte';
+	import ShareLinks from '$lib/battle_mode/ShareLinks.svelte';
 	import { z } from '$sync/client';
 	import { remove_screaming } from '$utils/formatting';
 	import { Query } from 'zero-svelte';
@@ -42,7 +45,7 @@
 	}
 
 	$effect(() => {
-		if (battle.current.status === 'ACTIVE') {
+		if (battle?.current?.status === 'ACTIVE') {
 			goto(`/battle/${page.params.id}/code`);
 		}
 	});
@@ -51,22 +54,38 @@
 <header>
 	<h2>Battle Lobby</h2>
 </header>
+{#if battle.current}
+	<h4>The Target</h4>
+	<img src={battle.current.target.image} alt="Battle Image" width="300" />
+	<p>Today's Referee: {battle?.current?.referee?.name}</p>
+	<h3>{remove_screaming(battle?.current?.type || '')}</h3>
 
-<p>Today's Referee: {battle?.current?.referee?.name}</p>
-<h3>{remove_screaming(battle?.current?.type || '')}</h3>
+	{#if !me}
+		<button onclick={join_battle}>Join</button>
+	{:else if me?.status === 'PENDING'}
+		<button onclick={lock_in}>Lock In</button>
+	{/if}
 
-{#if !me}
-	<button onclick={join_battle}>Join</button>
-{:else if me?.status === 'PENDING'}
-	<button onclick={lock_in}>Lock In</button>
+	{#if battle.current?.type === 'TIMED_MATCH'}
+		<Countdown battle={battle.current} />
+	{/if}
+
+	<ShareLinks battle={battle.current} />
+
+	<Participants
+		locked_in_participants={locked_in_participants || []}
+		participants={battle.current?.participants || []}
+	/>
+
+	{#each battle.current?.participants as participant}
+		<div>
+			<img src={participant.user?.image} alt="" />
+			<p>{participant.user.name} is {participant.status}</p>
+		</div>
+	{/each}
+
+	{#if battle?.current?.status === 'ACTIVE'}
+		<p>Battle is currently active.</p>
+		<a href={`/battle/${battle.current.id}/code`}>Go to Battle</a>
+	{/if}
 {/if}
-
-{locked_in_participants?.length} / {battle.current?.participants.length} Participants Locked In
-
-{#each battle.current?.participants as participant}
-	<div>
-		<img src={participant.user?.image} alt="" />
-		<p>{participant.user.name}</p>
-		<p>{participant.status}</p>
-	</div>
-{/each}

@@ -658,6 +658,48 @@ export const schema = {
       },
       primaryKey: ["id"],
     },
+    images: {
+      name: "images",
+      columns: {
+        id: {
+          type: "string",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "images",
+            "id"
+          >,
+        },
+        key: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "images",
+            "key"
+          >,
+        },
+        user_id: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "images",
+            "user_id"
+          >,
+        },
+        created_at: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "images",
+            "created_at"
+          >,
+        },
+      },
+      primaryKey: ["id"],
+    },
     jwks: {
       name: "jwks",
       columns: {
@@ -1308,6 +1350,60 @@ export const schema = {
           destField: ["id"],
           destSchema: "targets",
           cardinality: "one",
+        },
+      ],
+    },
+    images: {
+      user: [
+        {
+          sourceField: ["user_id"],
+          destField: ["id"],
+          destSchema: "user",
+          cardinality: "one",
+        },
+      ],
+    },
+    ratings: {
+      user: [
+        {
+          sourceField: ["user_id"],
+          destField: ["id"],
+          destSchema: "user",
+          cardinality: "one",
+        },
+      ],
+      target: [
+        {
+          sourceField: ["target_id"],
+          destField: ["id"],
+          destSchema: "targets",
+          cardinality: "one",
+        },
+      ],
+    },
+    targets: {
+      hax: [
+        {
+          sourceField: ["id"],
+          destField: ["target_id"],
+          destSchema: "hax",
+          cardinality: "many",
+        },
+      ],
+      ratings: [
+        {
+          sourceField: ["id"],
+          destField: ["target_id"],
+          destSchema: "ratings",
+          cardinality: "many",
+        },
+      ],
+      battles: [
+        {
+          sourceField: ["id"],
+          destField: ["target_id"],
+          destSchema: "battles",
+          cardinality: "many",
         },
       ],
     },
