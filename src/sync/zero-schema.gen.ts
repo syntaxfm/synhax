@@ -15,9 +15,9 @@
  * ------------------------------------------------------------
  */
 
-import type { ZeroCustomType } from 'drizzle-zero';
-import type * as drizzleSchema from '../db/schema';
-import type { DrizzleToZeroSchema } from 'drizzle-zero';
+import type { ZeroCustomType } from "drizzle-zero";
+import type * as drizzleSchema from "../db/schema";
+import type { DrizzleToZeroSchema } from "drizzle-zero";
 
 type ZeroSchema = DrizzleToZeroSchema<typeof drizzleSchema>;
 
@@ -26,753 +26,1344 @@ type ZeroSchema = DrizzleToZeroSchema<typeof drizzleSchema>;
  * This type is auto-generated from your Drizzle schema definition.
  */
 export const schema = {
-	tables: {
-		account: {
-			name: 'account',
-			columns: {
-				id: {
-					type: 'string',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'account', 'id'>
-				},
-				accountId: {
-					type: 'string',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'account', 'accountId'>,
-					serverName: 'account_id'
-				},
-				providerId: {
-					type: 'string',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'account', 'providerId'>,
-					serverName: 'provider_id'
-				},
-				userId: {
-					type: 'string',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'account', 'userId'>,
-					serverName: 'user_id'
-				},
-				accessToken: {
-					type: 'string',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'account', 'accessToken'>,
-					serverName: 'access_token'
-				},
-				refreshToken: {
-					type: 'string',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'account', 'refreshToken'>,
-					serverName: 'refresh_token'
-				},
-				idToken: {
-					type: 'string',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'account', 'idToken'>,
-					serverName: 'id_token'
-				},
-				accessTokenExpiresAt: {
-					type: 'number',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<
-						ZeroSchema,
-						'account',
-						'accessTokenExpiresAt'
-					>,
-					serverName: 'access_token_expires_at'
-				},
-				refreshTokenExpiresAt: {
-					type: 'number',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<
-						ZeroSchema,
-						'account',
-						'refreshTokenExpiresAt'
-					>,
-					serverName: 'refresh_token_expires_at'
-				},
-				scope: {
-					type: 'string',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'account', 'scope'>
-				},
-				password: {
-					type: 'string',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'account', 'password'>
-				},
-				createdAt: {
-					type: 'number',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'account', 'createdAt'>,
-					serverName: 'created_at'
-				},
-				updatedAt: {
-					type: 'number',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'account', 'updatedAt'>,
-					serverName: 'updated_at'
-				}
-			},
-			primaryKey: ['id']
-		},
-		awards: {
-			name: 'awards',
-			columns: {
-				id: {
-					type: 'string',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'awards', 'id'>
-				},
-				user_id: {
-					type: 'string',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'awards', 'user_id'>
-				},
-				battle_id: {
-					type: 'string',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'awards', 'battle_id'>
-				},
-				award_type: {
-					type: 'string',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'awards', 'award_type'>
-				},
-				outcome: {
-					type: 'string',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'awards', 'outcome'>
-				},
-				created_at: {
-					type: 'number',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'awards', 'created_at'>
-				},
-				updated_at: {
-					type: 'number',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'awards', 'updated_at'>
-				}
-			},
-			primaryKey: ['id']
-		},
-		battle_participants: {
-			name: 'battle_participants',
-			columns: {
-				id: {
-					type: 'string',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'battle_participants', 'id'>
-				},
-				battle_id: {
-					type: 'string',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<
-						ZeroSchema,
-						'battle_participants',
-						'battle_id'
-					>
-				},
-				user_id: {
-					type: 'string',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<
-						ZeroSchema,
-						'battle_participants',
-						'user_id'
-					>
-				},
-				status: {
-					type: 'string',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'battle_participants', 'status'>
-				},
-				display_order: {
-					type: 'number',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<
-						ZeroSchema,
-						'battle_participants',
-						'display_order'
-					>
-				},
-				joined_at: {
-					type: 'number',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<
-						ZeroSchema,
-						'battle_participants',
-						'joined_at'
-					>
-				},
-				last_seen_at: {
-					type: 'number',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<
-						ZeroSchema,
-						'battle_participants',
-						'last_seen_at'
-					>
-				},
-				finished_at: {
-					type: 'number',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<
-						ZeroSchema,
-						'battle_participants',
-						'finished_at'
-					>
-				},
-				created_at: {
-					type: 'number',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<
-						ZeroSchema,
-						'battle_participants',
-						'created_at'
-					>
-				},
-				updated_at: {
-					type: 'number',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<
-						ZeroSchema,
-						'battle_participants',
-						'updated_at'
-					>
-				}
-			},
-			primaryKey: ['id']
-		},
-		battle_votes: {
-			name: 'battle_votes',
-			columns: {
-				id: {
-					type: 'string',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'battle_votes', 'id'>
-				},
-				battle_id: {
-					type: 'string',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'battle_votes', 'battle_id'>
-				},
-				voter_id: {
-					type: 'string',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'battle_votes', 'voter_id'>
-				},
-				nominee_hax_id: {
-					type: 'string',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<
-						ZeroSchema,
-						'battle_votes',
-						'nominee_hax_id'
-					>
-				},
-				award_type: {
-					type: 'string',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'battle_votes', 'award_type'>
-				},
-				locked_at: {
-					type: 'number',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'battle_votes', 'locked_at'>
-				},
-				created_at: {
-					type: 'number',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'battle_votes', 'created_at'>
-				}
-			},
-			primaryKey: ['id']
-		},
-		battles: {
-			name: 'battles',
-			columns: {
-				id: {
-					type: 'string',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'battles', 'id'>
-				},
-				date: {
-					type: 'number',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'battles', 'date'>
-				},
-				referee_id: {
-					type: 'string',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'battles', 'referee_id'>
-				},
-				target_id: {
-					type: 'string',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'battles', 'target_id'>
-				},
-				status: {
-					type: 'string',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'battles', 'status'>
-				},
-				visibility: {
-					type: 'string',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'battles', 'visibility'>
-				},
-				zero_room_id: {
-					type: 'string',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'battles', 'zero_room_id'>
-				},
-				type: {
-					type: 'string',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'battles', 'type'>
-				},
-				total_time_seconds: {
-					type: 'number',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'battles', 'total_time_seconds'>
-				},
-				overtime_seconds: {
-					type: 'number',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'battles', 'overtime_seconds'>
-				},
-				rating: {
-					type: 'number',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'battles', 'rating'>
-				},
-				starts_at: {
-					type: 'number',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'battles', 'starts_at'>
-				},
-				ends_at: {
-					type: 'number',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'battles', 'ends_at'>
-				},
-				revealed_at: {
-					type: 'number',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'battles', 'revealed_at'>
-				},
-				created_at: {
-					type: 'number',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'battles', 'created_at'>
-				},
-				updated_at: {
-					type: 'number',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'battles', 'updated_at'>
-				}
-			},
-			primaryKey: ['id']
-		},
-		hax: {
-			name: 'hax',
-			columns: {
-				id: {
-					type: 'string',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'hax', 'id'>
-				},
-				target_id: {
-					type: 'string',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'hax', 'target_id'>
-				},
-				battle_id: {
-					type: 'string',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'hax', 'battle_id'>
-				},
-				user_id: {
-					type: 'string',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'hax', 'user_id'>
-				},
-				html: {
-					type: 'string',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'hax', 'html'>
-				},
-				css: {
-					type: 'string',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'hax', 'css'>
-				},
-				type: {
-					type: 'string',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'hax', 'type'>
-				},
-				submitted_at: {
-					type: 'number',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'hax', 'submitted_at'>
-				},
-				submission_locked_at: {
-					type: 'number',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'hax', 'submission_locked_at'>
-				},
-				is_final: {
-					type: 'boolean',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'hax', 'is_final'>
-				},
-				rendered_preview_url: {
-					type: 'string',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'hax', 'rendered_preview_url'>
-				},
-				created_at: {
-					type: 'number',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'hax', 'created_at'>
-				},
-				updated_at: {
-					type: 'number',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'hax', 'updated_at'>
-				}
-			},
-			primaryKey: ['id']
-		},
-		ratings: {
-			name: 'ratings',
-			columns: {
-				id: {
-					type: 'string',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'ratings', 'id'>
-				},
-				user_id: {
-					type: 'string',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'ratings', 'user_id'>
-				},
-				target_id: {
-					type: 'string',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'ratings', 'target_id'>
-				},
-				difficulty: {
-					type: 'number',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'ratings', 'difficulty'>
-				},
-				creativity: {
-					type: 'number',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'ratings', 'creativity'>
-				},
-				fun: {
-					type: 'number',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'ratings', 'fun'>
-				},
-				coolness: {
-					type: 'number',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'ratings', 'coolness'>
-				},
-				created_at: {
-					type: 'number',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'ratings', 'created_at'>
-				}
-			},
-			primaryKey: ['id']
-		},
-		session: {
-			name: 'session',
-			columns: {
-				id: {
-					type: 'string',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'session', 'id'>
-				},
-				expiresAt: {
-					type: 'number',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'session', 'expiresAt'>,
-					serverName: 'expires_at'
-				},
-				token: {
-					type: 'string',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'session', 'token'>
-				},
-				createdAt: {
-					type: 'number',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'session', 'createdAt'>,
-					serverName: 'created_at'
-				},
-				updatedAt: {
-					type: 'number',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'session', 'updatedAt'>,
-					serverName: 'updated_at'
-				},
-				ipAddress: {
-					type: 'string',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'session', 'ipAddress'>,
-					serverName: 'ip_address'
-				},
-				userAgent: {
-					type: 'string',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'session', 'userAgent'>,
-					serverName: 'user_agent'
-				},
-				userId: {
-					type: 'string',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'session', 'userId'>,
-					serverName: 'user_id'
-				},
-				impersonatedBy: {
-					type: 'string',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'session', 'impersonatedBy'>,
-					serverName: 'impersonated_by'
-				}
-			},
-			primaryKey: ['id']
-		},
-		targets: {
-			name: 'targets',
-			columns: {
-				id: {
-					type: 'string',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'targets', 'id'>
-				},
-				name: {
-					type: 'string',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'targets', 'name'>
-				},
-				image: {
-					type: 'string',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'targets', 'image'>
-				},
-				type: {
-					type: 'string',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'targets', 'type'>
-				},
-				inspo: {
-					type: 'string',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'targets', 'inspo'>
-				},
-				created_by: {
-					type: 'string',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'targets', 'created_by'>
-				},
-				is_active: {
-					type: 'boolean',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'targets', 'is_active'>
-				},
-				archived_at: {
-					type: 'number',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'targets', 'archived_at'>
-				},
-				last_updated_at: {
-					type: 'number',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'targets', 'last_updated_at'>
-				},
-				created_at: {
-					type: 'number',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'targets', 'created_at'>
-				},
-				updated_at: {
-					type: 'number',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'targets', 'updated_at'>
-				}
-			},
-			primaryKey: ['id']
-		},
-		user: {
-			name: 'user',
-			columns: {
-				id: {
-					type: 'string',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'user', 'id'>
-				},
-				name: {
-					type: 'string',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'user', 'name'>
-				},
-				email: {
-					type: 'string',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'user', 'email'>
-				},
-				emailVerified: {
-					type: 'boolean',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'user', 'emailVerified'>,
-					serverName: 'email_verified'
-				},
-				image: {
-					type: 'string',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'user', 'image'>
-				},
-				createdAt: {
-					type: 'number',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'user', 'createdAt'>,
-					serverName: 'created_at'
-				},
-				updatedAt: {
-					type: 'number',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'user', 'updatedAt'>,
-					serverName: 'updated_at'
-				},
-				role: {
-					type: 'string',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'user', 'role'>
-				},
-				banned: {
-					type: 'boolean',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'user', 'banned'>
-				},
-				banReason: {
-					type: 'string',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'user', 'banReason'>,
-					serverName: 'ban_reason'
-				},
-				banExpires: {
-					type: 'number',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'user', 'banExpires'>,
-					serverName: 'ban_expires'
-				},
-				avatar: {
-					type: 'string',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'user', 'avatar'>
-				},
-				bio: {
-					type: 'string',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'user', 'bio'>
-				},
-				theme: {
-					type: 'string',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'user', 'theme'>
-				}
-			},
-			primaryKey: ['id']
-		},
-		user_relationships: {
-			name: 'user_relationships',
-			columns: {
-				id: {
-					type: 'string',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'user_relationships', 'id'>
-				},
-				user_id: {
-					type: 'string',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'user_relationships', 'user_id'>
-				},
-				related_user_id: {
-					type: 'string',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<
-						ZeroSchema,
-						'user_relationships',
-						'related_user_id'
-					>
-				},
-				type: {
-					type: 'string',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'user_relationships', 'type'>
-				},
-				created_at: {
-					type: 'number',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<
-						ZeroSchema,
-						'user_relationships',
-						'created_at'
-					>
-				}
-			},
-			primaryKey: ['id']
-		},
-		verification: {
-			name: 'verification',
-			columns: {
-				id: {
-					type: 'string',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'verification', 'id'>
-				},
-				identifier: {
-					type: 'string',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'verification', 'identifier'>
-				},
-				value: {
-					type: 'string',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'verification', 'value'>
-				},
-				expiresAt: {
-					type: 'number',
-					optional: false,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'verification', 'expiresAt'>,
-					serverName: 'expires_at'
-				},
-				createdAt: {
-					type: 'number',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'verification', 'createdAt'>,
-					serverName: 'created_at'
-				},
-				updatedAt: {
-					type: 'number',
-					optional: true,
-					customType: null as unknown as ZeroCustomType<ZeroSchema, 'verification', 'updatedAt'>,
-					serverName: 'updated_at'
-				}
-			},
-			primaryKey: ['id']
-		}
-	},
-	relationships: {}
+  tables: {
+    account: {
+      name: "account",
+      columns: {
+        id: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "account",
+            "id"
+          >,
+        },
+        accountId: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "account",
+            "accountId"
+          >,
+          serverName: "account_id",
+        },
+        providerId: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "account",
+            "providerId"
+          >,
+          serverName: "provider_id",
+        },
+        userId: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "account",
+            "userId"
+          >,
+          serverName: "user_id",
+        },
+        accessToken: {
+          type: "string",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "account",
+            "accessToken"
+          >,
+          serverName: "access_token",
+        },
+        refreshToken: {
+          type: "string",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "account",
+            "refreshToken"
+          >,
+          serverName: "refresh_token",
+        },
+        idToken: {
+          type: "string",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "account",
+            "idToken"
+          >,
+          serverName: "id_token",
+        },
+        accessTokenExpiresAt: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "account",
+            "accessTokenExpiresAt"
+          >,
+          serverName: "access_token_expires_at",
+        },
+        refreshTokenExpiresAt: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "account",
+            "refreshTokenExpiresAt"
+          >,
+          serverName: "refresh_token_expires_at",
+        },
+        scope: {
+          type: "string",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "account",
+            "scope"
+          >,
+        },
+        password: {
+          type: "string",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "account",
+            "password"
+          >,
+        },
+        createdAt: {
+          type: "number",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "account",
+            "createdAt"
+          >,
+          serverName: "created_at",
+        },
+        updatedAt: {
+          type: "number",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "account",
+            "updatedAt"
+          >,
+          serverName: "updated_at",
+        },
+      },
+      primaryKey: ["id"],
+    },
+    awards: {
+      name: "awards",
+      columns: {
+        id: {
+          type: "string",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "awards",
+            "id"
+          >,
+        },
+        user_id: {
+          type: "string",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "awards",
+            "user_id"
+          >,
+        },
+        battle_id: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "awards",
+            "battle_id"
+          >,
+        },
+        award_type: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "awards",
+            "award_type"
+          >,
+        },
+        outcome: {
+          type: "string",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "awards",
+            "outcome"
+          >,
+        },
+        created_at: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "awards",
+            "created_at"
+          >,
+        },
+        updated_at: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "awards",
+            "updated_at"
+          >,
+        },
+      },
+      primaryKey: ["id"],
+    },
+    battle_participants: {
+      name: "battle_participants",
+      columns: {
+        id: {
+          type: "string",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "battle_participants",
+            "id"
+          >,
+        },
+        battle_id: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "battle_participants",
+            "battle_id"
+          >,
+        },
+        user_id: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "battle_participants",
+            "user_id"
+          >,
+        },
+        status: {
+          type: "string",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "battle_participants",
+            "status"
+          >,
+        },
+        display_order: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "battle_participants",
+            "display_order"
+          >,
+        },
+        joined_at: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "battle_participants",
+            "joined_at"
+          >,
+        },
+        last_seen_at: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "battle_participants",
+            "last_seen_at"
+          >,
+        },
+        finished_at: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "battle_participants",
+            "finished_at"
+          >,
+        },
+        created_at: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "battle_participants",
+            "created_at"
+          >,
+        },
+        updated_at: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "battle_participants",
+            "updated_at"
+          >,
+        },
+      },
+      primaryKey: ["id"],
+    },
+    battle_votes: {
+      name: "battle_votes",
+      columns: {
+        id: {
+          type: "string",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "battle_votes",
+            "id"
+          >,
+        },
+        battle_id: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "battle_votes",
+            "battle_id"
+          >,
+        },
+        voter_id: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "battle_votes",
+            "voter_id"
+          >,
+        },
+        nominee_hax_id: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "battle_votes",
+            "nominee_hax_id"
+          >,
+        },
+        award_type: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "battle_votes",
+            "award_type"
+          >,
+        },
+        locked_at: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "battle_votes",
+            "locked_at"
+          >,
+        },
+        created_at: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "battle_votes",
+            "created_at"
+          >,
+        },
+      },
+      primaryKey: ["id"],
+    },
+    battles: {
+      name: "battles",
+      columns: {
+        id: {
+          type: "string",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "battles",
+            "id"
+          >,
+        },
+        date: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "battles",
+            "date"
+          >,
+        },
+        referee_id: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "battles",
+            "referee_id"
+          >,
+        },
+        target_id: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "battles",
+            "target_id"
+          >,
+        },
+        status: {
+          type: "string",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "battles",
+            "status"
+          >,
+        },
+        visibility: {
+          type: "string",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "battles",
+            "visibility"
+          >,
+        },
+        zero_room_id: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "battles",
+            "zero_room_id"
+          >,
+        },
+        type: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "battles",
+            "type"
+          >,
+        },
+        total_time_seconds: {
+          type: "number",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "battles",
+            "total_time_seconds"
+          >,
+        },
+        overtime_seconds: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "battles",
+            "overtime_seconds"
+          >,
+        },
+        starts_at: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "battles",
+            "starts_at"
+          >,
+        },
+        ends_at: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "battles",
+            "ends_at"
+          >,
+        },
+        revealed_at: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "battles",
+            "revealed_at"
+          >,
+        },
+        created_at: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "battles",
+            "created_at"
+          >,
+        },
+        updated_at: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "battles",
+            "updated_at"
+          >,
+        },
+      },
+      primaryKey: ["id"],
+    },
+    hax: {
+      name: "hax",
+      columns: {
+        id: {
+          type: "string",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "hax",
+            "id"
+          >,
+        },
+        target_id: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "hax",
+            "target_id"
+          >,
+        },
+        battle_id: {
+          type: "string",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "hax",
+            "battle_id"
+          >,
+        },
+        user_id: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "hax",
+            "user_id"
+          >,
+        },
+        html: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "hax",
+            "html"
+          >,
+        },
+        css: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "hax",
+            "css"
+          >,
+        },
+        type: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "hax",
+            "type"
+          >,
+        },
+        submitted_at: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "hax",
+            "submitted_at"
+          >,
+        },
+        submission_locked_at: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "hax",
+            "submission_locked_at"
+          >,
+        },
+        is_final: {
+          type: "boolean",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "hax",
+            "is_final"
+          >,
+        },
+        rendered_preview_url: {
+          type: "string",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "hax",
+            "rendered_preview_url"
+          >,
+        },
+        created_at: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "hax",
+            "created_at"
+          >,
+        },
+        updated_at: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "hax",
+            "updated_at"
+          >,
+        },
+      },
+      primaryKey: ["id"],
+    },
+    jwks: {
+      name: "jwks",
+      columns: {
+        id: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "jwks",
+            "id"
+          >,
+        },
+        publicKey: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "jwks",
+            "publicKey"
+          >,
+          serverName: "public_key",
+        },
+        privateKey: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "jwks",
+            "privateKey"
+          >,
+          serverName: "private_key",
+        },
+        createdAt: {
+          type: "number",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "jwks",
+            "createdAt"
+          >,
+          serverName: "created_at",
+        },
+      },
+      primaryKey: ["id"],
+    },
+    ratings: {
+      name: "ratings",
+      columns: {
+        id: {
+          type: "string",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "ratings",
+            "id"
+          >,
+        },
+        user_id: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "ratings",
+            "user_id"
+          >,
+        },
+        target_id: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "ratings",
+            "target_id"
+          >,
+        },
+        difficulty: {
+          type: "number",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "ratings",
+            "difficulty"
+          >,
+        },
+        creativity: {
+          type: "number",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "ratings",
+            "creativity"
+          >,
+        },
+        fun: {
+          type: "number",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "ratings",
+            "fun"
+          >,
+        },
+        coolness: {
+          type: "number",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "ratings",
+            "coolness"
+          >,
+        },
+        created_at: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "ratings",
+            "created_at"
+          >,
+        },
+      },
+      primaryKey: ["id"],
+    },
+    session: {
+      name: "session",
+      columns: {
+        id: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "session",
+            "id"
+          >,
+        },
+        expiresAt: {
+          type: "number",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "session",
+            "expiresAt"
+          >,
+          serverName: "expires_at",
+        },
+        token: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "session",
+            "token"
+          >,
+        },
+        createdAt: {
+          type: "number",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "session",
+            "createdAt"
+          >,
+          serverName: "created_at",
+        },
+        updatedAt: {
+          type: "number",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "session",
+            "updatedAt"
+          >,
+          serverName: "updated_at",
+        },
+        ipAddress: {
+          type: "string",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "session",
+            "ipAddress"
+          >,
+          serverName: "ip_address",
+        },
+        userAgent: {
+          type: "string",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "session",
+            "userAgent"
+          >,
+          serverName: "user_agent",
+        },
+        userId: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "session",
+            "userId"
+          >,
+          serverName: "user_id",
+        },
+        impersonatedBy: {
+          type: "string",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "session",
+            "impersonatedBy"
+          >,
+          serverName: "impersonated_by",
+        },
+      },
+      primaryKey: ["id"],
+    },
+    targets: {
+      name: "targets",
+      columns: {
+        id: {
+          type: "string",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "targets",
+            "id"
+          >,
+        },
+        name: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "targets",
+            "name"
+          >,
+        },
+        image: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "targets",
+            "image"
+          >,
+        },
+        type: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "targets",
+            "type"
+          >,
+        },
+        inspo: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "targets",
+            "inspo"
+          >,
+        },
+        created_by: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "targets",
+            "created_by"
+          >,
+        },
+        is_active: {
+          type: "boolean",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "targets",
+            "is_active"
+          >,
+        },
+        archived_at: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "targets",
+            "archived_at"
+          >,
+        },
+        last_updated_at: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "targets",
+            "last_updated_at"
+          >,
+        },
+        created_at: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "targets",
+            "created_at"
+          >,
+        },
+        updated_at: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "targets",
+            "updated_at"
+          >,
+        },
+      },
+      primaryKey: ["id"],
+    },
+    user: {
+      name: "user",
+      columns: {
+        id: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "user",
+            "id"
+          >,
+        },
+        name: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "user",
+            "name"
+          >,
+        },
+        email: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "user",
+            "email"
+          >,
+        },
+        emailVerified: {
+          type: "boolean",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "user",
+            "emailVerified"
+          >,
+          serverName: "email_verified",
+        },
+        image: {
+          type: "string",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "user",
+            "image"
+          >,
+        },
+        createdAt: {
+          type: "number",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "user",
+            "createdAt"
+          >,
+          serverName: "created_at",
+        },
+        updatedAt: {
+          type: "number",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "user",
+            "updatedAt"
+          >,
+          serverName: "updated_at",
+        },
+        role: {
+          type: "string",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "user",
+            "role"
+          >,
+        },
+        banned: {
+          type: "boolean",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "user",
+            "banned"
+          >,
+        },
+        banReason: {
+          type: "string",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "user",
+            "banReason"
+          >,
+          serverName: "ban_reason",
+        },
+        banExpires: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "user",
+            "banExpires"
+          >,
+          serverName: "ban_expires",
+        },
+        avatar: {
+          type: "string",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "user",
+            "avatar"
+          >,
+        },
+        bio: {
+          type: "string",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "user",
+            "bio"
+          >,
+        },
+        theme: {
+          type: "string",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "user",
+            "theme"
+          >,
+        },
+      },
+      primaryKey: ["id"],
+    },
+    user_relationships: {
+      name: "user_relationships",
+      columns: {
+        id: {
+          type: "string",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "user_relationships",
+            "id"
+          >,
+        },
+        user_id: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "user_relationships",
+            "user_id"
+          >,
+        },
+        related_user_id: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "user_relationships",
+            "related_user_id"
+          >,
+        },
+        type: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "user_relationships",
+            "type"
+          >,
+        },
+        created_at: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "user_relationships",
+            "created_at"
+          >,
+        },
+      },
+      primaryKey: ["id"],
+    },
+    verification: {
+      name: "verification",
+      columns: {
+        id: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "verification",
+            "id"
+          >,
+        },
+        identifier: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "verification",
+            "identifier"
+          >,
+        },
+        value: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "verification",
+            "value"
+          >,
+        },
+        expiresAt: {
+          type: "number",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "verification",
+            "expiresAt"
+          >,
+          serverName: "expires_at",
+        },
+        createdAt: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "verification",
+            "createdAt"
+          >,
+          serverName: "created_at",
+        },
+        updatedAt: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "verification",
+            "updatedAt"
+          >,
+          serverName: "updated_at",
+        },
+      },
+      primaryKey: ["id"],
+    },
+  },
+  relationships: {
+    battle_participants: {
+      battle: [
+        {
+          sourceField: ["battle_id"],
+          destField: ["id"],
+          destSchema: "battles",
+          cardinality: "one",
+        },
+      ],
+      user: [
+        {
+          sourceField: ["user_id"],
+          destField: ["id"],
+          destSchema: "user",
+          cardinality: "one",
+        },
+      ],
+    },
+    battles: {
+      target: [
+        {
+          sourceField: ["target_id"],
+          destField: ["id"],
+          destSchema: "targets",
+          cardinality: "one",
+        },
+      ],
+      referee: [
+        {
+          sourceField: ["referee_id"],
+          destField: ["id"],
+          destSchema: "user",
+          cardinality: "one",
+        },
+      ],
+      participants: [
+        {
+          sourceField: ["id"],
+          destField: ["battle_id"],
+          destSchema: "battle_participants",
+          cardinality: "many",
+        },
+      ],
+      hax: [
+        {
+          sourceField: ["id"],
+          destField: ["battle_id"],
+          destSchema: "hax",
+          cardinality: "many",
+        },
+      ],
+    },
+    hax: {
+      user: [
+        {
+          sourceField: ["user_id"],
+          destField: ["id"],
+          destSchema: "user",
+          cardinality: "one",
+        },
+      ],
+      battle: [
+        {
+          sourceField: ["battle_id"],
+          destField: ["id"],
+          destSchema: "battles",
+          cardinality: "one",
+        },
+      ],
+      target: [
+        {
+          sourceField: ["target_id"],
+          destField: ["id"],
+          destSchema: "targets",
+          cardinality: "one",
+        },
+      ],
+    },
+    user: {
+      relationships: [
+        {
+          sourceField: ["id"],
+          destField: ["user_id"],
+          destSchema: "user_relationships",
+          cardinality: "many",
+        },
+      ],
+      relatedRelationships: [
+        {
+          sourceField: ["id"],
+          destField: ["related_user_id"],
+          destSchema: "user_relationships",
+          cardinality: "many",
+        },
+      ],
+      participants: [
+        {
+          sourceField: ["id"],
+          destField: ["user_id"],
+          destSchema: "battle_participants",
+          cardinality: "many",
+        },
+      ],
+      hax: [
+        {
+          sourceField: ["id"],
+          destField: ["user_id"],
+          destSchema: "hax",
+          cardinality: "many",
+        },
+      ],
+    },
+    user_relationships: {
+      user: [
+        {
+          sourceField: ["user_id"],
+          destField: ["id"],
+          destSchema: "user",
+          cardinality: "one",
+        },
+      ],
+      relatedUser: [
+        {
+          sourceField: ["related_user_id"],
+          destField: ["id"],
+          destSchema: "user",
+          cardinality: "one",
+        },
+      ],
+    },
+  },
 } as const;
 
 /**

@@ -1,4 +1,4 @@
-import { sql } from 'drizzle-orm';
+import { relations, sql } from 'drizzle-orm';
 import {
 	pgTable,
 	pgEnum,
@@ -9,8 +9,7 @@ import {
 	timestamp,
 	index,
 	uniqueIndex,
-	check,
-	index
+	check
 } from 'drizzle-orm/pg-core';
 
 /* =========================
@@ -28,6 +27,7 @@ export const participant_status_enum = pgEnum('participant_status', [
 	'DROPPED',
 	'FINISHED'
 ]);
+
 export const user_award_enum = pgEnum('user_award', [
 	'MOST_ACCURATE',
 	'REAL_WORLD',
@@ -120,10 +120,10 @@ export const user_relationships = pgTable(
 		type: relationship_type_enum('type').notNull(),
 		created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow()
 	},
-	(t) => ({
-		unique_pair: uniqueIndex('user_relationships_unique').on(t.user_id, t.related_user_id, t.type),
-		no_self: check('user_relationships_no_self', sql`${t.user_id} <> ${t.related_user_id}`)
-	})
+	(t) => [
+		uniqueIndex('user_relationships_unique').on(t.user_id, t.related_user_id, t.type),
+		check('user_relationships_no_self', sql`${t.user_id} <> ${t.related_user_id}`)
+	]
 );
 
 /* =========================
@@ -172,7 +172,6 @@ export const battles = pgTable(
 		type: battle_type_enum().notNull(),
 		total_time_seconds: integer().notNull(),
 		overtime_seconds: integer(),
-		rating: integer(),
 		starts_at: timestamp({ withTimezone: true }),
 		ends_at: timestamp({ withTimezone: true }),
 		revealed_at: timestamp({ withTimezone: true }),
@@ -331,14 +330,11 @@ export const awards = pgTable(
 		created_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
 		updated_at: timestamp({ withTimezone: true }).notNull().defaultNow()
 	},
-	(t) => ({
-		unique_award_per_battle: uniqueIndex('awards_unique_battle_award_type').on(
-			t.battle_id,
-			t.award_type
-		),
-		awards_user_idx: index('awards_user_idx').on(t.user_id),
-		awards_battle_idx: index('awards_battle_idx').on(t.battle_id)
-	})
+	(t) => [
+		uniqueIndex('awards_unique_battle_award_type').on(t.battle_id, t.award_type),
+		index('awards_user_idx').on(t.user_id),
+		index('awards_battle_idx').on(t.battle_id)
+	]
 );
 
 export const jwks = pgTable('jwks', {
@@ -347,3 +343,67 @@ export const jwks = pgTable('jwks', {
 	privateKey: text('private_key').notNull(),
 	createdAt: timestamp('created_at').notNull()
 });
+
+// User → Session, Account, Relationship, BattleParticipant, Hax
+export const user_relations = relations(user, ({ many }) => ({
+	relationships: many(user_relationships, { relationName: 'fromUser' }),
+	relatedRelationships: many(user_relationships, { relationName: 'toUser' }),
+	participants: many(battle_participants),
+	hax: many(hax)
+}));
+
+// UserRelationships → User
+export const user_relationships_relations = relations(user_relationships, ({ one }) => ({
+	user: one(user, {
+		fields: [user_relationships.user_id],
+		references: [user.id],
+		relationName: 'fromUser'
+	}),
+	relatedUser: one(user, {
+		fields: [user_relationships.related_user_id],
+		references: [user.id],
+		relationName: 'toUser'
+	})
+}));
+
+// Battles → Target and Referee (User)
+export const battle_relations = relations(battles, ({ one, many }) => ({
+	target: one(targets, {
+		fields: [battles.target_id],
+		references: [targets.id]
+	}),
+	referee: one(user, {
+		fields: [battles.referee_id],
+		references: [user.id]
+	}),
+	participants: many(battle_participants),
+	hax: many(hax)
+}));
+
+// BattleParticipants → Battle + User
+export const battle_participants_relations = relations(battle_participants, ({ one }) => ({
+	battle: one(battles, {
+		fields: [battle_participants.battle_id],
+		references: [battles.id]
+	}),
+	user: one(user, {
+		fields: [battle_participants.user_id],
+		references: [user.id]
+	})
+}));
+
+// Hax → User, Battle, Target
+export const hax_relations = relations(hax, ({ one }) => ({
+	user: one(user, {
+		fields: [hax.user_id],
+		references: [user.id]
+	}),
+	battle: one(battles, {
+		fields: [hax.battle_id],
+		references: [battles.id]
+	}),
+	target: one(targets, {
+		fields: [hax.target_id],
+		references: [targets.id]
+	})
+}));

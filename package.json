@@ -12,7 +12,7 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"format": "prettier --write .",
 		"lint": "prettier --check .",
-		"sync-generate": "drizzle-zero generate --format",
+		"sync-generate": "drizzle-zero generate --format  -o ./src/sync/zero-schema.gen.ts",
 		"auth-generate": "pnpx @better-auth/cli generate",
 		"sync": "pnpx zero-cache-dev",
 		"postinstall": "pnpm sync-generate",

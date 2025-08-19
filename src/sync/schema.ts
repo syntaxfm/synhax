@@ -30,3 +30,5 @@ export const permissions = definePermissions<AuthData, Schema>(schema, () => {
 		battles: ANYONE_CAN_DO_ANYTHING
 	} satisfies PermissionsConfig<AuthData, Schema>;
 });
+
+// TODO only ref can make changes to battle settings
