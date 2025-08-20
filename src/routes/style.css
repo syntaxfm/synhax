@@ -3,7 +3,11 @@
 	--grey: #ddd;
 	--border: 1px solid var(--grey);
 
-	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	font-family: system-ui, sans-serif;
+
+	--hot: #ff45a8;
+	--teal: #3edcff;
+	--yellow: #ffd00e;
 }
 
 body {
@@ -30,8 +34,12 @@ iframe {
 }
 
 button {
-	border: var(--border);
+	border: solid 2px;
+	text-transform: uppercase;
+	font-weight: 900;
 	background: transparent;
 	border-radius: 4px;
-	font-size: 14px;
+	font-size: 16px;
+	padding: 0px 4px;
+	text-box-trim: trim-both;
 }

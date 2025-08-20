@@ -13,43 +13,28 @@
 	import css from 'svelte-highlight/languages/css';
 	import xml from 'svelte-highlight/languages/xml';
 	import horizonDark from 'svelte-highlight/styles/horizon-dark';
-	import AppFrame from '$lib/AppFrame.svelte';
-	import Toolbar from '$lib/battle_mode/Toolbar.svelte';
+	import AppFrame from '$lib/battle_mode/AppFrame.svelte';
 	import Debug from '$lib/Debug.svelte';
-	import { UserState } from '$lib/state/UserState.svelte';
 	import { Pane, Splitpanes } from 'svelte-splitpanes';
-	import type { Battle } from '$sync/schema';
+	import type { Battle, Hax } from '$sync/schema';
 
-	let size = $state(20);
-
-	let { battle }: { battle: Battle } = $props();
-
-	const user = new UserState();
-	$effect(() => {
-		user.setup_user();
-	});
+	let { battle, hax }: { battle: Battle; hax: Hax } = $props();
 </script>
 
-<svelte:head>
-	{@html horizonDark}
-</svelte:head>
-
 <section class="battle-mode">
-	<Toolbar {user} />
-
 	<Splitpanes>
 		<Pane>
 			<Splitpanes horizontal={true}>
 				<Pane minSize={15}>
 					<article class="stack">
 						<h2>HTML</h2>
-						<Highlight language={xml} code={user.active_project?.html.text || ''} />
+						<Highlight language={xml} code={hax.html || ''} />
 					</article>
 				</Pane>
 				<Pane>
 					<article class="stack">
 						<h2>CSS</h2>
-						<Highlight language={css} code={user.active_project?.css.text || ''} />
+						<Highlight language={css} code={hax.css || ''} />
 					</article>
 				</Pane>
 			</Splitpanes>
@@ -65,21 +50,54 @@
 				<Pane>
 					<div class="output stack">
 						<h2>App</h2>
-						<AppFrame {user} />
+						<AppFrame {hax} />
+						<a target="_blank" href="/battle/{battle.id}/code/breakout"
+							><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+								><title>launch</title><g
+									fill="#000000"
+									stroke-linejoin="miter"
+									stroke-linecap="butt"
+									><line
+										x1="11"
+										y1="13"
+										x2="22"
+										y2="2"
+										fill="none"
+										stroke="#000000"
+										stroke-miterlimit="10"
+										stroke-width="2"
+									></line><polyline
+										points="14 2 22 2 22 10"
+										fill="none"
+										stroke="#000000"
+										stroke-linecap="square"
+										stroke-miterlimit="10"
+										stroke-width="2"
+									></polyline><path
+										d="M9,4H4A2,2,0,0,0,2,6V20a2,2,0,0,0,2,2H18a2,2,0,0,0,2-2V15"
+										fill="none"
+										stroke="#000000"
+										stroke-linecap="square"
+										stroke-miterlimit="10"
+										stroke-width="2"
+									></path></g
+								></svg
+							></a
+						>
 					</div>
 				</Pane>
 			</Splitpanes>
 		</Pane>
 	</Splitpanes>
 
-	<Debug {user} />
+	<Debug />
 </section>
 
 <style>
 	.battle-mode {
 		display: grid;
 		height: 100vh;
-		grid-template-rows: auto minmax(0, 1fr) auto;
+		grid-template-rows: minmax(0, 1fr) auto;
 	}
 
 	h2 {

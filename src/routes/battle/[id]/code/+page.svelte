@@ -15,12 +15,14 @@
 <!-- Create Battle -->
 
 <!-- Difference between battle and target? -->
-<script>
+<script lang="ts">
 	import { Query } from 'zero-svelte';
 	import BattleMode from './BattleMode.svelte';
 	import { z } from '$sync/client';
 	import { page } from '$app/state';
 	import Countdown from '$lib/battle_mode/Countdown.svelte';
+	import { files } from '$lib/state/FileState.svelte';
+	import { to_snake_case } from '$lib/user/utils';
 
 	let battle = new Query(
 		z.current.query.battles
@@ -30,10 +32,54 @@
 			.related('participants', (q) => q.related('user'))
 			.related('target')
 	);
+
+	let hax = $derived.by(
+		() =>
+			new Query(
+				z.current.query.hax
+					.where(({ cmp, and }) =>
+						and(cmp('battle_id', battle?.current?.id || ''), cmp('user_id', z.current.userID))
+					)
+					.one()
+			)
+	);
+
+	// Modern Svelte 5 approach with runes
+	let poll_timer: NodeJS.Timeout | null = $state(null);
+
+	$effect(() => {
+		if (battle.current?.target?.name) {
+			files.load_hax_directory(to_snake_case(battle.current?.target.name));
+		}
+	});
+
+	$effect(() => {
+		console.log('Starting polling');
+
+		// Start the polling interval
+		poll_timer = setInterval(async () => {
+			try {
+				await files.read_and_apply_project_files(hax.current?.id, false);
+			} catch (error) {
+				console.error('Error reading project files:', error);
+			}
+		}, 400);
+
+		// Cleanup function - runs when component unmounts
+		return () => {
+			console.log('Stop Polling');
+			if (poll_timer) {
+				clearInterval(poll_timer);
+				poll_timer = null;
+			}
+		};
+	});
 </script>
 
 {#if battle.current?.type === 'TIMED_MATCH'}
 	<Countdown battle={battle.current} view="CODE" />
 {/if}
 
-<BattleMode battle={battle.current} />
+{#if hax.current && battle.current}
+	<BattleMode battle={battle.current} hax={hax.current} />
+{/if}

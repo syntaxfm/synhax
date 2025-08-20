@@ -14,6 +14,8 @@ export type Target = Row<typeof schema.tables.targets>;
 export type Rating = Row<typeof schema.tables.ratings>;
 export type Battle = Row<typeof schema.tables.battles>;
 export type Participants = Row<typeof schema.tables.battle_participants>;
+export type Hax = Row<typeof schema.tables.hax>;
+export type Votes = Row<typeof schema.tables.battle_votes>;
 
 type AuthData = {
 	// The logged-in user.

@@ -6,13 +6,14 @@
 	import { remove_screaming } from '$utils/formatting';
 	import { Query } from 'zero-svelte';
 	import { BATTLE_RATINGS } from '$lib/constants';
+	import Battlers from '$lib/battle_mode/Battlers.svelte';
 
 	let battle = new Query(
 		z.current.query.battles
 			.where('id', page?.params?.id || '')
 			.one()
 			.related('referee')
-			.related('participants', (q) => q.related('user'))
+			.related('participants', (q) => q.related('user').related('hax', (h) => h.related('votes')))
 			.related('target')
 	);
 
@@ -71,14 +72,9 @@
 		></wa-rating>
 	{/each}
 
-	<ShareLinks code={false} battle={battle.current} />
+	<ShareLinks code={false} watch={false} vote={true} battle={battle.current} />
 
-	{#each battle.current?.participants as participant}
-		<div>
-			<img src={participant.user?.image} alt="" />
-			<p>{participant.user.name} is {participant.status}</p>
-		</div>
-	{/each}
+	<Battlers battle={battle.current} results={true} />
 
 	{#if battle?.current?.status === 'ACTIVE'}
 		<p>Battle is currently active.</p>

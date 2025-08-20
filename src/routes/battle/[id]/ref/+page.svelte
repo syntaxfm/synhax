@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import AppFrame from '$lib/battle_mode/AppFrame.svelte';
+	import Battlers from '$lib/battle_mode/Battlers.svelte';
 	import Countdown from '$lib/battle_mode/Countdown.svelte';
 	import ShareLinks from '$lib/battle_mode/ShareLinks.svelte';
 	import ToggleButton from '$lib/ui/ToggleButton.svelte';
@@ -11,10 +13,12 @@
 			.where('id', page?.params?.id || '')
 			.one()
 			.related('referee')
-			.related('participants', (q) => q.related('user'))
+			.related('participants', (q) => q.related('user').related('hax', (h) => h.related('votes')))
 			.related('target')
 	);
+	$inspect(battle.current);
 	let over_status: 'ACTIVE' | 'OVER' = $state('ACTIVE');
+	let controls_visible = $derived(['PENDING', 'ACTIVE'].includes(battle.current?.status));
 
 	async function start() {
 		if (!battle.current) return;
@@ -102,56 +106,57 @@
 		off_text="Private"
 	/>
 
-	<ShareLinks battle={battle.current} />
-
-	<ToggleButton
-		disabled={battle.current?.status === 'ACTIVE'}
-		toggle={battle.current.type === 'TIME_TRIAL'}
-		ontoggle={toggle_type}
-		on_text="Time Trial"
-		off_text="Timed Match"
+	<ShareLinks
+		battle={battle.current}
+		code={controls_visible}
+		watch={controls_visible}
+		vote={!controls_visible}
 	/>
 
-	{#if battle.current?.type === 'TIMED_MATCH'}
-		<div>
-			<label for="time-limit">Time Limit</label>
-			<input
-				defaultValue={battle.current.total_time_seconds / 60 || 10}
-				id="time-limit"
-				type="number"
-				placeholder="Enter time limit"
-				required
-				step="any"
-				onchange={update_time_limit}
-			/>minutes
-		</div>
+	{#if controls_visible}
+		<ToggleButton
+			disabled={['ACTIVE', 'COMPLETED'].includes(battle.current?.status)}
+			toggle={battle.current.type === 'TIME_TRIAL'}
+			ontoggle={toggle_type}
+			on_text="Time Trial"
+			off_text="Timed Match"
+		/>
 
-		<Countdown battle={battle.current} bind:status={over_status} view="REF" />
+		{#if battle.current?.type === 'TIMED_MATCH'}
+			<div>
+				<label for="time-limit">Time Limit</label>
+				<input
+					defaultValue={battle.current.total_time_seconds / 60 || 10}
+					id="time-limit"
+					type="number"
+					placeholder="Enter time limit"
+					required
+					step="any"
+					onchange={update_time_limit}
+				/>minutes
+			</div>
 
-		{#if battle.current.status === 'ACTIVE' && over_status === 'OVER'}
-			<h3>Time's Up!</h3>
-			<button
-				disabled={battle.current?.status !== 'ACTIVE' && over_status !== 'OVER'}
-				onclick={finish_battle}>Finish Battle</button
-			>
+			<Countdown battle={battle.current} bind:status={over_status} view="REF" />
 
-			<hr />
-			<p>Need more time?</p>
-			<label for="overtime">Add Overtime (minutes)</label>
-			<button onclick={() => add_overtime(5)}>5</button>
-			<button onclick={() => add_overtime(10)}>10</button>
-			<button onclick={() => add_overtime(15)}>15</button>
-			<button onclick={() => add_overtime(20)}>20</button>
+			{#if battle.current.status === 'ACTIVE' && over_status === 'OVER'}
+				<h3>Time's Up!</h3>
+				<button
+					disabled={battle.current?.status !== 'ACTIVE' && over_status !== 'OVER'}
+					onclick={finish_battle}>Finish Battle</button
+				>
+
+				<hr />
+				<p>Need more time?</p>
+				<label for="overtime">Add Overtime (minutes)</label>
+				<button onclick={() => add_overtime(5)}>5</button>
+				<button onclick={() => add_overtime(10)}>10</button>
+				<button onclick={() => add_overtime(15)}>15</button>
+				<button onclick={() => add_overtime(20)}>20</button>
+			{/if}
 		{/if}
 	{/if}
 
-	{#each battle.current?.participants as participant}
-		<div>
-			<img src={participant.user?.image} alt="" />
-			<p>{participant.user.name}</p>
-			<p>{participant.status}</p>
-		</div>
-	{/each}
+	<Battlers battle={battle.current} results={true} />
 
 	{#if battle.current?.status === 'PENDING'}
 		<button
@@ -162,4 +167,5 @@
 {/if}
 
 <!-- TODO add battlers from this screen -->
-<!-- TODO add battlers from this screen -->
+
+<!-- TODO add after completed, change interface to see votes, ability to reveal -->

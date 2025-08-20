@@ -1,15 +1,13 @@
 <script lang="ts">
-	import type { UserState } from '$lib/state/UserState.svelte';
-
-	const { user }: { user: UserState } = $props();
+	import { files } from './state/FileState.svelte';
 </script>
 
 <section>
-	<span class="status {user.status}">
-		Status: {user.status}
+	<span class="status {files.status}">
+		Status: {files.status}
 	</span>
-	<span>Dir: {user.synhax_directory_handle?.name}</span>
-	<span class="error">{user.error}</span>
+	<span>Dir: {files.synhax_directory_handle?.name}</span>
+	<span class="error">{files.error}</span>
 </section>
 
 <style>

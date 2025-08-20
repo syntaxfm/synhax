@@ -291,6 +291,7 @@ export const battle_votes = pgTable(
 			.references(() => hax.id, { onDelete: 'cascade' }),
 		award_type: user_award_enum().notNull(),
 		locked_at: timestamp({ withTimezone: true }),
+		value: integer().notNull(),
 		created_at: timestamp({ withTimezone: true }).notNull().defaultNow()
 	},
 	(t) => [
@@ -403,7 +404,7 @@ export const battle_relations = relations(battles, ({ one, many }) => ({
 	hax: many(hax)
 }));
 
-// BattleParticipants → Battle + User
+// BattleParticipants → Battle + User + Hax
 export const battle_participants_relations = relations(battle_participants, ({ one }) => ({
 	battle: one(battles, {
 		fields: [battle_participants.battle_id],
@@ -412,11 +413,15 @@ export const battle_participants_relations = relations(battle_participants, ({ o
 	user: one(user, {
 		fields: [battle_participants.user_id],
 		references: [user.id]
+	}),
+	hax: one(hax, {
+		fields: [battle_participants.user_id, battle_participants.battle_id],
+		references: [hax.user_id, hax.battle_id]
 	})
 }));
 
-// Hax → User, Battle, Target
-export const hax_relations = relations(hax, ({ one }) => ({
+// Hax → User, Battle, Target, Votes
+export const hax_relations = relations(hax, ({ one, many }) => ({
 	user: one(user, {
 		fields: [hax.user_id],
 		references: [user.id]
@@ -428,7 +433,8 @@ export const hax_relations = relations(hax, ({ one }) => ({
 	target: one(targets, {
 		fields: [hax.target_id],
 		references: [targets.id]
-	})
+	}),
+	votes: many(battle_votes)
 }));
 
 // --- Ratings relations
@@ -448,4 +454,20 @@ export const targets_relations = relations(targets, ({ many }) => ({
 	hax: many(hax),
 	ratings: many(ratings),
 	battles: many(battles)
+}));
+
+// --- Battle votes relations
+export const battle_votes_relations = relations(battle_votes, ({ one }) => ({
+	battle: one(battles, {
+		fields: [battle_votes.battle_id],
+		references: [battles.id]
+	}),
+	voter: one(user, {
+		fields: [battle_votes.voter_id],
+		references: [user.id]
+	}),
+	nomineeHax: one(hax, {
+		fields: [battle_votes.nominee_hax_id],
+		references: [hax.id]
+	})
 }));

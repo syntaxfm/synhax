@@ -1,10 +1,13 @@
 <script lang="ts">
 	import { customAlphabet } from 'nanoid';
-	const nanoid = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', 8);
+	import { files } from '$lib/state/FileState.svelte';
 	import { goto } from '$app/navigation';
 	import { z } from '$sync/client';
+	import RequestAccess from '$lib/files/RequestAccess.svelte';
 
 	let { target_id } = $props();
+
+	const nanoid = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', 8);
 
 	async function new_battle() {
 		const id = crypto.randomUUID();
@@ -22,4 +25,8 @@
 	}
 </script>
 
-<button onclick={new_battle}>New Battle</button>
+{#if files.status === 'ACCESS'}
+	<button onclick={new_battle}>New Battle</button>
+{:else}
+	<RequestAccess />
+{/if}

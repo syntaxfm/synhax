@@ -382,6 +382,15 @@ export const schema = {
             "locked_at"
           >,
         },
+        value: {
+          type: "number",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "battle_votes",
+            "value"
+          >,
+        },
         created_at: {
           type: "number",
           optional: true,
@@ -1292,6 +1301,14 @@ export const schema = {
           cardinality: "one",
         },
       ],
+      hax: [
+        {
+          sourceField: ["user_id", "battle_id"],
+          destField: ["user_id", "battle_id"],
+          destSchema: "hax",
+          cardinality: "one",
+        },
+      ],
     },
     battles: {
       target: [
@@ -1327,6 +1344,32 @@ export const schema = {
         },
       ],
     },
+    battle_votes: {
+      battle: [
+        {
+          sourceField: ["battle_id"],
+          destField: ["id"],
+          destSchema: "battles",
+          cardinality: "one",
+        },
+      ],
+      voter: [
+        {
+          sourceField: ["voter_id"],
+          destField: ["id"],
+          destSchema: "user",
+          cardinality: "one",
+        },
+      ],
+      nomineeHax: [
+        {
+          sourceField: ["nominee_hax_id"],
+          destField: ["id"],
+          destSchema: "hax",
+          cardinality: "one",
+        },
+      ],
+    },
     hax: {
       user: [
         {
@@ -1350,6 +1393,14 @@ export const schema = {
           destField: ["id"],
           destSchema: "targets",
           cardinality: "one",
+        },
+      ],
+      votes: [
+        {
+          sourceField: ["id"],
+          destField: ["nominee_hax_id"],
+          destSchema: "battle_votes",
+          cardinality: "many",
         },
       ],
     },

@@ -1,0 +1,11 @@
+- Voting
+- Prevent submissions after time stopped
+- Revealing
+- Styling / UI
+- Animations
+- Music
+- Image uploading
+- video based targets
+- Code based targets
+- AI avatars from github
+- Breakout reset styles

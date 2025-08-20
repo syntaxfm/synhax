@@ -10,3 +10,7 @@ export async function get_jwt() {
 		return null;
 	}
 }
+
+export function to_snake_case(str: string): string {
+	return str.replace(/\s+/g, '_').toLowerCase();
+}

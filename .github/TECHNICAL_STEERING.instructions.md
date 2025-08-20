@@ -7,13 +7,15 @@ description: 'Technical Steering Document'
 
 ## Project Overview
 
-**Battle Mode** is a real-time collaborative coding platform built with:
+**Battle Mode** (SynHax) is a real-time collaborative CSS/HTML coding competition platform built with:
 
-- **Frontend**: SvelteKit 2.22+ with Svelte 5
-- **Backend**: Better Auth 1.3+ for authentication
-- **Database**: Drizzle ORM with PostgreSQL
-- **Real-time Sync**: Rocicorp Zero for real-time collaboration
-- **Styling**: Custom CSS with split-pane components
+- **Frontend**: SvelteKit 2.30+ with Svelte 5.38+ (using runes)
+- **Backend**: Better Auth 1.3+ for authentication with admin plugins
+- **Database**: Drizzle ORM 0.44+ with PostgreSQL
+- **Real-time Sync**: Rocicorp Zero 0.22+ with zero-svelte 0.3+
+- **File Management**: File System Access API for local development
+- **Styling**: Custom CSS variables, svelte-splitpanes
+- **Code Highlighting**: svelte-highlight with horizon dark theme
 
 ## Documentation Strategy: Always Use Context7 via MCP
 
@@ -49,15 +51,17 @@ mcp_context7_get-library-docs(
 
 ### Core Dependencies Documentation Mapping
 
-| Technology        | Context7 Library ID         | Common Topics                                 |
-| ----------------- | --------------------------- | --------------------------------------------- |
-| **SvelteKit**     | `/sveltejs/kit`             | routing, forms, hooks, layouts, stores        |
-| **Svelte 5**      | `/sveltejs/svelte`          | runes, components, reactivity, lifecycle      |
-| **Better Auth**   | `/better-auth/better-auth`  | authentication, session management, providers |
-| **Drizzle ORM**   | `/drizzle-team/drizzle-orm` | schema, queries, migrations, relations        |
-| **Rocicorp Zero** | `/rocicorp/zero`            | sync, schema, real-time updates               |
-| **Vite**          | `/vitejs/vite`              | configuration, plugins, build                 |
-| **TypeScript**    | `/microsoft/typescript`     | types, interfaces, generics                   |
+| Technology                 | Context7 Library ID         | Common Topics                                                       |
+| -------------------------- | --------------------------- | ------------------------------------------------------------------- |
+| **SvelteKit**              | `/sveltejs/kit`             | routing, forms, hooks, layouts, stores, page state                  |
+| **Svelte 5**               | `/sveltejs/svelte`          | runes, components, reactivity, lifecycle, $state, $derived, $effect |
+| **Better Auth**            | `/better-auth/better-auth`  | authentication, session management, providers, admin plugin, JWT    |
+| **Drizzle ORM**            | `/drizzle-team/drizzle-orm` | schema, queries, migrations, relations, PostgreSQL adapter          |
+| **Rocicorp Zero**          | `/rocicorp/zero`            | sync, schema, real-time updates, permissions                        |
+| **Zero Svelte**            | `/rocicorp/zero-svelte`     | Query, reactive queries, Svelte integration                         |
+| **Vite**                   | `/vitejs/vite`              | configuration, plugins, build                                       |
+| **TypeScript**             | `/microsoft/typescript`     | types, interfaces, generics                                         |
+| **File System Access API** | N/A (Web API)               | directory handles, file manipulation, permissions                   |
 
 ### Project-Specific Context7 Usage Patterns
 
@@ -65,43 +69,44 @@ mcp_context7_get-library-docs(
 
 ```typescript
 // When working with auth, always check Context7 for:
-// - Session management patterns
-// - Provider configuration
-// - TypeScript integration
-// - SvelteKit integration
+// - Better Auth 1.3+ with admin plugin integration
+// - Session management with SvelteKit hooks
+// - JWT token handling with auth API
+// - GitHub OAuth provider configuration
+// - TypeScript integration with Drizzle adapter
 ```
 
-#### For Real-time Sync (Zero)
+#### For Real-time Sync (Zero + Zero-Svelte)
 
 ```typescript
 // Context7 topics to focus on:
-// - Schema definition
-// - Client setup
-// - Svelte integration
-// - Real-time queries
-// - Conflict resolution
+// - Zero-Svelte Query class usage patterns
+// - Schema definition with drizzle-zero generation
+// - Client setup with JWT authentication
+// - Real-time queries with .where() and .related()
+// - Permissions configuration with definePermissions
 ```
 
 #### For Database Operations (Drizzle)
 
 ```typescript
 // Key Context7 areas:
-// - Schema design patterns
-// - Query optimization
-// - Migration strategies
-// - PostgreSQL-specific features
-// - TypeScript integration
+// - Schema design with enums and relations
+// - PostgreSQL-specific features (pgTable, pgEnum)
+// - Migration strategies with drizzle-kit
+// - Zero schema synchronization (dual schema approach)
+// - Complex constraints and indexes
 ```
 
 #### For Frontend Architecture (SvelteKit + Svelte 5)
 
 ```typescript
 // Essential Context7 topics:
-// - Runes and reactivity
-// - Server-side rendering
-// - Form handling
-// - Layout patterns
-// - State management
+// - Svelte 5 runes: $state, $derived, $effect
+// - Modern reactive patterns with Query classes
+// - Component props destructuring with $props()
+// - Page state management with $app/state
+// - File system integration patterns
 ```
 
 ### Context7 Token Management
@@ -126,20 +131,29 @@ If Context7 doesn't have adequate coverage:
 - Always check Context7 for latest Zero-Svelte patterns
 - Focus on: schema definition, client setup, reactive queries
 
-#### 2. Better Auth + SvelteKit Hooks
+#### 2. Better Auth + SvelteKit Integration
 
-- Context7 coverage for: hooks.server.ts patterns, session handling
-- Key files: `src/hooks.server.ts`, `src/lib/auth.ts`
+- Context7 coverage for: hooks.server.ts patterns, session handling, JWT token management
+- Key files: `src/hooks.server.ts`, `src/lib/auth.ts`, `src/lib/auth-client.ts`
+- Admin plugin usage and role-based access control
 
-#### 3. Drizzle + Zero Schema Sync
+#### 3. Drizzle + Zero Dual Schema Management
 
 - Critical: schema compatibility between Drizzle and Zero
-- Files: `src/db/schema.ts`, `src/sync/schema.ts`
+- Files: `src/db/schema.ts`, `src/sync/schema.ts`, `src/sync/zero-schema.gen.ts`
+- Auto-generation workflow with drizzle-zero CLI
 
-#### 4. Real-time State Management
+#### 4. Svelte 5 Runes + Zero-Svelte Integration
 
-- Context7 for: Svelte 5 runes with Zero sync
-- Files: `src/lib/state/BattleState.svelte.ts`, `src/lib/state/UserState.svelte.ts`
+- Context7 for: Modern reactive patterns with Query classes
+- Files: `src/lib/state/FileState.svelte.ts`, component patterns throughout routes
+- $state, $derived, $effect usage with real-time data
+
+#### 5. File System Access API Integration
+
+- Local development workflow with directory handles
+- Real-time file watching and sync to Zero database
+- File persistence with IndexedDB for handle storage
 
 ### Development Workflow
 
@@ -168,10 +182,20 @@ If Context7 doesn't have adequate coverage:
 src/
 ├── db/           # Drizzle schema and database setup
 ├── lib/          # Shared components and utilities
-│   ├── auth.ts   # Better Auth configuration
-│   └── state/    # Svelte 5 runes for global state
-├── routes/       # SvelteKit routing
-└── sync/         # Zero real-time sync setup
+│   ├── auth.ts           # Better Auth server configuration
+│   ├── auth-client.ts    # Better Auth client (Svelte)
+│   ├── battle_mode/      # Battle-specific components
+│   ├── constants/        # App constants and templates
+│   ├── state/            # Svelte 5 runes for global state
+│   ├── targets/          # Target management components
+│   ├── ui/               # Reusable UI components
+│   └── user/             # User utilities and helpers
+├── routes/       # SvelteKit routing with nested battle structure
+├── sync/         # Zero real-time sync setup
+│   ├── client.ts         # Zero client configuration
+│   ├── schema.ts         # Zero schema with permissions
+│   └── zero-schema.gen.ts # Auto-generated from Drizzle
+└── utils/        # Application utilities (filesystem, formatting, etc.)
 ```
 
 ### Context7 Search Strategies
