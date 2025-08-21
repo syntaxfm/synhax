@@ -4,6 +4,7 @@
 	import Countdown from '$lib/battle_mode/Countdown.svelte';
 	import Header from '$lib/battle_mode/Header.svelte';
 	import ShareLinks from '$lib/battle_mode/ShareLinks.svelte';
+	import Modal from '$lib/ui/Modal.svelte';
 	import ToggleButton from '$lib/ui/ToggleButton.svelte';
 	import { z } from '$sync/client';
 	import { Query } from 'zero-svelte';
@@ -147,31 +148,45 @@
 			{/if}
 
 			{#if battle.current?.type === 'TIMED_MATCH'}
-				{#if battle.current.status === 'ACTIVE' && over_status === 'OVER'}
-					<h3>Time's Up!</h3>
+				<Modal
+					title="Time's Up!"
+					open={battle.current.status === 'ACTIVE' && over_status === 'OVER'}
+				>
 					<button
+						class="go_button"
 						disabled={battle.current?.status !== 'ACTIVE' && over_status !== 'OVER'}
 						onclick={finish_battle}>Finish Battle</button
 					>
 
 					<hr />
-					<p>Need more time?</p>
-					<label for="overtime">Add Overtime (minutes)</label>
-					<button onclick={() => add_overtime(5)}>5</button>
-					<button onclick={() => add_overtime(10)}>10</button>
-					<button onclick={() => add_overtime(15)}>15</button>
-					<button onclick={() => add_overtime(20)}>20</button>
-				{/if}
+					<div class="overtime">
+						<p>Need more time?</p>
+						<label for="overtime">Add Overtime (minutes)</label>
+						<div class="ot-buttons">
+							<button onclick={() => add_overtime(5)}>5</button>
+							<button onclick={() => add_overtime(10)}>10</button>
+							<button onclick={() => add_overtime(15)}>15</button>
+							<button onclick={() => add_overtime(20)}>20</button>
+						</div>
+					</div>
+				</Modal>
 			{/if}
 		{/if}
 	</section>
 	<Battlers battle={battle.current} results={true} />
 {/if}
 
+<!-- TODO SMall private toggle -->
+
+<!-- TODO don't show setting during battle -->
+
+<!-- TODO don't show ratings during battle -->
+
 <!-- TODO time trial not showing ready unless time limit changed -->
 
 <!-- TODO add after completed, change interface to see votes, ability to reveal -->
 
+<!-- TODO style overtime -->
 <style>
 	h2 {
 		margin-top: 2rem;
@@ -201,5 +216,30 @@
 	}
 	.go_button {
 		margin-bottom: 4rem;
+	}
+
+	.overtime {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+		> p {
+			margin-top: 1rem;
+		}
+	}
+
+	.ot-buttons {
+		display: flex;
+		gap: 10px;
+		justify-content: center;
+		button {
+			padding: 6px 20px;
+			transition: 0.2s ease all;
+			&:hover,
+			&:focus-visible {
+				background: var(--yellow);
+				color: var(--black);
+				border-color: var(--yellow);
+			}
+		}
 	}
 </style>

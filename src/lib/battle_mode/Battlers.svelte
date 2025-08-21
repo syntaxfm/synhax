@@ -35,7 +35,7 @@
 						<h4>{participant.user.name}</h4>
 						<p class="status">{participant.status}</p>
 					</div>
-					<CodeFrame html_text={participant.hax.html} css_text={participant.hax.css} />
+					<CodeFrame html_text={participant?.hax?.html} css_text={participant.hax.css} />
 					<AppFrame hax={participant.hax} />
 				</div>
 			{/each}
@@ -80,7 +80,7 @@
 
 	.battlers {
 		border-top: 1px solid rgb(255 255 255 /0.1);
-		background: #222;
+		background: hsl(from var(--black) h s 5%);
 		min-height: 40vh;
 	}
 
@@ -103,7 +103,7 @@
 		opacity: 0.6;
 		p {
 			font-size: 20px;
-			margin-top: 2rem;
+			margin-top: 4rem;
 		}
 	}
 </style>

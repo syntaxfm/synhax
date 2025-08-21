@@ -6,6 +6,7 @@
 	import { remove_screaming } from '$utils/formatting';
 	import { Query } from 'zero-svelte';
 	import Battlers from '$lib/battle_mode/Battlers.svelte';
+	import Header from '$lib/battle_mode/Header.svelte';
 
 	let battle = new Query(
 		z.current.query.battles
@@ -17,17 +18,14 @@
 	);
 </script>
 
-<header>
-	<h2>Battle Voting</h2>
-</header>
-
 {#if battle.current && battle.current.visibility === 'PUBLIC'}
-	<h4>The Target</h4>
-	<img src={battle.current.target.image} alt="Battle Image" width="300" />
-	<p>Today's Referee: {battle?.current?.referee?.name}</p>
-	<h3>{remove_screaming(battle?.current?.type || '')}</h3>
-
-	<ShareLinks code={false} battle={battle.current} watch={false} vote={true} />
-
+	<Header battle={battle.current}>
+		{#snippet detail()}
+			<p>Today's Referee: {battle?.current?.referee?.name}</p>
+			<h3>{remove_screaming(battle?.current?.type || '')}</h3>
+			<ShareLinks code={false} battle={battle.current} watch={false} vote={true} />
+		{/snippet}
+		{#snippet countdown()}{/snippet}
+	</Header>
 	<Battlers battle={battle.current} votes={true} />
 {/if}

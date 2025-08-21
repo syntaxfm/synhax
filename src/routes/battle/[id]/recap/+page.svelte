@@ -7,6 +7,7 @@
 	import { Query } from 'zero-svelte';
 	import { BATTLE_RATINGS } from '$lib/constants';
 	import Battlers from '$lib/battle_mode/Battlers.svelte';
+	import Header from '$lib/battle_mode/Header.svelte';
 
 	let battle = new Query(
 		z.current.query.battles
@@ -51,16 +52,18 @@
 	}
 </script>
 
-<header>
-	<h2>Battle Recap</h2>
-</header>
-
 {#if battle.current && battle.current.visibility === 'PUBLIC'}
-	<h4>The Target</h4>
-	<img src={battle.current.target.image} alt="Battle Image" width="300" />
-	<p>Today's Referee: {battle?.current?.referee?.name}</p>
-	<h3>{remove_screaming(battle?.current?.type || '')}</h3>
+	<Header battle={battle.current}>
+		{#snippet detail()}
+			<p>Today's Referee: {battle?.current?.referee?.name}</p>
+			<h3>{remove_screaming(battle?.current?.type || '')}</h3>
+			<ShareLinks code={false} watch={false} vote={true} battle={battle.current} />
+		{/snippet}
+		{#snippet countdown()}{/snippet}
+	</Header>
+
 	<h3>How did you like the battle?</h3>
+	<!-- TODO important issue. Rating for wrong battle showing up -->
 
 	{#each BATTLE_RATINGS as rating_type}
 		<label for="winner">{rating_type}:</label>
@@ -72,16 +75,11 @@
 		></wa-rating>
 	{/each}
 
-	<ShareLinks code={false} watch={false} vote={true} battle={battle.current} />
-
 	<Battlers battle={battle.current} results={true} />
-
-	{#if battle?.current?.status === 'ACTIVE'}
-		<p>Battle is currently active.</p>
-	{:else if battle?.current?.status === 'COMPLETED'}
-		<p>This battle has finished</p>
-		<a href={`/battle/${battle.current.id}/recap`}>See the results</a>
-	{/if}
 {/if}
 
-<!-- TODO code output -->
+<style>
+	wa-rating {
+		--symbol-color-active: var(--yellow);
+	}
+</style>

@@ -37,6 +37,7 @@
 		padding: 10px 30px;
 		background: var(--grey);
 		border-radius: 10px 0 0 10px;
+		box-shadow: 1px 4px rgb(255 255 255/ 0.6) inset;
 		& + button {
 			border-radius: 0 10px 10px 0;
 		}

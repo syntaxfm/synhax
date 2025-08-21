@@ -23,6 +23,7 @@
 	import Countdown from '$lib/battle_mode/Countdown.svelte';
 	import { files } from '$lib/state/FileState.svelte';
 	import { to_snake_case } from '$lib/user/utils';
+	import Header from '$lib/battle_mode/Header.svelte';
 
 	let battle = new Query(
 		z.current.query.battles
@@ -54,8 +55,6 @@
 	});
 
 	$effect(() => {
-		console.log('Starting polling');
-
 		// Start the polling interval
 		poll_timer = setInterval(async () => {
 			try {
@@ -76,9 +75,14 @@
 	});
 </script>
 
-{#if battle.current?.type === 'TIMED_MATCH'}
-	<Countdown battle={battle.current} view="CODE" />
-{/if}
+<Header battle={battle.current}>
+	{#snippet detail()}{/snippet}
+	{#snippet countdown()}
+		{#if battle.current?.type === 'TIMED_MATCH'}
+			<Countdown battle={battle.current} view="CODE" />
+		{/if}
+	{/snippet}
+</Header>
 
 {#if hax.current && battle.current}
 	<BattleMode battle={battle.current} hax={hax.current} />

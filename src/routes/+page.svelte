@@ -96,7 +96,14 @@
 		font-size: 80px;
 		justify-content: center;
 		gap: 20px;
+		transition: 0.2s ease all;
+		&:hover {
+			background: var(--blue);
+			border-color: var(--blue);
+			box-shadow: 0 3px 5px hsl(from #1c55fc h s 30 / 0.2);
+		}
 	}
+
 	.sentry {
 		box-shadow: 0 0 15px var(--black);
 		background: var(--pink);

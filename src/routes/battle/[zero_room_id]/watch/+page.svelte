@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import Battlers from '$lib/battle_mode/Battlers.svelte';
 	import Countdown from '$lib/battle_mode/Countdown.svelte';
+	import Header from '$lib/battle_mode/Header.svelte';
 	import ShareLinks from '$lib/battle_mode/ShareLinks.svelte';
 	import { z } from '$sync/client';
 	import { remove_screaming } from '$utils/formatting';
@@ -11,7 +13,7 @@
 			.where('zero_room_id', page?.params?.zero_room_id || '')
 			.one()
 			.related('referee')
-			.related('participants', (q) => q.related('user'))
+			.related('participants', (q) => q.related('user').related('hax', (h) => h.related('votes')))
 			.related('target')
 	);
 </script>
@@ -20,22 +22,20 @@
 
 {#if battle.current}
 	{#if battle.current.visibility === 'PUBLIC'}
-		<h4>The Target</h4>
-		<img src={battle.current.target.image} alt="Battle Image" width="300" />
-		<p>Today's Referee: {battle?.current?.referee?.name}</p>
-		<h3>{remove_screaming(battle?.current?.type || '')}</h3>
-		{#if battle.current?.type === 'TIMED_MATCH'}
-			<Countdown battle={battle.current} view="WATCH" />
-		{/if}
+		<Header battle={battle.current}>
+			{#snippet detail()}
+				<p>Today's Referee: {battle?.current?.referee?.name}</p>
+				<h3>{remove_screaming(battle?.current?.type || '')}</h3>
+				<ShareLinks code={false} battle={battle.current} />
+			{/snippet}
+			{#snippet countdown()}
+				{#if battle.current?.type === 'TIMED_MATCH'}
+					<Countdown battle={battle.current} view="WATCH" />
+				{/if}
+			{/snippet}
+		</Header>
 
-		<ShareLinks code={false} battle={battle.current} />
-
-		{#each battle.current?.participants as participant}
-			<div>
-				<img src={participant.user?.image} alt="" />
-				<p>{participant.user.name} is {participant.status}</p>
-			</div>
-		{/each}
+		<Battlers battle={battle.current} results={true} />
 	{:else}
 		<div class="private">
 			<p>This battle is private. Sorry.</p>

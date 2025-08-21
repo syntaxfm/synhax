@@ -19,7 +19,7 @@
 			.where('id', page?.params?.id || '')
 			.one()
 			.related('referee')
-			.related('participants', (q) => q.related('user'))
+			.related('participants', (q) => q.related('user').related('hax', (h) => h.related('votes')))
 			.related('target')
 	);
 	let me = $derived(battle.current?.participants.find((p) => p.user_id === z.current.userID));

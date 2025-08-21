@@ -56,13 +56,15 @@ iframe {
 	}
 }
 
-button {
+button,
+.button {
 	cursor: pointer;
 	border: solid 2px;
 	text-transform: uppercase;
 	font-weight: 900;
 	background: transparent;
 	border-radius: 4px;
+	text-decoration: none;
 	font-size: 16px;
 	padding: 0px 4px;
 	text-box-trim: trim-both;
@@ -83,4 +85,14 @@ input {
 	border: 0;
 	padding: 8px 40px;
 	box-shadow: 0 3px 5px hsl(from #1c55fc h s 30 / 0.2);
+}
+
+.disabled {
+	filter: grayscale(100%);
+	opacity: 0.7;
+	pointer-events: none;
+}
+
+.big_button {
+	font-size: 40px;
 }
