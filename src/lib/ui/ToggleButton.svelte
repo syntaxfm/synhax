@@ -32,12 +32,16 @@
 	}
 	button {
 		margin: 0;
-		border-radius: 4px 0 0 4px;
+		font-size: 40px;
+		color: var(--black);
+		padding: 10px 30px;
+		background: var(--grey);
+		border-radius: 10px 0 0 10px;
 		& + button {
-			border-radius: 0 4px 4px 0;
+			border-radius: 0 10px 10px 0;
 		}
 	}
 	button.active {
-		color: green;
+		background: var(--yellow);
 	}
 </style>

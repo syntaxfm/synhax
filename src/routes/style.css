@@ -5,13 +5,36 @@
 
 	font-family: system-ui, sans-serif;
 
+	--black: #181225;
 	--hot: #ff45a8;
 	--teal: #3edcff;
 	--yellow: #ffd00e;
+	--purp: #6e47ae;
+	--pink: #ef467d;
+	--red: #cd3a25;
+	--blue: #226dfc;
+}
+
+@font-face {
+	font-family: 'TickingTimebombBB';
+	src:
+		url('/font/TickingTimebombBB.woff') format('woff'),
+		url('/font/TickingTimebombBB.woff2') format('woff2'),
+		url('/font/TickingTimebombBB.svg#TickingTimebombBB') format('svg'),
+		url('/font/TickingTimebombBB.eot'),
+		url('/font/TickingTimebombBB.eot?#iefix') format('embedded-opentype'),
+		url('/font/TickingTimebombBB.ttf') format('truetype');
+
+	font-weight: normal;
+	font-style: normal;
+	font-display: swap;
 }
 
 body {
+	background: var(--black);
+	color: var(--white);
 	height: 100vh;
+	scrollbar-width: none;
 }
 
 iframe {
@@ -34,6 +57,7 @@ iframe {
 }
 
 button {
+	cursor: pointer;
 	border: solid 2px;
 	text-transform: uppercase;
 	font-weight: 900;
@@ -42,4 +66,21 @@ button {
 	font-size: 16px;
 	padding: 0px 4px;
 	text-box-trim: trim-both;
+	color: var(--white);
+}
+
+input {
+	background: transparent;
+	color: var(--white);
+	border: solid 1px var(--white);
+	border-radius: 4px;
+	border: solid 2px;
+	padding: 4px 8px;
+}
+
+.go_button {
+	background: var(--blue);
+	border: 0;
+	padding: 8px 40px;
+	box-shadow: 0 3px 5px hsl(from #1c55fc h s 30 / 0.2);
 }

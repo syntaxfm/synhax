@@ -14,14 +14,14 @@
 	</section>
 {/if}
 
-<!-- TODO timetrial not showing ready unless time limit changed -->
-
 <style>
 	section {
 		border: 1px solid #eee;
 		border-radius: 5px;
 		padding: 1em;
-		margin-bottom: 1em;
 		text-align: center;
+		a {
+			color: var(--white);
+		}
 	}
 </style>

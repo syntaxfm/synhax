@@ -31,5 +31,3 @@
 
 	<Battlers battle={battle.current} votes={true} />
 {/if}
-
-<!-- TODO ratings can happen after hacks -->

@@ -11,6 +11,7 @@
 		battle: Battle;
 		participant: Participants & { user: User; hax: Hax };
 	} = $props();
+	// TODO voting updating broken
 
 	let votes = $derived.by(
 		() =>
@@ -24,11 +25,13 @@
 				)
 			)
 	);
+
 	function vote(award: (typeof BATTLE_AWARDS)[number], value: number) {
+		const current_vote = votes.current?.find((v) => v.award_type === award);
 		if (participant.hax.id) {
 			z.current.mutate.battle_votes
 				.upsert({
-					id: votes?.current?.id || crypto.randomUUID(),
+					id: current_vote?.id || crypto.randomUUID(),
 					battle_id: battle.id || '',
 					nominee_hax_id: participant.hax.id,
 					voter_id: z.current.userID,

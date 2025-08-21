@@ -50,18 +50,12 @@
 	}
 </script>
 
-<div>
-	Started At: {battle.starts_at
-		? new Date(battle.starts_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-		: 'Not set'}
-	Ends At: {battle.ends_at
-		? new Date(battle.ends_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-		: 'Not set'}
-	<p>Clock: {countdown.toFixed(1)} seconds</p>
+<div class="clock">
+	<p>{countdown.toFixed(1)}</p>
 </div>
 
 {#if view !== 'REF'}
-	{#if status === 'OVER'}
+	<dialog open={status === 'OVER' && ['ACTIVE', 'COMPLETED'].includes(battle.status)}>
 		<p>
 			{#if view === 'CODE'}Pencils down!{/if}
 			{#if view === 'WATCH'}The battle is over{/if}
@@ -77,5 +71,28 @@
 		{:else}
 			<p>Battle recap pending....</p>
 		{/if}
-	{/if}
+	</dialog>
 {/if}
+
+<style>
+	.clock {
+		font-size: 100px;
+		text-align: center;
+		display: flex;
+		border-radius: 4px;
+		justify-content: center;
+		align-items: center;
+		background: #000;
+		padding: 0 40px;
+		margin: 10px;
+		border: solid 1px rgb(255 255 255 / 0.2);
+		p {
+			font-family: 'TickingTimebombBB';
+			color: rgb(from var(--pink) r g b / 0.5);
+			text-shadow: 0 0 5px var(--pink);
+			translate: 0 5px;
+			margin: 0;
+			text-box-trim: trim-both;
+		}
+	}
+</style>

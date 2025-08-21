@@ -16,27 +16,38 @@
 	);
 </script>
 
-<header>
-	<h2>Battle Stands</h2>
-</header>
+<header></header>
 
-{#if battle.current && battle.current.visibility === 'PUBLIC'}
-	<h4>The Target</h4>
-	<img src={battle.current.target.image} alt="Battle Image" width="300" />
-	<p>Today's Referee: {battle?.current?.referee?.name}</p>
-	<h3>{remove_screaming(battle?.current?.type || '')}</h3>
-	{#if battle.current?.type === 'TIMED_MATCH'}
-		<Countdown battle={battle.current} view="WATCH" />
-	{/if}
+{#if battle.current}
+	{#if battle.current.visibility === 'PUBLIC'}
+		<h4>The Target</h4>
+		<img src={battle.current.target.image} alt="Battle Image" width="300" />
+		<p>Today's Referee: {battle?.current?.referee?.name}</p>
+		<h3>{remove_screaming(battle?.current?.type || '')}</h3>
+		{#if battle.current?.type === 'TIMED_MATCH'}
+			<Countdown battle={battle.current} view="WATCH" />
+		{/if}
 
-	<ShareLinks code={false} battle={battle.current} />
+		<ShareLinks code={false} battle={battle.current} />
 
-	{#each battle.current?.participants as participant}
-		<div>
-			<img src={participant.user?.image} alt="" />
-			<p>{participant.user.name} is {participant.status}</p>
+		{#each battle.current?.participants as participant}
+			<div>
+				<img src={participant.user?.image} alt="" />
+				<p>{participant.user.name} is {participant.status}</p>
+			</div>
+		{/each}
+	{:else}
+		<div class="private">
+			<p>This battle is private. Sorry.</p>
 		</div>
-	{/each}
+	{/if}
 {/if}
 
 <!-- TODO code output -->
+
+<style>
+	.private {
+		text-align: center;
+		margin-block: 4rem;
+	}
+</style>

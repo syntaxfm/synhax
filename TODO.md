@@ -1,5 +1,5 @@
-- Voting
 - Prevent submissions after time stopped
+- Prevent voting for anon
 - Revealing
 - Styling / UI
 - Animations

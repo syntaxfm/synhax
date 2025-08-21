@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import Battlers from '$lib/battle_mode/Battlers.svelte';
 	import Countdown from '$lib/battle_mode/Countdown.svelte';
+	import Header from '$lib/battle_mode/Header.svelte';
 	import Participants from '$lib/battle_mode/Participants.svelte';
 	import RefBanner from '$lib/battle_mode/RefBanner.svelte';
 	import ShareLinks from '$lib/battle_mode/ShareLinks.svelte';
@@ -84,43 +86,54 @@
 
 {#if battle.current}
 	<RefBanner battle={battle.current} />
-	<h4>The Target</h4>
+	<Header battle={battle.current}>
+		{#snippet detail()}
+			<p>Today's Referee: {battle?.current?.referee?.name}</p>
+			<ShareLinks battle={battle.current} />
+		{/snippet}
+		{#snippet countdown()}
+			{#if battle.current?.type === 'TIMED_MATCH'}
+				<Countdown battle={battle.current} />
+			{/if}
+		{/snippet}
+	</Header>
 
-	<header>
-		<h2>Battle Lobby</h2>
-	</header>
+	<div class="lobby-details">
+		<h3>{remove_screaming(battle?.current?.type || '')}</h3>
+		<Participants
+			locked_in_participants={locked_in_participants || []}
+			participants={battle.current?.participants || []}
+		/>
 
-	<img src={battle.current.target.image} alt="Battle Image" width="300" />
-	<p>Today's Referee: {battle?.current?.referee?.name}</p>
-	<h3>{remove_screaming(battle?.current?.type || '')}</h3>
-	<Participants
-		locked_in_participants={locked_in_participants || []}
-		participants={battle.current?.participants || []}
-	/>
+		{#if !me}
+			<p>The battle is about to start, please join the battle.</p>
+			<button class="go_button" onclick={join_battle}>Join</button>
+		{:else if me?.status === 'PENDING'}
+			<button class="go_button" onclick={lock_in}>Lock In</button>
+			<button class="go_button" onclick={leave_battle}>Leave</button>
+		{/if}
+	</div>
 
-	{#if !me}
-		<p>The battle is about to start, please join the battle.</p>
-		<button onclick={join_battle}>Join</button>
-	{:else if me?.status === 'PENDING'}
-		<button onclick={lock_in}>Lock In</button>
-		<button onclick={leave_battle}>Leave</button>
-	{/if}
-
-	{#if battle.current?.type === 'TIMED_MATCH'}
-		<Countdown battle={battle.current} />
-	{/if}
-
-	<ShareLinks battle={battle.current} />
-
-	{#each battle.current?.participants as participant}
-		<div>
-			<img src={participant.user?.image} alt="" />
-			<p>{participant.user.name} is {participant.status}</p>
-		</div>
-	{/each}
+	<Battlers battle={battle.current} />
 
 	{#if battle?.current?.status === 'ACTIVE'}
 		<p>Battle is currently active.</p>
 		<a href={`/battle/${battle.current.id}/code`}>Go to Battle</a>
 	{/if}
 {/if}
+
+<style>
+	.lobby-details {
+		text-align: center;
+		margin-block: 4rem;
+		button {
+			font-size: 40px;
+			margin-block: 2rem;
+		}
+	}
+
+	h3 {
+		font-size: 40px;
+		text-transform: capitalize;
+	}
+</style>

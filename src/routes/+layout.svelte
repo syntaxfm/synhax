@@ -4,6 +4,7 @@
 	import favicon from '$lib/assets/favicon.svg';
 	import { z } from '../sync/client';
 	import { Query } from 'zero-svelte';
+	import Jukebox from '$lib/media/Jukebox.svelte';
 
 	let { children } = $props();
 
@@ -15,3 +16,5 @@
 </svelte:head>
 
 {@render children?.()}
+
+<!-- <Jukebox /> -->

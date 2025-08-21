@@ -44,7 +44,7 @@
 </script>
 
 <div>
-	<p>Score: {tallied.overallAverage}</p>
+	<p>Score: {tallied.overallAverage.toFixed(2)}</p>
 	<p>
 		Most Accurate: {tallied.MOST_ACCURATE || 'N/A'}<br />
 		Real World: {tallied.REAL_WORLD || 'N/A'}<br />
