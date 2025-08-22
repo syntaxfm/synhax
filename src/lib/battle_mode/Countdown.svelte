@@ -14,7 +14,7 @@
 		view?: 'WATCH' | 'CODE' | 'REF';
 	} = $props();
 
-	let countdown = $state(0);
+	let countdown = $derived(battle.total_time_seconds);
 	let timer: ReturnType<typeof setInterval> | null = null;
 
 	$effect(() => {
@@ -22,7 +22,11 @@
 			clearInterval(timer);
 			timer = null;
 		}
-		if (battle && battle.type === 'TIMED_MATCH') {
+		if (
+			battle &&
+			battle.type === 'TIMED_MATCH' &&
+			['ACTIVE', 'COMPLETED'].includes(battle.status)
+		) {
 			timer = setInterval(() => {
 				const now = Date.now();
 				if (battle.ends_at && battle.ends_at > now) {
@@ -32,8 +36,6 @@
 					make_over();
 				}
 			}, 100);
-		} else {
-			make_over();
 		}
 
 		return () => {

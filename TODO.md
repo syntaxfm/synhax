@@ -1,9 +1,11 @@
-- Prevent submissions after time stopped
-- Prevent voting for anon
-- Revealing
+- New battle button should ask for settings before going to ref view
 - Styling / UI
 - Animations
 - Music
+- Find all todos
+- Prevent submissions after time stopped
+- Prevent voting for anon
+- Revealing
 - Image uploading
 - video based targets
 - Code based targets

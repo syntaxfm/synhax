@@ -15,6 +15,9 @@
 		padding: 6px 16px;
 		font-size: 35px;
 		display: inline-block;
+		mask-image: url(/Grit%20Mask@2x.wqK0L7zb.png);
+		mask-repeat: repeat;
+		mask-size: 300px;
 	}
 
 	section {

@@ -1,0 +1,356 @@
+/**
+ * Sentry Sentinel Dark Theme for Highlight.js
+ * Beautiful, accessible dark theme inspired by Sentry's brand colors
+ * 
+ * @author Sentry
+ * @version 1.0.0
+ */
+
+/* Base */
+.hljs {
+	color: #f9f8f9;
+}
+
+/* Comments */
+.hljs-comment,
+.hljs-quote {
+	color: #898294;
+	font-style: italic;
+}
+
+/* Keywords, selectors, tags */
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-subst,
+.hljs-type {
+	color: #9e86ff;
+	font-weight: bold;
+}
+
+/* Special keywords (this, new, etc) */
+.hljs-variable.language_,
+.hljs-keyword.hljs-this,
+.hljs-keyword.hljs-new {
+	color: #9e86ff;
+	font-weight: bold;
+}
+
+/* Strings */
+.hljs-string,
+.hljs-doctag {
+	color: #83da90;
+}
+
+/* Types, Classes, Interfaces */
+.hljs-class .hljs-title,
+.hljs-title.class_,
+.hljs-title.class_.inherited__,
+.hljs-params .hljs-type {
+	color: #ff45a8;
+}
+
+/* Built-in constructors and classes */
+.hljs-built_in {
+	color: #ff45a8;
+}
+
+/* Functions */
+.hljs-title.function_,
+.hljs-function .hljs-title,
+.hljs-function {
+	color: #226dfc;
+}
+
+/* Method calls */
+.hljs-property.hljs-function,
+.hljs-title.function_.invoked__ {
+	color: #226dfc;
+}
+
+/* HTML/JSX attributes specifically */
+.language-xml .hljs-attr,
+.language-html .hljs-attr {
+	color: #3edcff;
+}
+
+/* Numbers, literals */
+.hljs-number,
+.hljs-symbol,
+.hljs-bullet {
+	color: #fdb81b;
+}
+
+/* Boolean literals */
+.hljs-literal {
+	color: #fdb81b;
+	font-weight: bold;
+}
+
+/* Variables, attributes */
+.hljs-variable,
+.hljs-template-variable {
+	color: #ff9838;
+}
+
+/* Constants */
+.hljs-constant {
+	color: #7553ff;
+}
+
+/* Built-in names, Hooks */
+.hljs-builtin-name,
+.hljs-built_in {
+	color: #226dfc;
+}
+
+/* Deleted/removed */
+.hljs-deletion {
+	background: rgba(254, 65, 68, 0.15);
+	color: #fe4144;
+}
+
+/* Inserted/added */
+.hljs-addition {
+	background: rgba(94, 206, 115, 0.15);
+	color: #5ece73;
+}
+
+/* Emphasis */
+.hljs-emphasis {
+	font-style: italic;
+}
+
+/* Strong */
+.hljs-strong {
+	font-weight: bold;
+}
+
+/* Links */
+.hljs-link {
+	text-decoration: underline;
+}
+
+/* Section/headers */
+.hljs-section {
+	color: #9e86ff;
+	font-weight: bold;
+}
+
+/* Attributes and object properties */
+.hljs-attribute,
+.hljs-property,
+.hljs-attr {
+	color: #ff70bc;
+}
+
+/* Object literal keys */
+.hljs-attr,
+.hljs-property {
+	color: #ff70bc !important;
+}
+
+/* Regular expressions */
+.hljs-regexp {
+	color: #ff9838;
+}
+
+/* Meta strings */
+.hljs-meta,
+.hljs-meta .hljs-keyword,
+.hljs-meta .hljs-string {
+	color: #ff9838;
+}
+
+/* Operators */
+.hljs-operator,
+.hljs-punctuation.hljs-operator {
+	color: #ff45a8;
+}
+
+/* Punctuation */
+.hljs-punctuation {
+	color: #d5d2da;
+}
+
+/* Tags */
+.hljs-tag {
+	color: #7553ff;
+}
+
+/* Tag names */
+.hljs-name,
+.hljs-tag .hljs-name {
+	color: #7553ff;
+}
+
+/* Tag attributes */
+.hljs-tag .hljs-attr {
+	color: #ff9838;
+}
+
+/* Selectors in CSS */
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-selector-attr,
+.hljs-selector-pseudo {
+	color: #7553ff;
+}
+
+/* Template tags */
+.hljs-template-tag {
+	color: #7553ff;
+}
+
+/* CSS units */
+.css .hljs-number {
+	color: #fdb81b;
+}
+
+/* JSON keys */
+.json .hljs-attr {
+	color: #ff45a8;
+}
+
+/* Object literal keys in JS/TS */
+.language-javascript .hljs-attr,
+.language-typescript .hljs-attr,
+.language-jsx .hljs-attr:not(.hljs-tag .hljs-attr),
+.language-tsx .hljs-attr:not(.hljs-tag .hljs-attr) {
+	color: #ff70bc;
+}
+
+/* Markdown code */
+.markdown .hljs-code {
+	color: #83da90;
+}
+
+/* Markdown headings */
+.markdown .hljs-section {
+	color: #ff45a8;
+	font-weight: bold;
+}
+
+/* SQL keywords */
+.sql .hljs-keyword {
+	color: #9e86ff;
+	font-weight: bold;
+}
+
+/* Diff header */
+.diff .hljs-meta {
+	color: #06b6d4;
+}
+
+/* Diff additions */
+.diff .hljs-addition {
+	background-color: rgba(94, 206, 115, 0.2);
+	color: #5ece73;
+}
+
+/* React/JSX specific */
+.language-jsx .hljs-keyword,
+.language-tsx .hljs-keyword,
+.language-javascript .hljs-keyword,
+.language-typescript .hljs-keyword {
+	color: #9e86ff;
+}
+
+/* JavaScript/TypeScript object properties */
+.language-javascript .hljs-property,
+.language-typescript .hljs-property,
+.language-jsx .hljs-property,
+.language-tsx .hljs-property {
+	color: #ff70bc !important;
+}
+
+/* JavaScript/TypeScript literals and constants */
+.language-javascript .hljs-literal,
+.language-typescript .hljs-literal,
+.language-jsx .hljs-literal,
+.language-tsx .hljs-literal {
+	color: #fdb81b;
+	font-weight: bold;
+}
+
+/* JavaScript 'this' keyword */
+.language-javascript .hljs-variable.language_,
+.language-typescript .hljs-variable.language_,
+.language-jsx .hljs-variable.language_,
+.language-tsx .hljs-variable.language_ {
+	color: #9e86ff;
+	font-weight: bold;
+}
+
+/* React Component Names and Types */
+.language-jsx .hljs-title.class_,
+.language-tsx .hljs-title.class_,
+.language-jsx .hljs-title.function_,
+.language-tsx .hljs-title.function_ {
+	color: #ff45a8;
+}
+
+/* React Hooks and built-in functions */
+.language-jsx .hljs-title,
+.language-tsx .hljs-title,
+.language-javascript .hljs-title,
+.language-typescript .hljs-title {
+	color: #226dfc;
+}
+
+/* JSX Tags */
+.language-jsx .hljs-tag,
+.language-tsx .hljs-tag,
+.language-jsx .hljs-tag .hljs-name,
+.language-tsx .hljs-tag .hljs-name {
+	color: #ff45a8;
+}
+
+/* JSX/TSX Tag Attributes specifically */
+.language-jsx .hljs-tag .hljs-attr,
+.language-tsx .hljs-tag .hljs-attr {
+	color: #3edcff;
+}
+
+/* Import/Export keywords */
+.hljs-keyword.hljs-import,
+.hljs-keyword.hljs-export,
+.hljs-keyword.hljs-from,
+.hljs-keyword.hljs-as {
+	color: #9e86ff;
+	font-weight: bold;
+}
+
+/* Import statement operators and keywords */
+.language-javascript .hljs-operator,
+.language-typescript .hljs-operator,
+.language-jsx .hljs-operator,
+.language-tsx .hljs-operator {
+	color: #ff45a8;
+}
+
+/* Special characters in imports */
+.language-javascript .hljs-punctuation,
+.language-typescript .hljs-punctuation,
+.language-jsx .hljs-punctuation,
+.language-tsx .hljs-punctuation {
+	color: #d5d2da;
+}
+
+/* Correct property colors */
+.hljs-property {
+	color: #ff70bc !important;
+}
+
+/* Template literals */
+.hljs-template-string,
+.hljs-template-string .hljs-template-variable {
+	color: #83da90;
+}
+
+/* Fix for const, let, var */
+.hljs-keyword.hljs-const,
+.hljs-keyword.hljs-let,
+.hljs-keyword.hljs-var {
+	color: #9e86ff;
+	font-weight: bold;
+}

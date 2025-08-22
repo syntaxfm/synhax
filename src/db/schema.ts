@@ -295,7 +295,12 @@ export const battle_votes = pgTable(
 		created_at: timestamp({ withTimezone: true }).notNull().defaultNow()
 	},
 	(t) => [
-		uniqueIndex('battle_votes_unique').on(t.battle_id, t.voter_id, t.award_type),
+		uniqueIndex('battle_votes_unique_per_nominee').on(
+			t.battle_id,
+			t.voter_id,
+			t.award_type,
+			t.nominee_hax_id
+		),
 		index('battle_votes_by_battle_award').on(t.battle_id, t.award_type)
 	]
 );

@@ -14,3 +14,7 @@ export async function get_jwt() {
 export function to_snake_case(str: string): string {
 	return str.replace(/\s+/g, '_').toLowerCase();
 }
+
+export function s(str: string | null): string {
+	return str || '';
+}

@@ -1,53 +1,75 @@
 <script lang="ts">
-	import type { Votes } from '$sync/schema';
+	import type { ParticipantScores } from '$utils/scores';
+	import { fly } from 'svelte/transition';
 
-	const { votes }: { votes: Votes[] } = $props();
-
-	// Convert Votes[] to tally up average by type
-	const tallied = $derived.by(() => {
-		const averagesByType: Record<string, number> = {};
-
-		// Group votes by award_type
-		const votesByType = votes.reduce(
-			(acc, vote) => {
-				if (!acc[vote.award_type]) {
-					acc[vote.award_type] = [];
-				}
-				acc[vote.award_type].push(vote.value);
-				return acc;
-			},
-			{} as Record<string, number[]>
-		);
-
-		// Calculate average for each award type
-		for (const [awardType, values] of Object.entries(votesByType)) {
-			if (values.length > 0) {
-				const sum = values.reduce((total, value) => total + value, 0);
-				averagesByType[awardType] = sum / values.length;
-			}
-		}
-
-		// Calculate overall average of all three award types
-		const averageValues = Object.values(averagesByType);
-		const overallAverage =
-			averageValues.length > 0
-				? averageValues.reduce((total, avg) => total + avg, 0) / averageValues.length
-				: 0;
-
-		return {
-			...averagesByType,
-			overallAverage
-		};
-	});
-
-	$inspect(tallied);
+	const { score }: { score: ParticipantScores } = $props();
 </script>
 
-<div>
-	<p>Score: {tallied.overallAverage.toFixed(2)}</p>
-	<p>
-		Most Accurate: {tallied.MOST_ACCURATE || 'N/A'}<br />
-		Real World: {tallied.REAL_WORLD || 'N/A'}<br />
-		Best Feel: {tallied.BEST_FEEL || 'N/A'}
+<div class="voting">
+	<div class="vote score">
+		<span class="label">Score:</span>
+		<div class="digits" score={score.place}>
+			{#each score.total_score.toFixed(2).toString().split('') as digit}
+				{#key digit}
+					<span class="digit" in:fly={{ y: 50, duration: 200 }}>{digit}</span>
+				{/key}
+			{/each}
+		</div>
+	</div>
+	<p class="vote">
+		<span class="label">Most Accurate:</span>
+		{score.MOST_ACCURATE || 'N/A'}
+	</p>
+
+	<p class="vote">
+		<span class="label">Real World:</span>
+		{score.REAL_WORLD || 'N/A'}
+	</p>
+	<p class="vote">
+		<span class="label">Best Feel:</span>
+		{score.BEST_FEEL || 'N/A'}
 	</p>
 </div>
+
+<style>
+	.voting {
+		padding: 10px;
+		background: linear-gradient(to top, rgb(0 0 0 / 1), rgb(0 0 0 / 0));
+		display: grid;
+		gap: 10px;
+		grid-template-columns: auto 1fr;
+	}
+	.vote {
+		display: grid;
+		width: 100%;
+		grid-column: 1 / -1;
+		grid-template-columns: subgrid;
+		align-items: end;
+		line-height: 1;
+	}
+	.label {
+		text-align: right;
+		font-size: 14px;
+		text-transform: capitalize;
+	}
+	.score {
+		font-size: 64px;
+		font-weight: 900;
+	}
+
+	.digits {
+		overflow: hidden;
+		display: flex;
+		transform-origin: bottom left;
+		transition: 0.2s ease scale;
+		&[score='1'] {
+			scale: 1.5;
+		}
+		&[score='2'] {
+			scale: 1.3;
+		}
+	}
+	.digit {
+		display: block;
+	}
+</style>

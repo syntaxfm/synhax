@@ -112,6 +112,7 @@ export class FileState {
 				// Check current permission status without requesting
 				try {
 					const permission = await handle.queryPermission({ mode: 'read' });
+					console.log('permission', permission);
 
 					if (permission === 'granted') {
 						// Permission already granted, verify directory is accessible
@@ -125,6 +126,22 @@ export class FileState {
 							return true;
 						} catch (accessError) {
 							console.warn('Directory no longer accessible:', accessError);
+						}
+					} else if (permission === 'prompt') {
+						// Permission needs to be requested again (happens after page refresh)
+						try {
+							const requestedPermission = await handle.requestPermission({ mode: 'read' });
+							if (requestedPermission === 'granted') {
+								// Try to read the directory to verify it's still valid
+								const entries = handle.entries();
+								await entries.next(); // Just check if we can iterate
+
+								this.synhax_directory_handle = handle;
+								this.set_status('ACCESS');
+								return true;
+							}
+						} catch (requestError) {
+							console.warn('User denied permission or error requesting:', requestError);
 						}
 					}
 				} catch (error) {
@@ -250,6 +267,7 @@ export class FileState {
 		const html_file = await this.html_file_handle.getFile();
 		const html_mtime = html_file?.lastModified;
 		const html_text = await html_file?.text();
+
 		const css_file = await this.css_file_handle.getFile();
 		const css_mtime = css_file?.lastModified;
 		const css_text = await css_file?.text();

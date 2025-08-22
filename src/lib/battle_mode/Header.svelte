@@ -5,14 +5,22 @@
 	const {
 		battle,
 		detail,
-		countdown
-	}: { battle: Battle & { target: Target }; detail: Snippet; countdown: Snippet } = $props();
+		countdown,
+		target = true
+	}: {
+		battle: Battle & { target: Target };
+		detail: Snippet;
+		countdown: Snippet;
+		target: boolean;
+	} = $props();
 </script>
 
 <header>
 	<div class="target">
-		<img src={battle.target.image} alt="Battle Image" />
-		<p>The Target</p>
+		{#if target}
+			<img src={battle.target.image} alt="Battle Image" />
+			<p>The Target</p>
+		{/if}
 	</div>
 	<div class="detail">
 		{@render detail()}
@@ -23,11 +31,12 @@
 <style>
 	header {
 		display: grid;
-		background: #222;
+		background: var(--black);
 		gap: 20px;
 		grid-template-columns: auto 1fr auto;
-		border-bottom: 1px solid rgb(255 255 255 /0.1);
-		box-shadow: 0 5px 10px rgb(0 0 0 / 0.2);
+		box-shadow:
+			0 5px 10px rgb(0 0 0 / 0.2),
+			0 -1px 1px rgb(255 255 255 / 0.1) inset;
 	}
 
 	.target {
@@ -48,6 +57,7 @@
 
 	.detail {
 		padding: 20px;
+		text-align: right;
 		font-size: 14px;
 	}
 </style>

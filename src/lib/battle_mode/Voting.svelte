@@ -2,6 +2,7 @@
 	import { BATTLE_AWARDS } from '$lib/constants';
 	import { z } from '$sync/client';
 	import type { Battle, Hax, Participants, User } from '$sync/schema';
+	import { remove_screaming } from '$utils/formatting';
 	import { Query } from 'zero-svelte';
 
 	const {
@@ -46,12 +47,37 @@
 	}
 </script>
 
-{#each BATTLE_AWARDS as award}
-	<label for="winner">{award}:</label>
-	<wa-rating
-		value={votes.current?.find((v) => v.award_type === award)?.value || 0}
-		label="Rating"
-		style="font-size: 2rem;"
-		onchange={(e) => vote(award, e.target.value)}
-	></wa-rating>
-{/each}
+<div class="voting">
+	{#each BATTLE_AWARDS as award}
+		<div class="vote">
+			<label for="winner">{remove_screaming(award)}:</label>
+			<wa-rating
+				value={votes.current?.find((v) => v.award_type === award)?.value || 0}
+				label="Rating"
+				style="font-size: 1.6rem;"
+				onchange={(e) => vote(award, e.target.value)}
+			></wa-rating>
+		</div>
+	{/each}
+</div>
+
+<style>
+	.voting {
+		padding: 10px;
+		background: linear-gradient(to top, rgb(0 0 0 / 1), rgb(0 0 0 / 0));
+		display: grid;
+		grid-template-columns: auto 1fr;
+	}
+	.vote {
+		display: grid;
+		width: 100%;
+		grid-column: 1 / -1;
+		grid-template-columns: subgrid;
+		align-items: center;
+		text-align: right;
+	}
+	label {
+		font-size: 14px;
+		text-transform: capitalize;
+	}
+</style>
