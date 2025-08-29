@@ -2,7 +2,7 @@
 	import { z } from '$sync/client';
 	import { goto } from '$app/navigation';
 
-	import TargetForm, { type Target } from '$routes/target/TargetForm.svelte';
+	import TargetForm, { type Target } from '../../TargetForm.svelte';
 	import { page } from '$app/state';
 	import { Query } from 'zero-svelte';
 

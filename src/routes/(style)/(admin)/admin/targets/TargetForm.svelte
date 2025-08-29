@@ -55,7 +55,7 @@
 	}
 </script>
 
-<form onsubmit={handleSubmit}>
+<form onsubmit={handleSubmit} class="stack">
 	<div class="field">
 		<label for="name">Target Name</label>
 		<input
@@ -110,9 +110,11 @@
 	{/if}
 
 	<div class="form-actions">
-		<button type="submit" disabled={isLoading}>
+		<button class="go_button" type="submit" disabled={isLoading}>
 			{isLoading ? 'Saving...' : submitText}
 		</button>
-		<button type="button" onclick={handleCancel} disabled={isLoading}> Cancel </button>
+		<button class="go_button red" type="button" onclick={handleCancel} disabled={isLoading}>
+			Cancel
+		</button>
 	</div>
 </form>

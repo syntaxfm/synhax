@@ -1,12 +1,12 @@
-- New battle button should ask for settings before going to ref view
-- Styling / UI
+- Target Creation UI
+  - Upload image
+  - Upload video
+  - Upload code?
 - Animations
-- Music
 - Find all todos
 - Prevent submissions after time stopped
 - Prevent voting for anon
 - Revealing
-- Image uploading
 - video based targets
 - Code based targets
 - AI avatars from github
