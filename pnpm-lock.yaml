@@ -17,9 +17,6 @@ importers:
       '@aws-sdk/s3-request-presigner':
         specifier: ^3.864.0
         version: 3.864.0
-      '@rich_harris/svelte-split-pane':
-        specifier: ^2.0.0
-        version: 2.0.0(svelte@5.38.1)
       '@rocicorp/zero':
         specifier: ^0.22.2025081300
         version: 0.22.2025081300(@opentelemetry/core@2.0.1(@opentelemetry/api@1.9.0))(typescript@5.9.2)
@@ -1640,11 +1637,6 @@ packages:
 
   '@protobufjs/utf8@1.1.0':
     resolution: {integrity: sha512-Vvn3zZrhQZkkBE8LSuW3em98c0FwgO4nxzv6OdSxPKJIEKY2bGbHn+mhGIPerzI4twdxaP8/0+06HBpwf345Lw==}
-
-  '@rich_harris/svelte-split-pane@2.0.0':
-    resolution: {integrity: sha512-mwdBUw59nlozluhoU3fbMO11YZlJ6IM48ZT6jxen8hAJbGbjTZMDKpMwD1neuK8gxgBM1QKAHJLZN7DpSY+hjA==}
-    peerDependencies:
-      svelte: ^5
 
   '@rocicorp/lock@1.0.4':
     resolution: {integrity: sha512-FavTiO8ETXFXDVfA87IThGduTTTR8iqzBnr/c60gUUmbk7knGEXPmf2B+yiNuluJD0ku0fL2V2r62UXnsLXl6w==}
@@ -5651,10 +5643,6 @@ snapshots:
   '@protobufjs/pool@1.1.0': {}
 
   '@protobufjs/utf8@1.1.0': {}
-
-  '@rich_harris/svelte-split-pane@2.0.0(svelte@5.38.1)':
-    dependencies:
-      svelte: 5.38.1
 
   '@rocicorp/lock@1.0.4':
     dependencies:

@@ -1,23 +1,13 @@
-<!-- BATTLE MODE -->
-<!-- 1. Select Project Dir -->
-<!-- 2. Choose battle -->
-<!-- 2.1 Available Battles To Select -->
-<!-- 2.2 Change Project Dir -->
-<!-- 3. Battle View -->
-<!-- 3.1 HTML & CSS File Showing the one edited last or clicked on  -->
-<!-- 3.2 iFrame of output -->
-<!-- 3.3 iFrame could be broken out into it's own window -->
-<!-- 3.4 Timer -->
 <script lang="ts">
+	import AppFrame from '$lib/battle_mode/AppFrame.svelte';
+	import Debug from '$lib/Debug.svelte';
+	import type { Battle, Hax, Target } from '$sync/schema';
 	import Highlight from 'svelte-highlight';
 	import css from 'svelte-highlight/languages/css';
 	import xml from 'svelte-highlight/languages/xml';
-	import AppFrame from '$lib/battle_mode/AppFrame.svelte';
-	import Debug from '$lib/Debug.svelte';
 	import { Pane, Splitpanes } from 'svelte-splitpanes';
-	import type { Battle, Hax } from '$sync/schema';
 
-	let { battle, hax }: { battle: Battle; hax: Hax } = $props();
+	let { battle, hax }: { battle: Battle & { target: Target }; hax: Hax } = $props();
 </script>
 
 <section class="battle-mode">
