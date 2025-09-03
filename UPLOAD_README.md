@@ -13,15 +13,15 @@ This project is a media processing platform built on Cloudflare Workers that han
 
 ### Endpoint Security Matrix
 
-| Service       | Endpoint                     | API Key Required | Client-Safe | Description                                 |
-| ------------- | ---------------------------- | ---------------- | ----------- | ------------------------------------------- |
-| Image Service | `/generate-image-upload-url` | No               | Yes         | Get presigned URL for image upload          |
-| Image Service | `/upload`                    | Yes              | No          | Direct image upload (server-to-server only) |
-| Image Service | `/assets/*`                  | No               | Yes         | Serve original images                       |
-| Video Service | `/generate-upload-url`       | Yes              | No          | Get presigned URL for video upload          |
-| Video Service | `/notify-upload-complete`    | Yes              | No          | Notify API to start transcoding job         |
-| Video Service | `/job-status`                | No               | Yes         | Poll transcoding job status                 |
-| Video Service | `/playback-url`              | No               | Yes         | Get HLS playback URL                        |
+| Service       | Endpoint                     | API Key Required | Client-Safe | Description                                           |
+| ------------- | ---------------------------- | ---------------- | ----------- | ----------------------------------------------------- |
+| Image Service | `/generate-image-upload-url` | Yes              | No          | Get presigned URL for image upload (server-to-server) |
+| Image Service | `/upload`                    | Yes              | No          | Direct image upload (server-to-server only)           |
+| Image Service | `/assets/*`                  | No               | Yes         | Serve original images                                 |
+| Video Service | `/generate-upload-url`       | Yes              | No          | Get presigned URL for video upload                    |
+| Video Service | `/notify-upload-complete`    | Yes              | No          | Notify API to start transcoding job                   |
+| Video Service | `/job-status`                | No               | Yes         | Poll transcoding job status                           |
+| Video Service | `/playback-url`              | No               | Yes         | Get HLS playback URL                                  |
 
 **Key Points:**
 
@@ -61,8 +61,7 @@ All sensitive endpoints (uploads, presigned URL generation, job notification) re
 
 **For image uploads:**
 
-- The API key is required for the `/upload` endpoint (legacy, server-to-server only). **Do not use this from the browser.**
-- The secure, client-side upload flow uses `/generate-image-upload-url` to get a presigned URL, and then uploads directly to R2 (no API key required for upload step).
+- The API key is required for the `/upload` endpoint (legacy, server-to-server only) and the `/generate-image-upload-url` endpoint. **Do not use these from the browser.**
 
 **Example (video, client + server):**
 
@@ -105,7 +104,7 @@ await fetch('https://videos.break-code.com/notify-upload-complete', {
 });
 ```
 
-API keys are managed via the `API_KEYS` environment variable (comma-separated for multiple keys). See `wrangler.toml` for configuration. For single-user/dev, you can hardcode a strong key in your secrets and use it in your UI.
+API keys are managed via the `IV_API_KEY` environment variable (comma-separated for multiple keys). See `wrangler.toml` for configuration. For single-user/dev, you can hardcode a strong key in your secrets and use it in your UI.
 
 ### Input Validation
 
@@ -125,42 +124,49 @@ All uploads, job starts, and errors are logged. For production, Sentry is integr
 
 This section explains how to use the image processing API for direct uploads and optimized image delivery, matching the actual implementation in the codebase.
 
-### 1. Secure Image Upload Flow (Client-Side, No API Key)
+### 1. Secure Image Upload Flow (Server-Side URL Generation)
 
-**Recommended: Use the `/generate-image-upload-url` endpoint for secure, public image uploads.**
+This is the recommended secure flow. It requires a server to get the presigned URL, which is then passed to the client to perform the upload.
 
-#### Step 1: Request a presigned image upload URL (client-side)
+#### Step 1: Request a presigned image upload URL (server-side)
 
-Call the `/generate-image-upload-url` endpoint from your frontend (no API key required):
+Call the `/generate-image-upload-url` endpoint from your backend server, providing your API key:
 
 ```js
+// This code runs on your trusted server
 const res = await fetch('https://assets.break-code.com/generate-image-upload-url', {
 	method: 'POST',
-	headers: { 'Content-Type': 'application/json' },
+	headers: {
+		'Content-Type': 'application/json',
+		'x-api-key': 'your-secret-api-key'
+	},
 	body: JSON.stringify({
 		app_id: 'yourAppId',
 		image_id: 'yourImageId', // optional, random if omitted
-		content_type: file.type // e.g. "image/jpeg"
+		content_type: 'image/jpeg' // The content type of the file to be uploaded
 	})
 });
 const { upload_url, key, asset_url, transform_url } = await res.json();
+
+// Now, send the `upload_url` and other data to your frontend.
 ```
 
 #### Step 2: Upload the image file (client-side)
 
-Upload the file to the returned `upload_url` (a secure, time-limited presigned URL pointing directly to R2):
+Your frontend receives the `upload_url` from your server and uses it to upload the file directly to R2. No API key is exposed to the client.
 
 ```js
+// This code runs in the browser
 await fetch(upload_url, {
 	method: 'PUT',
-	headers: { 'Content-Type': file.type },
+	headers: { 'Content-Type': 'image/jpeg' }, // Must match the content_type from Step 1
 	body: file
 });
 ```
 
 #### Step 3: Use the image in your frontend (client-side)
 
-Use the returned `asset_url` (original) or `transform_url` (optimized) in your UI:
+Use the `asset_url` or `transform_url` (which you also passed from your server) in your UI:
 
 ```js
 <img src={transform_url} alt="Optimized image" />
@@ -168,9 +174,8 @@ Use the returned `asset_url` (original) or `transform_url` (optimized) in your U
 
 **Note:**
 
-- The legacy `/upload` endpoint is for server-to-server or trusted backend uploads only and requires an API key. Do not use it from the browser.
-- The `/upload-direct` endpoint has been removed for security. All uploads must use the secure presigned URL returned by `/generate-image-upload-url`.
-- You can further adjust the transformation by modifying the `cdn-cgi/image/` parameters in the `transform_url` (see Cloudflare Images docs for options).
+- The legacy `/upload` endpoint is for server-to-server or trusted backend uploads only and requires an API key.
+- The `/upload-direct` endpoint has been removed for security. All uploads must use the secure presigned URL flow.
 
 ### 3. Best Practices
 
@@ -244,12 +249,12 @@ await fetch('https://videos.break-code.com/notify-upload-complete', {
 
 This project uses Sentry for error tracking and alerting in both the image and video services. To enable Sentry:
 
-1.  Create a new Sentry project of type **JavaScript (Browser)** for each Worker (image and video).
-2.  For the Node.js transcoder container, use a **Node.js** Sentry project.
-3.  Set the DSNs as secrets in your Cloudflare account:
-    - `IV_SENTRY_DSN`: For the `image-service` and `video-service` Workers.
-    - `TRANS_SENTRY_DSN`: For the `transcode-container`.
-4.  Errors and exceptions will be automatically reported to Sentry.
+1. Create a new Sentry project of type **JavaScript (Browser)** for each Worker (image and video).
+2. For the Node.js transcoder container, use a **Node.js** Sentry project.
+3. Set the DSNs as secrets in your Cloudflare account:
+   - `IV_SENTRY_DSN`: For the `image-service` and `video-service` Workers.
+   - `TRANS_SENTRY_DSN`: For the `transcode-container`.
+4. Errors and exceptions will be automatically reported to Sentry.
 
 For more details, see the Sentry docs for [Cloudflare Workers](https://docs.sentry.io/platforms/javascript/guides/cloudflare-workers/).
 

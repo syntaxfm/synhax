@@ -17,6 +17,7 @@
 		"sync": "pnpm zero-cache-dev",
 		"postinstall": "pnpm sync-generate",
 		"push": "drizzle-kit push",
+		"studio": "drizzle-kit studio",
 		"sync-permissions": "zero-deploy-permissions -p ./src/sync/schema.ts"
 	},
 	"devDependencies": {
