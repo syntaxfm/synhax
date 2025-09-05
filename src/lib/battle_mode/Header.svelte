@@ -22,10 +22,10 @@
 			<p>The Target</p>
 		{/if}
 	</div>
+	{@render countdown()}
 	<div class="detail">
 		{@render detail()}
 	</div>
-	{@render countdown()}
 </header>
 
 <style>
@@ -33,7 +33,7 @@
 		display: grid;
 		background: var(--black);
 		gap: 20px;
-		grid-template-columns: auto 1fr auto;
+		grid-template-columns: 1fr auto 1fr;
 		box-shadow:
 			0 5px 10px rgb(0 0 0 / 0.2),
 			0 -1px 1px rgb(255 255 255 / 0.1) inset;

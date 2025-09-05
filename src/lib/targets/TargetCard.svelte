@@ -49,7 +49,7 @@
 		<h2>{target.name}</h2>
 	</header>
 	<div class="frame">
-		<img src={target.inspo} alt={target.name} />
+		<img src={target.image} alt={target.name} />
 	</div>
 	<div class="ratings">
 		<span>
