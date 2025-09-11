@@ -4,19 +4,18 @@
 - Typecheck: `pnpm check`; watch `pnpm check:watch`
 - Lint/format: `pnpm lint` (check) and `pnpm format` (write)
 - Data/Zero: `pnpm push`, `pnpm studio`, `pnpm sync-generate`, `pnpm sync`, `pnpm sync-permissions`
-- Tests: none configured; if adding Vitest, single test: `pnpm vitest path/to/file.test.ts -t "name"`
-- Imports: use aliases `$lib`, `$routes`, `$sync`, `$db`, `$utils`, `$const` (see `svelte.config.js`)
-- Types: use `import type`; export public types with `export type`; avoid implicit `any`
-- TS: strict on; `moduleResolution: bundler`; `allowJs` + `checkJs`
-- Svelte: Svelte 5; `<script lang="ts">`; type props/stores; prefer runes over legacy APIs
-- Naming: PascalCase components/types; camelCase vars/functions; UPPER_SNAKE_CASE constants; helpers like `to_snake_case`
-- Formatting: Prettier with tabs, single quotes, width 100, no trailing commas; plugin `prettier-plugin-svelte`
-- Prettier ignore: lockfiles and `/static/` (see `.prettierignore`)
+- Tests: none configured; single test (if Vitest): `pnpm vitest path/to/file.test.ts -t "name"`
+- Imports: use `$lib`, `$routes`, `$sync`, `$db`, `$utils`, `$const` (see `svelte.config.js`)
+- Types/TS: `import type`, `export type`; strict; `moduleResolution: bundler`; `allowJs` + `checkJs`; no implicit `any`
+- Formatting: Prettier tabs, single quotes, width 100, no trailing commas; plugin `prettier-plugin-svelte` (lockfiles + `/static/` ignored)
+- Svelte MCP: REQUIRED for all Svelte 5 work
+- MCP usage: run `list_sections` first; then `get_documentation` for all relevant runes/template/Kit sections; base code on retrieved docs and cite section names in PRs
+- Svelte code: Svelte 5; `<script lang="ts">`; type props/stores; prefer runes ($state, $derived, $effect, $props) over legacy APIs
+- Naming: PascalCase components/types; camelCase vars/functions; UPPER_SNAKE_CASE constants; helpers may use snake_case
 - Errors (endpoints): validate input; return `json(data, { status })`; wrap external I/O in try/catch
-- Errors (pages/actions): use `throw error(status, message)` or `fail(status, data)`
-- File layout: shared UI in `src/lib/`; routes in `src/routes/` per SvelteKit
-- Generated files: don’t edit `src/sync/zero-schema.gen.ts`; run `pnpm sync-generate`
-- Commit hygiene: run `pnpm format` and `pnpm check` before PRs
-- Cursor/Copilot: none found; if added later, follow them
-- Svelte MCP: available; use `list_sections` then `get_documentation` to fetch relevant docs
-- Keep changes minimal and consistent with existing patterns
+- Errors (pages/actions): use `throw error(status, message)` or `fail(status, data)` appropriately
+- Structure/gen: shared UI in `src/lib/`; routes in `src/routes/`; never edit `src/sync/zero-schema.gen.ts` (regen via `pnpm sync-generate`)
+- Auth/aliases: prefer alias imports; avoid brittle long relatives
+- Commit hygiene: run `pnpm format` and `pnpm check` before PRs/commits
+- Cursor/Copilot: no repo rules found; if added later, they take precedence
+- Consistency: keep edits minimal and align with existing patterns
