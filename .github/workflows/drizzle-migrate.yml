@@ -1,0 +1,26 @@
+name: Drizzle Migrations
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/sync/schema.ts'
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    env:
+      ZERO_UPSTREAM_DB: ${{ secrets.ZERO_UPSTREAM_DB }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - name: Apply Drizzle migrations
+        run: pnpm push
