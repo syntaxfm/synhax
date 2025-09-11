@@ -1,3 +1,3 @@
-import { DB_URL } from '$env/static/private';
+import { ZERO_UPSTREAM_DB } from '$env/static/private';
 import { drizzle } from 'drizzle-orm/node-postgres';
-export const db = drizzle(DB_URL);
+export const db = drizzle(ZERO_UPSTREAM_DB);

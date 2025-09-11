@@ -283,3 +283,66 @@ TARGET_ATTRIBUTES
 - Friending System
 
 - Individual submissions, hackweek version include ONLY battles a means of submitting
+
+## Environment Variables
+
+- `ZERO_UPSTREAM_DB`: Postgres connection string used for both application runtime and Drizzle migrations. Replaces the former `DB_URL` variable (now deprecated).
+
+### Setup
+
+1. Local dev: add to `.env` (not committed):
+   ```bash
+   ZERO_UPSTREAM_DB=postgres://user:pass@host:5432/dbname
+   ```
+2. SvelteKit server code imports it via `$env/static/private` (see `src/db/index.ts`). Restart the dev server after changes.
+3. Cloudflare Workers: store as a secret (recommended):
+   ```bash
+   wrangler secret put ZERO_UPSTREAM_DB
+   ```
+4. Drizzle CLI + migrations use `process.env.ZERO_UPSTREAM_DB` (see `drizzle.config.ts`).
+
+Remove any legacy `DB_URL` definitions from local `.env` and Cloudflare secrets to avoid confusion. Only `ZERO_UPSTREAM_DB` is now used.
+
+## Sentry
+
+Error and performance monitoring is integrated with Sentry.
+
+### Config Files
+
+- `sentry.server.config.ts`: Initializes Sentry for server/runtime using `SENTRY_DSN`.
+- `sentry.client.config.ts`: Initializes Sentry in the browser using `PUBLIC_SENTRY_DSN`.
+
+These are auto-loaded by the Sentry SDK (import side effects) when bundled.
+
+### Env Vars
+
+Add to `.env` (do not commit real values):
+
+```
+SENTRY_DSN=... # private
+PUBLIC_SENTRY_DSN=... # optional public (omit if not capturing browser errors)
+```
+
+### Source Maps (optional CI)
+
+Provide the following in your CI environment to enable source map upload via the Vite plugin:
+
+```
+SENTRY_AUTH_TOKEN=your_auth_token
+SENTRY_ORG=scott-tolinski-projects
+SENTRY_PROJECT=javascript-svelte
+```
+
+The plugin is inert locally unless those vars are set.
+
+### Server Error Capture
+
+Unhandled server errors are captured in `src/hooks.server.ts` via `handleError`.
+
+### Testing
+
+Trigger a test error in a route load/function to verify it appears in Sentry.
+
+### Adjust Sampling
+
+Modify `tracesSampleRate` / `profilesSampleRate` in the config files as needed for production.

@@ -8,7 +8,7 @@
 - Imports: use `$lib`, `$routes`, `$sync`, `$db`, `$utils`, `$const` (see `svelte.config.js`)
 - Types/TS: `import type`, `export type`; strict; `moduleResolution: bundler`; `allowJs` + `checkJs`; no implicit `any`
 - Formatting: Prettier tabs, single quotes, width 100, no trailing commas; plugin `prettier-plugin-svelte` (lockfiles + `/static/` ignored)
-- Svelte MCP: REQUIRED for all Svelte 5 work
+- Svelte MCP: for all Svelte 5 work
 - MCP usage: run `list_sections` first; then `get_documentation` for all relevant runes/template/Kit sections; base code on retrieved docs and cite section names in PRs
 - Svelte code: Svelte 5; `<script lang="ts">`; type props/stores; prefer runes ($state, $derived, $effect, $props) over legacy APIs
 - Naming: PascalCase components/types; camelCase vars/functions; UPPER_SNAKE_CASE constants; helpers may use snake_case

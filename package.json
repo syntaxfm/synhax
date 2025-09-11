@@ -21,6 +21,7 @@
 		"sync-permissions": "zero-deploy-permissions -p ./src/sync/schema.ts"
 	},
 	"devDependencies": {
+		"@sentry/vite-plugin": "^4.3.0",
 		"@sveltejs/adapter-auto": "^6.0.0",
 		"@sveltejs/adapter-cloudflare": "^7.2.3",
 		"@sveltejs/kit": "^2.22.0",
@@ -47,6 +48,7 @@
 		"@aws-sdk/client-s3": "^3.864.0",
 		"@aws-sdk/s3-request-presigner": "^3.864.0",
 		"@rocicorp/zero": "^0.22.2025081300",
+		"@sentry/sveltekit": "^10.11.0",
 		"@tanstack/match-sorter-utils": "^8.19.4",
 		"@tanstack/svelte-table": "npm:tanstack-table-8-svelte-5@^0.1",
 		"@tanstack/table-core": "^8.21.3",
