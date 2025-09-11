@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'src/sync/schema.ts'
+  workflow_dispatch:
 
 jobs:
   migrate:
