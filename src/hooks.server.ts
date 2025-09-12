@@ -3,6 +3,7 @@ import type { HandleServerError, Handle } from '@sveltejs/kit';
 import { auth } from '$lib/auth';
 import { svelteKitHandler } from 'better-auth/svelte-kit';
 import { building } from '$app/environment';
+import { sequence } from '@sveltejs/kit/hooks';
 
 // Server SDK initialized in instrumentation.server.ts per manual setup docs
 
@@ -20,11 +21,12 @@ export const handleError: HandleServerError =
 
 const sentryHandle = Sentry.sentryHandle();
 
-export const handle: Handle = async ({ event, resolve }) => {
-	// Let Better Auth process /api/auth/* and fall through to the rest
-	const response = await svelteKitHandler({ event, resolve, auth, building });
+const authHandle: Handle = async ({ event, resolve }) => {
+	return svelteKitHandler({ event, resolve, auth, building });
+};
 
-	// Attach user context for Sentry after auth handling
+const sessionHandle: Handle = async ({ event, resolve }) => {
+	const response = await resolve(event);
 	try {
 		const session = await auth.api.getSession({
 			headers: event.request.headers
@@ -46,6 +48,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	} catch (e) {
 		Sentry.captureException(e);
 	}
-
 	return response;
 };
+
+export const handle: Handle = sequence(sentryHandle, authHandle, sessionHandle);
