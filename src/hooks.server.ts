@@ -1,26 +1,40 @@
 import * as Sentry from '@sentry/sveltekit';
 import type { HandleServerError, Handle } from '@sveltejs/kit';
 import { auth } from '$lib/auth';
+import { svelteKitHandler } from 'better-auth/svelte-kit';
+import { building } from '$app/environment';
 
 // Server SDK initialized in instrumentation.server.ts per manual setup docs
 
-const myErrorHandler = ({ error, event }: { error: unknown; event: unknown }) => {
+const myErrorHandler = ({
+	error,
+	event
+}: {
+	error: unknown;
+	event: unknown;
+}) => {
 	console.error('An error occurred on the server side:', error, event);
 };
-export const handleError: HandleServerError = Sentry.handleErrorWithSentry(myErrorHandler);
+export const handleError: HandleServerError =
+	Sentry.handleErrorWithSentry(myErrorHandler);
 
 const sentryHandle = Sentry.sentryHandle();
 
 export const handle: Handle = async ({ event, resolve }) => {
-	// First run Sentry's handler (starts trace, sets up scope)
-	const response = await sentryHandle({ event, resolve });
+	// Let Better Auth process /api/auth/* and fall through to the rest
+	const response = await svelteKitHandler({ event, resolve, auth, building });
 
-	// Then enrich scope with auth user (cannot alter already-sent spans, but user context attaches to future events in same request lifecycle if emitted later)
+	// Attach user context for Sentry after auth handling
 	try {
-		const session = await auth.api.getSession({ headers: event.request.headers });
+		const session = await auth.api.getSession({
+			headers: event.request.headers
+		});
 		if (session) {
 			event.locals.session = session.session;
-			event.locals.user = { id: session.user.id, role: session.user.role || undefined };
+			event.locals.user = {
+				id: session.user.id,
+				role: session.user.role || undefined
+			};
 			Sentry.setUser({
 				id: session.user.id,
 				username: session.user.name || undefined,

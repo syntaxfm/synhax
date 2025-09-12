@@ -1,11 +1,8 @@
-- Target Creation UI
-  - Upload image
-  - Upload video
-  - Upload code?
 - Animations
 - Find all todos
 - Prevent submissions after time stopped
 - Prevent voting for anon
+  - Upload code?
 - Revealing
 - video based targets
 - Code based targets
