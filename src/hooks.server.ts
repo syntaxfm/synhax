@@ -14,7 +14,7 @@ import { drizzle } from 'drizzle-orm/postgres-js';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { admin, jwt } from 'better-auth/plugins';
 import { betterAuth } from 'better-auth';
-import type { auth } from '$lib/auth';
+import type { BetterAuthOptions } from 'better-auth';
 
 // Server SDK initialized in instrumentation.server.ts per manual setup docs
 
@@ -46,34 +46,6 @@ export const handleError: HandleServerError =
 	Sentry.handleErrorWithSentry(myErrorHandler);
 
 const sentryHandle = Sentry.sentryHandle();
-
-const sessionHandle: Handle = async ({ event, resolve }) => {
-	try {
-		const session = await auth.api.getSession({
-			headers: event.request.headers
-		});
-		if (session) {
-			event.locals.session = session.session;
-			event.locals.user = {
-				id: session.user.id,
-				role: session.user.role || undefined
-			};
-			Sentry.setUser({
-				id: session.user.id,
-				username: session.user.name || undefined,
-				email: session.user.email || undefined
-			});
-		} else {
-			Sentry.setUser(null);
-		}
-	} catch (e) {
-		Sentry.captureException(e);
-	}
-	const response = await resolve(event);
-	return response;
-};
-
-// export const handle: Handle = sequence(sentryHandle, authHandle, sessionHandle);
 
 export const handle: Handle = async ({ event, resolve }) => {
 	const env = event.platform?.env as
@@ -110,8 +82,35 @@ export const handle: Handle = async ({ event, resolve }) => {
 		},
 		plugins: [admin(), jwt()]
 	});
+
 	const authHandle: Handle = async ({ event, resolve }) => {
 		return svelteKitHandler({ event, resolve, auth, building });
+	};
+
+	const sessionHandle: Handle = async ({ event, resolve }) => {
+		try {
+			const session = await auth.api.getSession({
+				headers: event.request.headers
+			});
+			if (session) {
+				event.locals.session = session.session;
+				event.locals.user = {
+					id: session.user.id,
+					role: session.user.role || undefined
+				};
+				Sentry.setUser({
+					id: session.user.id,
+					username: session.user.name || undefined,
+					email: session.user.email || undefined
+				});
+			} else {
+				Sentry.setUser(null);
+			}
+		} catch (e) {
+			Sentry.captureException(e);
+		}
+		const response = await resolve(event);
+		return response;
 	};
 
 	// Build handler chain
