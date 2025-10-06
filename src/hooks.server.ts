@@ -1,4 +1,3 @@
-import * as Sentry from '@sentry/sveltekit';
 import type { HandleServerError, Handle } from '@sveltejs/kit';
 import { svelteKitHandler } from 'better-auth/svelte-kit';
 import { building } from '$app/environment';
@@ -16,22 +15,8 @@ import { admin, jwt } from 'better-auth/plugins';
 import { betterAuth } from 'better-auth';
 import type { BetterAuthOptions } from 'better-auth';
 
-// Server SDK initialized in instrumentation.server.ts per manual setup docs
-
-Sentry.init({
-	dsn: 'https://a825005a7ee52dd8ea15b555f4eaa374@o4507217476845568.ingest.us.sentry.io/4510003969458176scott-tolinski-projects / synhax-l1',
-	// Adds request headers and IP for users, for more info visit:
-	// https://docs.sentry.io/platforms/javascript/guides/sveltekit/configuration/options/#sendDefaultPii
-	sendDefaultPii: true,
-	// Set tracesSampleRate to 1.0 to capture 100%
-	// of transactions for tracing.
-	// We recommend adjusting this value in production
-	// Learn more at
-	// https://docs.sentry.io/platforms/javascript/configuration/options/#traces-sample-rate
-	tracesSampleRate: 1.0,
-	// Enable logs to be sent to Sentry
-	enableLogs: true
-});
+// Sentry disabled on Cloudflare Workers due to edge runtime compatibility issues
+// TODO: Set up Sentry for Workers using @sentry/cloudflare-workers instead
 
 const myErrorHandler = ({
 	error,
@@ -42,10 +27,7 @@ const myErrorHandler = ({
 }) => {
 	console.error('An error occurred on the server side:', error, event);
 };
-export const handleError: HandleServerError =
-	Sentry.handleErrorWithSentry(myErrorHandler);
-
-const sentryHandle = Sentry.sentryHandle();
+export const handleError: HandleServerError = myErrorHandler;
 
 export const handle: Handle = async ({ event, resolve }) => {
 	const env = event.platform?.env as
@@ -98,23 +80,16 @@ export const handle: Handle = async ({ event, resolve }) => {
 					id: session.user.id,
 					role: session.user.role || undefined
 				};
-				Sentry.setUser({
-					id: session.user.id,
-					username: session.user.name || undefined,
-					email: session.user.email || undefined
-				});
-			} else {
-				Sentry.setUser(null);
 			}
 		} catch (e) {
-			Sentry.captureException(e);
+			console.error('Session error:', e);
 		}
 		const response = await resolve(event);
 		return response;
 	};
 
 	// Build handler chain
-	const chain = sequence(sentryHandle, authHandle, sessionHandle);
+	const chain = sequence(authHandle, sessionHandle);
 
 	try {
 		return await chain({ event, resolve });

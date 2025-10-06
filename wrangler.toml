@@ -16,6 +16,3 @@ id = "7b4ec959f560438b92c0b0e5c90bd59b"
 # wrangler.toml (wrangler v3.88.0^)
 [observability.logs]
 enabled = true
-
-
-
