@@ -1,6 +1,8 @@
 <script lang="ts">
-	import { z } from '$sync/client';
+	import { get_z } from '$lib/z';
 	import { Query } from 'zero-svelte';
+
+	const z = get_z();
 	import { type ColumnDef } from '@tanstack/table-core';
 	import Table from '$lib/ui/Table.svelte';
 	import { schema } from '$sync/schema';
@@ -12,7 +14,7 @@
 		[key: string]: any;
 	};
 
-	const hax = new Query(z.current.query.hax);
+	const hax = new Query(z.query.hax);
 	const columns: ColumnDef<HaxRow, any>[] = [
 		{
 			accessorKey: 'id',

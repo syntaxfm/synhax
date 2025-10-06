@@ -7,21 +7,27 @@
 	import ShareLinks from '$lib/battle_mode/ShareLinks.svelte';
 	import Modal from '$lib/ui/Modal.svelte';
 	import ToggleButton from '$lib/ui/ToggleButton.svelte';
-	import { z } from '$sync/client';
+	import { get_z } from '$lib/z';
 	import { fade } from 'svelte/transition';
 	import { Query } from 'zero-svelte';
 
+	const z = get_z();
+
 	let battle = new Query(
-		z.current.query.battles
+		z.query.battles
 			.where('id', page?.params?.id || '')
 			.one()
 			.related('referee')
-			.related('participants', (q) => q.related('user').related('hax', (h) => h.related('votes')))
+			.related('participants', (q) =>
+				q.related('user').related('hax', (h) => h.related('votes'))
+			)
 			.related('target')
 	);
 
 	let over_status: 'ACTIVE' | 'OVER' = $state('ACTIVE');
-	let controls_visible = $derived(['PENDING', 'ACTIVE'].includes(battle.current?.status));
+	let controls_visible = $derived(
+		['PENDING', 'ACTIVE'].includes(battle.current?.status)
+	);
 
 	async function start() {
 		if (!battle.current) return;
@@ -40,13 +46,14 @@
 			updates.ends_at = now + battle.current.total_time_seconds * 1000;
 		}
 
-		await z.current.mutate.battles.update(updates);
+		await z.mutate.battles.update(updates);
 	}
 
 	async function toggle_privacy() {
 		if (!battle.current) return;
-		const new_visibility = battle.current.visibility === 'PUBLIC' ? 'PRIVATE' : 'PUBLIC';
-		await z.current.mutate.battles.update({
+		const new_visibility =
+			battle.current.visibility === 'PUBLIC' ? 'PRIVATE' : 'PUBLIC';
+		await z.mutate.battles.update({
 			id: battle.current.id,
 			visibility: new_visibility
 		});
@@ -54,8 +61,9 @@
 
 	async function toggle_type() {
 		if (!battle.current) return;
-		const new_type = battle.current.type === 'TIME_TRIAL' ? 'TIMED_MATCH' : 'TIME_TRIAL';
-		await z.current.mutate.battles.update({
+		const new_type =
+			battle.current.type === 'TIME_TRIAL' ? 'TIMED_MATCH' : 'TIME_TRIAL';
+		await z.mutate.battles.update({
 			id: battle.current.id,
 			type: new_type
 		});
@@ -64,7 +72,7 @@
 	async function add_overtime(ot: number) {
 		if (!battle.current) return;
 
-		await z.current.mutate.battles.update({
+		await z.mutate.battles.update({
 			id: battle.current.id,
 			overtime_seconds: ot * 60,
 			ends_at: Date.now() + ot * 60 * 1000
@@ -76,7 +84,7 @@
 		const input = event.target as HTMLInputElement;
 		const new_time = parseFloat(input.value);
 		if (!isNaN(new_time)) {
-			z.current.mutate.battles.update({
+			z.mutate.battles.update({
 				id: battle.current.id,
 				total_time_seconds: new_time * 60
 			});
@@ -86,14 +94,14 @@
 	function finish_battle() {
 		if (!battle.current) return;
 
-		z.current.mutate.battles.update({
+		z.mutate.battles.update({
 			id: battle.current.id,
 			status: 'COMPLETED'
 		});
 	}
 	let locked_in_participants = $derived(
 		battle.current?.participants.filter(
-			(p) => p.user_id === z.current.userID && p.status === 'READY'
+			(p) => p.user_id === z.userID && p.status === 'READY'
 		)
 	);
 </script>
@@ -162,7 +170,10 @@
 	<Battlers battle={battle.current} results={true} />
 
 	{#if battle.current?.type === 'TIMED_MATCH'}
-		<Modal title="Time's Up!" open={battle.current.status === 'ACTIVE' && over_status === 'OVER'}>
+		<Modal
+			title="Time's Up!"
+			open={battle.current.status === 'ACTIVE' && over_status === 'OVER'}
+		>
 			<button
 				class="go_button big_button"
 				disabled={battle.current?.status !== 'ACTIVE' && over_status !== 'OVER'}

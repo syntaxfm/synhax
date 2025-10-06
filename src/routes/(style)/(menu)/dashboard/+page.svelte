@@ -1,15 +1,19 @@
 <script lang="ts">
 	import { Query } from 'zero-svelte';
-	import { z } from '$sync/client';
 	import LatestTargets from '$lib/targets/LatestTargets.svelte';
 	import { files } from '$lib/state/FileState.svelte';
-
-	// import BattlesInProgress from '$lib/battle_mode/BattlesInProgress.svelte';
-
+	import WelcomeModal from '$lib/user/WelcomeModal.svelte';
+	// import BattlesInProgress from '$lib/battle_mode/BattlesInProgress.svelte'
 	import blip from '$lib/ui/blip.mp3';
 	import throws from '$lib/ui/throw.mp3';
 	import throwforward from '$lib/ui/throwforward.mp3';
-	import { play_sound, sound_on_click, sound_on_interaction } from '$lib/ui/sounds';
+	import {
+		play_sound,
+		sound_on_click,
+		sound_on_interaction
+	} from '$lib/ui/sounds';
+	import { get_z } from '$lib/z';
+	const z = get_z();
 
 	const blip_sound = new Audio(blip);
 	const throw_sound = new Audio(throws);
@@ -20,10 +24,18 @@
 	throwforward_sound.preload = 'auto';
 	throwforward_sound.volume = 0.1;
 
-	const user = new Query(z.current.query.user.where('id', z.current.userID).one());
+	const user = new Query(z.query.user.where('id', z.userID).one());
 
 	let battle_select = $state(false);
+	let show_welcome = $state(false);
 	files.check();
+
+	// Check if user needs to see welcome modal (no avatar set)
+	$effect(() => {
+		if (user.current && !user.current.avatar) {
+			show_welcome = true;
+		}
+	});
 
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.key === 'Escape') {
@@ -31,12 +43,22 @@
 			battle_select = false;
 		}
 	}
+
+	function handleWelcomeComplete() {
+		// Refresh user data after avatar is set
+		user.refresh();
+	}
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
 
 <div class="logo">
-	<svg width="700" viewBox="0 0 948 177" fill="none" xmlns="http://www.w3.org/2000/svg">
+	<svg
+		width="700"
+		viewBox="0 0 948 177"
+		fill="none"
+		xmlns="http://www.w3.org/2000/svg"
+	>
 		<path
 			d="M840.27 103.499L898.07 74.8988L840.27 46.0988V19.8988L947.07 74.8988L840.27 129.899V103.499Z"
 			fill="black"
@@ -86,7 +108,9 @@
 	>
 	{#if user.current}
 		{#if user.current.role === 'syntax'}
-			<a href="/admin/targets/init" {@attach sound_on_interaction(blip_sound)}>New Target</a>
+			<a href="/admin/targets/init" {@attach sound_on_interaction(blip_sound)}
+				>New Target</a
+			>
 		{/if}
 	{/if}
 	<a href="/history" {@attach sound_on_interaction(blip_sound)}>Past Battles</a>
@@ -94,6 +118,8 @@
 </div>
 
 <LatestTargets {battle_select} />
+
+<WelcomeModal bind:open={show_welcome} onComplete={handleWelcomeComplete} />
 
 <style>
 	svg {

@@ -4,16 +4,20 @@
 	import Countdown from '$lib/battle_mode/Countdown.svelte';
 	import Header from '$lib/battle_mode/Header.svelte';
 	import ShareLinks from '$lib/battle_mode/ShareLinks.svelte';
-	import { z } from '$sync/client';
+	import { get_z } from '$lib/z';
 	import { remove_screaming } from '$utils/formatting';
 	import { Query } from 'zero-svelte';
 
+	const z = get_z();
+
 	let battle = new Query(
-		z.current.query.battles
+		z.query.battles
 			.where('zero_room_id', page?.params?.zero_room_id || '')
 			.one()
 			.related('referee')
-			.related('participants', (q) => q.related('user').related('hax', (h) => h.related('votes')))
+			.related('participants', (q) =>
+				q.related('user').related('hax', (h) => h.related('votes'))
+			)
 			.related('target')
 	);
 </script>

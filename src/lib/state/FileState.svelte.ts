@@ -1,7 +1,8 @@
 import { CSS_TEMPLATE, HTML_TEMPLATE } from '$lib/constants';
-import { z } from '$sync/client';
+import type { Schema } from '$sync/schema';
 import { validate_and_load_project_files } from '$utils/filesystem';
 import { css } from 'svelte-highlight/languages';
+import type { Z } from 'zero-svelte';
 
 export class FileState {
 	status: 'INITIAL' | 'NO_ACCESS' | 'ACCESS' | 'ERROR' = $state('INITIAL');
@@ -100,11 +101,13 @@ export class FileState {
 			const transaction = db.transaction(['handles'], 'readonly');
 			const store = transaction.objectStore('handles');
 
-			const handle: FileSystemDirectoryHandle = await new Promise((resolve, reject) => {
-				const request = store.get('directory');
-				request.onerror = () => reject(request.error);
-				request.onsuccess = () => resolve(request.result);
-			});
+			const handle: FileSystemDirectoryHandle = await new Promise(
+				(resolve, reject) => {
+					const request = store.get('directory');
+					request.onerror = () => reject(request.error);
+					request.onsuccess = () => resolve(request.result);
+				}
+			);
 
 			db.close();
 
@@ -130,7 +133,9 @@ export class FileState {
 					} else if (permission === 'prompt') {
 						// Permission needs to be requested again (happens after page refresh)
 						try {
-							const requestedPermission = await handle.requestPermission({ mode: 'read' });
+							const requestedPermission = await handle.requestPermission({
+								mode: 'read'
+							});
 							if (requestedPermission === 'granted') {
 								// Try to read the directory to verify it's still valid
 								const entries = handle.entries();
@@ -141,7 +146,10 @@ export class FileState {
 								return true;
 							}
 						} catch (requestError) {
-							console.warn('User denied permission or error requesting:', requestError);
+							console.warn(
+								'User denied permission or error requesting:',
+								requestError
+							);
 						}
 					}
 				} catch (error) {
@@ -161,9 +169,10 @@ export class FileState {
 			return;
 		}
 
-		const project_handle = await this.synhax_directory_handle.getDirectoryHandle(target_name, {
-			create: true
-		});
+		const project_handle =
+			await this.synhax_directory_handle.getDirectoryHandle(target_name, {
+				create: true
+			});
 		// HTML
 		const html_file_handle = await project_handle.getFileHandle('index.html', {
 			create: true
@@ -179,7 +188,10 @@ export class FileState {
 		await cssWritable.write(CSS_TEMPLATE);
 		await cssWritable.close();
 
-		const validation = await validate_and_load_project_files(project_handle, target_name);
+		const validation = await validate_and_load_project_files(
+			project_handle,
+			target_name
+		);
 
 		if (!validation.success) {
 			throw new Error(`Project validation failed: ${target_name}`);
@@ -194,7 +206,8 @@ export class FileState {
 			return;
 		}
 		try {
-			const project_dir = await this.synhax_directory_handle.getDirectoryHandle(target_name);
+			const project_dir =
+				await this.synhax_directory_handle.getDirectoryHandle(target_name);
 
 			// Load Project handle
 			this.project_directory_handle = project_dir;
@@ -217,14 +230,16 @@ export class FileState {
 		}
 		// Check for index.html
 		try {
-			this.html_file_handle = await this.project_directory_handle.getFileHandle('index.html');
+			this.html_file_handle =
+				await this.project_directory_handle.getFileHandle('index.html');
 		} catch (error) {
 			this.set_error('Failed to load index.html');
 		}
 
 		// Check for styles.css
 		try {
-			const css_handle = await this.project_directory_handle.getFileHandle('styles.css');
+			const css_handle =
+				await this.project_directory_handle.getFileHandle('styles.css');
 			this.css_file_handle = css_handle;
 		} catch (error) {
 			this.set_error('Failed to load styles.css');
@@ -252,7 +267,7 @@ export class FileState {
 		}
 	}
 
-	async read_and_apply_project_files(id: string, force: boolean) {
+	async read_and_apply_project_files(id: string, force: boolean, z: Z<Schema>) {
 		if (
 			!this.project_directory_handle ||
 			!this.synhax_directory_handle ||
@@ -280,24 +295,24 @@ export class FileState {
 
 		if (html_changed) {
 			this.html_mtime = html_mtime;
-			this.save_html(id, html_text);
+			this.save_html(id, html_text, z);
 		}
 		if (css_changed) {
 			this.css_mtime = css_mtime;
-			this.save_css(id, css_text);
+			this.save_css(id, css_text, z);
 		}
 	}
 
-	async save_html(id: string, text: string) {
-		z.current.mutate.hax.update({
+	async save_html(id: string, text: string, z: Z<Schema>) {
+		z.mutate.hax.update({
 			id,
 			html: text,
 			updated_at: Date.now()
 		});
 	}
 
-	async save_css(id: string, text: string) {
-		z.current.mutate.hax.update({
+	async save_css(id: string, text: string, z: Z<Schema>) {
+		z.mutate.hax.update({
 			id,
 			css: text,
 			updated_at: Date.now()

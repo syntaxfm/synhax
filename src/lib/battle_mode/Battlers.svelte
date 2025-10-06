@@ -10,8 +10,10 @@
 	import { fly } from 'svelte/transition';
 	import type { ParticipantScores } from '$utils/scores';
 	import JoinBattler from './JoinBattler.svelte';
-	import { z } from '$sync/client';
+
 	import { copyToClipboard } from '$utils/clipboard';
+	import { get_z } from '$lib/z';
+	const z = get_z();
 
 	const {
 		battle,
@@ -21,7 +23,9 @@
 		join = false
 	}: {
 		battle: Battle & {
-			participants: Array<Participants & { user: User; hax: Hax & { votes: Votes[] } }>;
+			participants: Array<
+				Participants & { user: User; hax: Hax & { votes: Votes[] } }
+			>;
 		};
 		votes?: boolean;
 		scores?: ParticipantScores[];
@@ -29,7 +33,7 @@
 	} = $props();
 
 	let me_participant = $derived(
-		battle?.participants.find((p: Participants) => p.user_id === z.current.userID)
+		battle?.participants.find((p: Participants) => p.user_id === z.userID)
 	);
 
 	const EXPRESSIONS = ['NORMAL', 'HAPPY', 'SAD', 'ANGRY'];
@@ -63,7 +67,9 @@
 			<JoinBattler {battle} {me_participant} />
 		{/if}
 		{#each battle?.participants.filter((p) => p.status === 'READY') as participant}
-			{@const expression = scores ? EXPRESSIONS[scores[participant.id].place] : 'NORMAL'}
+			{@const expression = scores
+				? EXPRESSIONS[scores[participant.id].place]
+				: 'NORMAL'}
 			<div class="battler">
 				<div class="top">
 					{#if votes}
@@ -74,7 +80,10 @@
 					{#if results}
 						<div class="voting-container" in:fly={{ y: 20, opacity: 300 }}>
 							{#if scores}
-								<VotingResults votes={participant.hax.votes} score={scores[participant.id]} />
+								<VotingResults
+									votes={participant.hax.votes}
+									score={scores[participant.id]}
+								/>
 							{/if}
 						</div>
 					{/if}
@@ -86,7 +95,9 @@
 				<wa-tab-group>
 					<wa-tab panel="custom">App</wa-tab>
 					<wa-tab panel="general">Code</wa-tab>
-					<wa-tab-panel name="custom"><AppFrame hax={participant.hax} /></wa-tab-panel>
+					<wa-tab-panel name="custom"
+						><AppFrame hax={participant.hax} /></wa-tab-panel
+					>
 					<wa-tab-panel name="general"
 						><CodeFrame
 							html_text={participant?.hax?.html}
@@ -99,7 +110,8 @@
 		<div
 			class="battler empty-seat"
 			type="button"
-			onclick={() => handleCopy(`http://localhost:5173/battle/${battle.id}/lobby`)}
+			onclick={() =>
+				handleCopy(`http://localhost:5173/battle/${battle.id}/lobby`)}
 		>
 			{#if battle.status === 'PENDING'}
 				<div class="image-frame">

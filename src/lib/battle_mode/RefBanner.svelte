@@ -1,14 +1,16 @@
 <script lang="ts">
-	import { z } from '$sync/client';
+	import { get_z } from '$lib/z';
+	const z = get_z();
 	import type { Battle } from '$sync/schema';
 	const { battle }: { battle: Battle } = $props();
 </script>
 
-{#if battle.referee_id === z.current.userID}
+{#if battle.referee_id === z.userID}
 	<section>
 		<p>
-			You are the referee, head on over to the <a target="_blank" href={`/battle/${battle.id}/ref`}
-				>referee dashboard</a
+			You are the referee, head on over to the <a
+				target="_blank"
+				href={`/battle/${battle.id}/ref`}>referee dashboard</a
 			> to get this party started.
 		</p>
 	</section>

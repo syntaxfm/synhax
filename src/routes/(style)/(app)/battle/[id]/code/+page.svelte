@@ -18,16 +18,18 @@
 <script lang="ts">
 	import { Query } from 'zero-svelte';
 	import BattleMode from './BattleMode.svelte';
-	import { z } from '$sync/client';
+	import { get_z } from '$lib/z';
 	import { page } from '$app/state';
 	import Countdown from '$lib/battle_mode/Countdown.svelte';
 	import { files } from '$lib/state/FileState.svelte';
 	import { to_snake_case } from '$lib/user/utils';
+
+	const z = get_z();
 	import Header from '$lib/battle_mode/Header.svelte';
 	import Modal from '$lib/ui/Modal.svelte';
 
 	let battle = new Query(
-		z.current.query.battles
+		z.query.battles
 			.where('id', page?.params?.id || '')
 			.one()
 			.related('referee')
@@ -38,9 +40,12 @@
 	let hax = $derived.by(
 		() =>
 			new Query(
-				z.current.query.hax
+				z.query.hax
 					.where(({ cmp, and }) =>
-						and(cmp('battle_id', battle?.current?.id || ''), cmp('user_id', z.current.userID))
+						and(
+							cmp('battle_id', battle?.current?.id || ''),
+							cmp('user_id', z.userID)
+						)
 					)
 					.one()
 			)
@@ -59,7 +64,7 @@
 		// Start the polling interval
 		poll_timer = setInterval(async () => {
 			try {
-				await files.read_and_apply_project_files(hax.current?.id, false);
+				await files.read_and_apply_project_files(hax.current?.id, false, z);
 			} catch (error) {
 				console.error('Error reading project files:', error);
 			}
@@ -93,7 +98,8 @@
 
 <Modal open={files.status !== 'ACCESS'} title="File Access">
 	<p>Your file access needs to be restored after refresh</p>
-	<button onclick={() => files.restore_directory_handle()} class="big_button go_button"
-		>Give Access</button
+	<button
+		onclick={() => files.restore_directory_handle()}
+		class="big_button go_button">Give Access</button
 	>
 </Modal>

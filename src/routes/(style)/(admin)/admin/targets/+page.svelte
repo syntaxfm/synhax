@@ -1,11 +1,13 @@
 <script lang="ts">
 	import Table from '$lib/ui/Table.svelte';
-	import { z } from '$sync/client';
-	import { type Target } from '$sync/schema';
+	import { get_z } from '$lib/z';
+	import type { Target } from '$sync/schema';
 	import type { ColumnDef } from '@tanstack/svelte-table';
 	import { Query } from 'zero-svelte';
 
-	let targets = new Query(z.current.query.targets);
+	const z = get_z();
+
+	let targets = new Query(z.query.targets);
 	const columns: ColumnDef<Target, any>[] = [
 		{
 			accessorKey: 'image',
@@ -16,7 +18,8 @@
 			header: 'ID',
 			filterFn: 'includesString',
 			enableColumnFilter: true,
-			cell: ({ row }) => `<a href="/admin/targets/${row.original.id}/edit">${row.original.id}</a>`
+			cell: ({ row }) =>
+				`<a href="/admin/targets/${row.original.id}/edit">${row.original.id}</a>`
 		},
 		{
 			accessorKey: 'name',

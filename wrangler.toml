@@ -6,3 +6,8 @@ compatibility_flags = ["nodejs_compat"]
 [assets]
 binding = "ASSETS"
 directory = ".svelte-kit/cloudflare"
+
+
+[[hyperdrive]]
+binding = "HYPERDRIVE"
+id = "7b4ec959f560438b92c0b0e5c90bd59b"

@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { BATTLE_AWARDS } from '$lib/constants';
-	import { z } from '$sync/client';
+	import { get_z } from '$lib/z';
 	import type { Battle, Hax, Participants, User } from '$sync/schema';
 	import { remove_screaming } from '$utils/formatting';
 	import { Query } from 'zero-svelte';
+
+	const z = get_z();
 
 	const {
 		battle,
@@ -17,10 +19,10 @@
 	let votes = $derived.by(
 		() =>
 			new Query(
-				z.current.query.battle_votes.where(({ and, cmp }) =>
+				z.query.battle_votes.where(({ and, cmp }) =>
 					and(
 						cmp('battle_id', battle?.id || ''),
-						cmp('voter_id', z.current.userID),
+						cmp('voter_id', z.userID),
 						cmp('nominee_hax_id', participant?.hax?.id || '')
 					)
 				)
@@ -30,12 +32,12 @@
 	function vote(award: (typeof BATTLE_AWARDS)[number], value: number) {
 		const current_vote = votes.current?.find((v) => v.award_type === award);
 		if (participant.hax.id) {
-			z.current.mutate.battle_votes
+			z.mutate.battle_votes
 				.upsert({
 					id: current_vote?.id || crypto.randomUUID(),
 					battle_id: battle.id || '',
 					nominee_hax_id: participant.hax.id,
-					voter_id: z.current.userID,
+					voter_id: z.userID,
 					award_type: award,
 					value
 				})

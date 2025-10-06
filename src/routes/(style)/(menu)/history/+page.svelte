@@ -1,10 +1,14 @@
 <script lang="ts">
+	import Table from '$lib/ui/Table.svelte';
+	import { get_z } from '$lib/z';
+	import { user } from '$lib/auth-client';
 	import { Query } from 'zero-svelte';
-	import { z } from '$sync/client';
+
+	const z = get_z();
 
 	const history = new Query(
-		z.current.query.battle_participants
-			.where('user_id', z.current.userID)
+		z.query.battle_participants
+			.where('user_id', z.userID)
 			.related('battle', (e) => e.related('target'))
 	);
 </script>

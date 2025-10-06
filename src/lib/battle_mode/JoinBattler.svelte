@@ -3,7 +3,8 @@
 	import { files } from '$lib/state/FileState.svelte';
 	import Avatar from '$lib/ui/Avatar.svelte';
 	import { s, to_snake_case } from '$lib/user/utils';
-	import { z } from '$sync/client';
+	import { get_z } from '$lib/z';
+	const z = get_z();
 	import { type Battle, type Participants, type Target } from '$sync/schema';
 	import { fade, fly } from 'svelte/transition';
 	import { Query } from 'zero-svelte';
@@ -16,15 +17,15 @@
 		me_participant: Participants;
 	} = $props();
 
-	let me = new Query(z.current.query.user.where('id', z.current.userID).one());
+	let me = new Query(z.query.user.where('id', z.userID).one());
 
 	function join_battle() {
 		// Make sure target actually exists
 		if (battle?.target?.name) {
 			// Create hax with files
-			z.current.mutate.hax.insert({
+			z.mutate.hax.insert({
 				id: crypto.randomUUID(),
-				user_id: z.current.userID,
+				user_id: z.userID,
 				target_id: battle?.target_id || '',
 				battle_id: battle?.id || '',
 				html: HTML_TEMPLATE,
@@ -36,10 +37,10 @@
 			files.create_hax_directory(to_snake_case(battle.target.name));
 
 			// Add self as a participant
-			z.current.mutate.battle_participants.insert({
+			z.mutate.battle_participants.insert({
 				id: crypto.randomUUID(),
 				battle_id: battle?.id || '',
-				user_id: z.current.userID,
+				user_id: z.userID,
 				status: 'PENDING' as const,
 				display_order: battle?.participants.length || 0
 			});
@@ -48,7 +49,7 @@
 
 	function leave_battle() {
 		if (me_participant && battle?.id) {
-			z.current.mutate.battle_participants.delete({
+			z.mutate.battle_participants.delete({
 				id: me_participant.id
 			});
 		}
@@ -56,10 +57,10 @@
 
 	function lock_in() {
 		if (me_participant) {
-			z.current.mutate.battle_participants.upsert({
+			z.mutate.battle_participants.upsert({
 				id: me_participant.id,
 				battle_id: battle?.id || '',
-				user_id: z.current.userID,
+				user_id: z.userID,
 				status: 'READY' as const
 			});
 		}
@@ -74,7 +75,9 @@
 				<h4>You?</h4>
 				<div class="joining">
 					<p>The battle starts now<br />claim your destiny!</p>
-					<button class="go_button big_button" onclick={join_battle}>Join</button>
+					<button class="go_button big_button" onclick={join_battle}
+						>Join</button
+					>
 				</div>
 			</div>
 		{:else if me_participant?.status === 'PENDING'}
@@ -82,7 +85,8 @@
 				<Avatar avatar={s(me.current?.avatar)} expression="NORMAL" />
 				<h4>{me.current.name}</h4>
 				<div class="joining">
-					<button class="go_button big_button" onclick={lock_in}>Lock In</button>
+					<button class="go_button big_button" onclick={lock_in}>Lock In</button
+					>
 					<button class="go_button red" onclick={leave_battle}>Leave</button>
 				</div>
 			</div>

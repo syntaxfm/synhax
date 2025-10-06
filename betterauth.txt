@@ -1,0 +1,103 @@
+BetterAuth + Zero/Drizzle setup (Battle Mode)
+
+Overview
+- Server-side auth is handled with BetterAuth using the Drizzle adapter on Postgres.
+- The same Drizzle schema file contains both BetterAuth tables and app tables.
+- The BetterAuth JWT plugin issues a JWT that the Zero client uses to authenticate and set the current user ID.
+- SvelteKit’s handle pipeline wires BetterAuth API routes and exposes the current user on event.locals.
+
+Key Files
+- Server config: src/lib/auth.ts
+- DB connection: src/db/index.ts
+- Drizzle schema (auth + app): src/db/schema.ts
+- SvelteKit handles: src/hooks.server.ts
+- Client auth helper: src/lib/auth-client.ts
+- Zero client (JWT usage): src/sync/client.ts
+- Optional reference schema (not used by adapter): auth-schema.ts
+- Drizzle config: drizzle.config.ts
+
+Database & Drizzle
+- Connection: Drizzle over node-postgres using env ZERO_UPSTREAM_DB (Postgres URL).
+  - File: src/db/index.ts
+- Drizzle config: schema at src/db/schema.ts, dialect postgresql, db URL from ZERO_UPSTREAM_DB.
+  - File: drizzle.config.ts
+- Auth tables in src/db/schema.ts (used by BetterAuth):
+  - user, session, account, verification, jwks
+- App tables (targets, battles, hax, ratings, etc.) live in the same schema file.
+
+BetterAuth (server)
+- File: src/lib/auth.ts
+  - Adapter: drizzleAdapter(db, { provider: 'pg', schema })
+  - Social provider: GitHub (env: GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET)
+  - Plugins: admin(), jwt()
+    - jwt(): stores signing keys in the jwks table and exposes a token endpoint
+- The adapter expects the above 5 auth tables to be present in the Drizzle schema passed in.
+
+SvelteKit integration
+- File: src/hooks.server.ts
+  - svelteKitHandler({ event, resolve, auth, building }) enables BetterAuth’s API routes under /api/auth/* and manages cookies/sessions.
+  - After BetterAuth runs, a sessionHandle calls auth.api.getSession({ headers }) and places
+    - event.locals.session = session.session
+    - event.locals.user = { id: session.user.id, role: session.user.role }
+  - Admin pages check locals.user.role (e.g. 'syntax') to gate access.
+  - Sentry is also wired here; when a user is present, Sentry.setUser is called.
+
+Client usage
+- File: src/lib/auth-client.ts
+  - createAuthClient() provides client helpers (signIn, signOut, etc.).
+- Example sign-in: src/routes/(style)/+page.svelte
+  - authClient.signIn.social({ provider: 'github', callbackURL: '/dashboard', ... })
+- Example sign-out: src/lib/user/Logout.svelte
+  - authClient.signOut({ fetchOptions: { onSuccess: () => goto('/') } })
+
+JWT for Zero
+- File: src/lib/user/utils.ts → get_jwt()
+  - Fetches '/api/auth/token' (provided by BetterAuth’s JWT plugin) and returns the JWT if logged in.
+- File: src/sync/client.ts
+  - Decodes the JWT to extract sub (user id) and sets:
+    - userID = decoded.sub (falls back to 'anon' if none)
+    - jwt = token (passed to Zero client)
+  - PUBLIC_SERVER env config points the client to your Zero server.
+- File: src/sync/schema.ts
+  - definePermissions<AuthData> uses type { sub: string } for the logged-in user context.
+  - Current config is permissive (ANYONE_CAN_DO_ANYTHING) but you can enforce row-level rules using sub.
+
+Auth endpoints (via BetterAuth + svelteKitHandler)
+- Mounted under /api/auth/*.
+- Common endpoints available out of the box include:
+  - /api/auth/signin, /api/auth/callback/[provider]
+  - /api/auth/signout
+  - /api/auth/session
+  - /api/auth/token (JWT plugin)
+- Server utilities used:
+  - auth.api.getSession({ headers }) — get current session + user from cookies
+
+Environment variables
+- ZERO_UPSTREAM_DB: Postgres connection string for Drizzle (server)
+- GITHUB_CLIENT_ID / GITHUB_CLIENT_SECRET: OAuth app credentials for GitHub provider
+- PUBLIC_SERVER: Zero server URL for the browser client
+
+Local dev & migrations
+- Install & dev: pnpm install; pnpm dev
+- Drizzle push: pnpm push (applies the schema to ZERO_UPSTREAM_DB)
+- Drizzle studio: pnpm studio
+- Zero schema generation: pnpm sync-generate (emits src/sync/zero-schema.gen.ts from Drizzle)
+
+Roles & authorization
+- The user table includes a role column. Admin routes check locals.user.role === 'syntax'.
+- Role assignment is out of band (e.g. manual update or admin tooling). Ensure your app logic sets/updates user.role as needed.
+
+Notes
+- The adapter schema is taken from src/db/schema.ts, not auth-schema.ts. The latter remains as a reference template.
+- /api/auth/token returns 401 for logged-out users; the client helper handles this gracefully.
+- The jwks table is required by the JWT plugin for key storage/rotation.
+
+Quick path index
+- BetterAuth config: src/lib/auth.ts
+- SvelteKit hook: src/hooks.server.ts
+- Drizzle schema (auth+app): src/db/schema.ts
+- DB connection: src/db/index.ts
+- Auth client: src/lib/auth-client.ts
+- JWT helper: src/lib/user/utils.ts
+- Zero client: src/sync/client.ts
+- Drizzle config: drizzle.config.ts

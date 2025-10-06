@@ -1,10 +1,13 @@
 <script lang="ts">
-	import { z } from '$sync/client';
 	import { Query } from 'zero-svelte';
+	import { get_z } from '$lib/z';
+	const z = get_z();
 
-	let battle = new Query(z.current.query.battles.where('status', 'PENDING').related('target'));
+	let battle = new Query(
+		z.query.battles.where('status', 'PENDING').related('target')
+	);
 	let battles_started = new Query(
-		z.current.query.battles.where('status', 'ACTIVE').related('target')
+		z.query.battles.where('status', 'ACTIVE').related('target')
 	);
 </script>
 

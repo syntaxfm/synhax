@@ -18,12 +18,14 @@
 <script lang="ts">
 	import { Query } from 'zero-svelte';
 
-	import { z } from '$sync/client';
+	import { get_z } from '$lib/z';
 	import { page } from '$app/state';
 	import { combine_html_and_css } from '$utils/code';
 
+	const z = get_z();
+
 	let battle = new Query(
-		z.current.query.battles
+		z.query.battles
 			.where('id', page?.params?.id || '')
 			.one()
 			.related('referee')
@@ -34,15 +36,20 @@
 	let hax = $derived.by(
 		() =>
 			new Query(
-				z.current.query.hax
+				z.query.hax
 					.where(({ cmp, and }) =>
-						and(cmp('battle_id', battle?.current?.id || ''), cmp('user_id', z.current.userID))
+						and(
+							cmp('battle_id', battle?.current?.id || ''),
+							cmp('user_id', z.userID)
+						)
 					)
 					.one()
 			)
 	);
 
-	const code = $derived(combine_html_and_css(hax?.current?.html, hax?.current?.css));
+	const code = $derived(
+		combine_html_and_css(hax?.current?.html, hax?.current?.css)
+	);
 </script>
 
 {@html code}

@@ -2,7 +2,7 @@
 	import '@awesome.me/webawesome/dist/components/rating/rating.js';
 	import { page } from '$app/state';
 	import ShareLinks from '$lib/battle_mode/ShareLinks.svelte';
-	import { z } from '$sync/client';
+	import { get_z } from '$lib/z';
 	import { remove_screaming } from '$utils/formatting';
 	import { Query } from 'zero-svelte';
 	import { BATTLE_RATINGS } from '$lib/constants';
@@ -10,22 +10,26 @@
 	import Header from '$lib/battle_mode/Header.svelte';
 	import { compute_battle_scores } from '$utils/scores';
 
+	const z = get_z();
+
 	let battle = new Query(
-		z.current.query.battles
+		z.query.battles
 			.where('id', page?.params?.id || '')
 			.one()
 			.related('referee')
-			.related('participants', (q) => q.related('user').related('hax', (h) => h.related('votes')))
+			.related('participants', (q) =>
+				q.related('user').related('hax', (h) => h.related('votes'))
+			)
 			.related('target')
 	);
 
 	let rating = $derived.by(
 		() =>
 			new Query(
-				z.current.query.ratings
+				z.query.ratings
 					.where(({ cmp, and }) =>
 						and(
-							cmp('user_id', z.current.userID),
+							cmp('user_id', z.userID),
 							cmp('target_id', battle.current?.target?.id || '')
 						)
 					)
@@ -35,17 +39,22 @@
 			)
 	);
 
-	let scores = $derived(compute_battle_scores(battle.current?.participants || []));
+	let scores = $derived(
+		compute_battle_scores(battle.current?.participants || [])
+	);
 
-	function rate_battle(rating_type: (typeof BATTLE_RATINGS)[number], rating_value: number) {
+	function rate_battle(
+		rating_type: (typeof BATTLE_RATINGS)[number],
+		rating_value: number
+	) {
 		let new_rating: Partial<Record<(typeof BATTLE_RATINGS)[number], number>> = {
 			[rating_type]: rating_value
 		};
 
-		z.current.mutate.ratings
+		z.mutate.ratings
 			.upsert({
 				id: rating.current?.id || crypto.randomUUID(),
-				user_id: z.current.userID,
+				user_id: z.userID,
 				target_id: battle.current?.target?.id || '',
 				difficulty: rating.current?.difficulty || 0,
 				creativity: rating.current?.creativity || 0,
@@ -65,7 +74,12 @@
 		{#snippet detail()}
 			<!-- <p>Today's Referee: {battle?.current?.referee?.name}</p>
 			<h3>{remove_screaming(battle?.current?.type || '')}</h3> -->
-			<ShareLinks code={false} watch={false} vote={true} battle={battle.current} />
+			<ShareLinks
+				code={false}
+				watch={false}
+				vote={true}
+				battle={battle.current}
+			/>
 		{/snippet}
 		{#snippet countdown()}
 			<div>

@@ -1,11 +1,13 @@
 <script lang="ts">
 	import Table from '$lib/ui/Table.svelte';
-	import { z } from '$sync/client';
+	import { get_z } from '$lib/z';
 	import type { Battle } from '$sync/schema';
 	import type { ColumnDef } from '@tanstack/svelte-table';
 	import { Query } from 'zero-svelte';
 
-	let battles = new Query(z.current.query.battles);
+	const z = get_z();
+
+	let battles = new Query(z.query.battles);
 
 	const columns: ColumnDef<Battle, any>[] = [
 		{

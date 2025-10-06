@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { Query } from 'zero-svelte';
-	import { z } from '$sync/client';
+	import { get_z } from '$lib/z';
+	const z = get_z();
 	import TargetCard from './TargetCard.svelte';
 	let { limit = 0 }: { limit: number } = $props();
-	let targets = new Query(z.current.query.targets.related('ratings').limit(limit));
+	let targets = new Query(z.query.targets.related('ratings').limit(limit));
 </script>
 
 <div class="scroll-wrapper">

@@ -6,20 +6,24 @@
 	import Header from '$lib/battle_mode/Header.svelte';
 	// import RefBanner from '$lib/battle_mode/RefBanner.svelte';
 	import ShareLinks from '$lib/battle_mode/ShareLinks.svelte';
-	import { z } from '$sync/client';
+	import { get_z } from '$lib/z';
 	import { remove_screaming } from '$utils/formatting';
 	import { Query } from 'zero-svelte';
+
+	const z = get_z();
 	// import lobby_song from '$lib/media/moonlight.mp3';
 	// const lobby_sound = new Audio(lobby_song);
 	// lobby_sound.preload = 'auto';
 	// lobby_sound.play();
 
 	let battle = new Query(
-		z.current.query.battles
+		z.query.battles
 			.where('id', page?.params?.id || '')
 			.one()
 			.related('referee')
-			.related('participants', (q) => q.related('user').related('hax', (h) => h.related('votes')))
+			.related('participants', (q) =>
+				q.related('user').related('hax', (h) => h.related('votes'))
+			)
 			.related('target')
 	);
 
@@ -39,9 +43,11 @@
 			<ShareLinks battle={battle.current} code={false} />
 		{/snippet}
 		{#snippet countdown()}
-			{#if battle.current?.type === 'TIMED_MATCH'}
-				<Countdown battle={battle.current} />
-			{/if}
+			<div>
+				{#if battle.current?.type === 'TIMED_MATCH'}
+					<Countdown battle={battle.current} />
+				{/if}
+			</div>
 		{/snippet}
 	</Header>
 
