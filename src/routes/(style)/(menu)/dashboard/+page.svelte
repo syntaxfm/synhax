@@ -29,7 +29,6 @@
 	let battle_select = $state(false);
 	let show_welcome = $state(false);
 	files.check();
-
 	// Check if user needs to see welcome modal (no avatar set)
 	$effect(() => {
 		if (user.current && !user.current.avatar) {
@@ -42,11 +41,6 @@
 			play_sound(throw_sound);
 			battle_select = false;
 		}
-	}
-
-	function handleWelcomeComplete() {
-		// Refresh user data after avatar is set
-		user.refresh();
 	}
 </script>
 
@@ -119,7 +113,7 @@
 
 <LatestTargets {battle_select} />
 
-<WelcomeModal bind:open={show_welcome} onComplete={handleWelcomeComplete} />
+<WelcomeModal bind:open={show_welcome} />
 
 <style>
 	svg {

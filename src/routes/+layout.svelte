@@ -7,7 +7,7 @@
 	const { children, data } = $props();
 
 	new Z<Schema>({
-		userID: data.user.id ? data.user.id : 'anon',
+		userID: data?.user?.id ? data.user.id : 'anon',
 		server: PUBLIC_SERVER,
 		schema
 	});

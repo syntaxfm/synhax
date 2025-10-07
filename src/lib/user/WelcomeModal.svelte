@@ -1,9 +1,9 @@
 <script lang="ts">
 	import Modal from '$lib/ui/Modal.svelte';
+	import { generateAvatar, skipAvatar } from './avatar.remote';
 
-	let { open = $bindable(false), onComplete } = $props<{
+	let { open = $bindable(false) } = $props<{
 		open: boolean;
-		onComplete?: () => void;
 	}>();
 
 	let isGenerating = $state(false);
@@ -13,21 +13,9 @@
 		isGenerating = true;
 		error = '';
 		try {
-			const res = await fetch('/api/avatar/generate', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				}
-			});
-
-			if (!res.ok) {
-				const data = await res.json();
-				throw new Error(data.error || 'Failed to generate avatar');
-			}
-
-			// Success! Close modal and call onComplete
+			await generateAvatar();
+			// Success! Close modal
 			open = false;
-			if (onComplete) onComplete();
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to generate avatar';
 		} finally {
@@ -38,21 +26,9 @@
 	async function handleSkip() {
 		error = '';
 		try {
-			const res = await fetch('/api/avatar/skip', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				}
-			});
-
-			if (!res.ok) {
-				const data = await res.json();
-				throw new Error(data.error || 'Failed to skip avatar');
-			}
-
-			// Success! Close modal and call onComplete
+			await skipAvatar();
+			// Success! Close modal
 			open = false;
-			if (onComplete) onComplete();
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to skip avatar';
 		}
@@ -62,15 +38,15 @@
 <Modal bind:open title="Welcome to SynHax!">
 	<div class="welcome-content">
 		<p>
-			Welcome to SynHax - the ultimate competitive CSS/HTML coding battle platform! Here, you'll
-			face off against other developers in timed battles to replicate UI targets while others watch
-			live.
+			Welcome to SynHax - the ultimate competitive CSS/HTML coding battle
+			platform! Here, you'll face off against other developers in timed battles
+			to replicate UI targets while others watch live.
 		</p>
 
 		<p>
-			<strong>How it works:</strong> Compete as a battler, watch as a viewer, or control the action
-			as a referee. After each battle, vote on awards like Most Accurate, Real World, and Best Feel
-			in our Mario Party-style ceremony!
+			<strong>How it works:</strong> Compete as a battler, watch as a viewer, or
+			control the action as a referee. After each battle, vote on awards like Most
+			Accurate, Real World, and Best Feel in our Mario Party-style ceremony!
 		</p>
 
 		<p class="avatar-prompt">Let's start by creating your anime avatar:</p>
@@ -80,10 +56,16 @@
 		{/if}
 
 		<div class="button-group">
-			<button onclick={handleGenerate} disabled={isGenerating} class="generate-btn">
+			<button
+				onclick={handleGenerate}
+				disabled={isGenerating}
+				class="generate-btn"
+			>
 				{isGenerating ? 'Generating...' : 'Generate Avatar'}
 			</button>
-			<button onclick={handleSkip} disabled={isGenerating} class="skip-btn"> Skip </button>
+			<button onclick={handleSkip} disabled={isGenerating} class="skip-btn">
+				Skip
+			</button>
 		</div>
 
 		{#if isGenerating}
