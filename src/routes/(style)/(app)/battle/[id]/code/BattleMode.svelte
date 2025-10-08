@@ -7,13 +7,14 @@
 	import xml from 'svelte-highlight/languages/xml';
 	import { Pane, Splitpanes } from 'svelte-splitpanes';
 
-	let { battle, hax }: { battle: Battle & { target: Target }; hax: Hax } = $props();
+	let { battle, hax }: { battle: Battle & { target: Target }; hax: Hax } =
+		$props();
 </script>
 
 <section class="battle-mode">
 	<Splitpanes>
 		<Pane>
-			<Splitpanes horizontal={true}>
+			<!-- <Splitpanes horizontal={true}>
 				<Pane minSize={15}>
 					<article class="stack code">
 						<h2>HTML</h2>
@@ -30,55 +31,66 @@
 						</div>
 					</article>
 				</Pane>
-			</Splitpanes>
+			</Splitpanes> -->
+			<div class="output stack">
+				<h2>Target</h2>
+				<img src={battle?.target?.image} alt="Battle Image" width="100%" />
+			</div>
 		</Pane>
 		<Pane minSize={20}>
-			<Splitpanes horizontal={true}>
+			<!-- <Splitpanes horizontal={true}>
 				<Pane minSize={15}>
 					<div class="output stack">
 						<h2>Target</h2>
 						<img src={battle?.target?.image} alt="Battle Image" width="100%" />
 					</div>
-				</Pane>
-				<Pane>
-					<div class="output stack code-output">
-						<h2>
-							App
-							<a target="_blank" href="/battle/{battle.id}/code/breakout"
-								><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-									><title>launch</title><g fill="#fff" stroke-linejoin="miter" stroke-linecap="butt"
-										><line
-											x1="11"
-											y1="13"
-											x2="22"
-											y2="2"
-											fill="none"
-											stroke="#fff"
-											stroke-miterlimit="10"
-											stroke-width="2"
-										></line><polyline
-											points="14 2 22 2 22 10"
-											fill="none"
-											stroke="#fff"
-											stroke-linecap="square"
-											stroke-miterlimit="10"
-											stroke-width="2"
-										></polyline><path
-											d="M9,4H4A2,2,0,0,0,2,6V20a2,2,0,0,0,2,2H18a2,2,0,0,0,2-2V15"
-											fill="none"
-											stroke="#fff"
-											stroke-linecap="square"
-											stroke-miterlimit="10"
-											stroke-width="2"
-										></path></g
-									></svg
-								></a
-							>
-						</h2>
-						<AppFrame {hax} />
-					</div>
-				</Pane>
-			</Splitpanes>
+				</Pane> -->
+			<!-- <Pane> -->
+			<div class="output stack code-output">
+				<h2>
+					App
+					<a target="_blank" href="/battle/{battle.id}/code/breakout"
+						><svg
+							xmlns="http://www.w3.org/2000/svg"
+							width="16"
+							height="16"
+							viewBox="0 0 24 24"
+							><title>launch</title><g
+								fill="#fff"
+								stroke-linejoin="miter"
+								stroke-linecap="butt"
+								><line
+									x1="11"
+									y1="13"
+									x2="22"
+									y2="2"
+									fill="none"
+									stroke="#fff"
+									stroke-miterlimit="10"
+									stroke-width="2"
+								></line><polyline
+									points="14 2 22 2 22 10"
+									fill="none"
+									stroke="#fff"
+									stroke-linecap="square"
+									stroke-miterlimit="10"
+									stroke-width="2"
+								></polyline><path
+									d="M9,4H4A2,2,0,0,0,2,6V20a2,2,0,0,0,2,2H18a2,2,0,0,0,2-2V15"
+									fill="none"
+									stroke="#fff"
+									stroke-linecap="square"
+									stroke-miterlimit="10"
+									stroke-width="2"
+								></path></g
+							></svg
+						></a
+					>
+				</h2>
+				<AppFrame {hax} />
+			</div>
+			<!-- </Pane>
+			</Splitpanes> -->
 		</Pane>
 	</Splitpanes>
 
