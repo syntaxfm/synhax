@@ -3,5 +3,8 @@ import { defineConfig } from 'vite';
 import { sentrySvelteKit } from '@sentry/sveltekit';
 
 export default defineConfig({
-	plugins: [sentrySvelteKit(), sveltekit()]
+	plugins: [sentrySvelteKit(), sveltekit()],
+	server: {
+		port: 7777
+	}
 });

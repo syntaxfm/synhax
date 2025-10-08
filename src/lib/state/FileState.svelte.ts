@@ -115,7 +115,6 @@ export class FileState {
 				// Check current permission status without requesting
 				try {
 					const permission = await handle.queryPermission({ mode: 'read' });
-					console.log('permission', permission);
 
 					if (permission === 'granted') {
 						// Permission already granted, verify directory is accessible

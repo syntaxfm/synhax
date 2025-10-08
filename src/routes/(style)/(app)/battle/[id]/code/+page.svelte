@@ -72,7 +72,6 @@
 
 		// Cleanup function - runs when component unmounts
 		return () => {
-			console.log('Stop Polling');
 			if (poll_timer) {
 				clearInterval(poll_timer);
 				poll_timer = null;
