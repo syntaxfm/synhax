@@ -11,22 +11,46 @@
 		isLoading = true;
 
 		try {
-			// Create new target using zero-sync mutation
-			await z.mutate.targets.insert({
+			console.log('Creating target with data:', { name, image, type, inspo });
+			console.log('User ID:', z.userID);
+
+			if (!z.userID) {
+				throw new Error('User is not authenticated. Please log in and try again.');
+			}
+
+			const now = Date.now();
+			const targetData = {
 				id: crypto.randomUUID(),
 				name,
 				image,
 				type,
 				inspo,
 				created_by: z.userID,
-				is_active: true
-			});
+				is_active: true,
+				archived_at: null,
+				last_updated_at: now,
+				created_at: now,
+				updated_at: now
+			};
 
-			// Redirect to dashboard on success
-			goto('/dashboard');
+			console.log('Full target data:', targetData);
+
+			// Create new target using zero-sync mutation
+			const result = await z.mutate.targets.insert(targetData);
+
+			console.log('Target created successfully:', result);
+
+			// Small delay to ensure sync completes
+			await new Promise((resolve) => setTimeout(resolve, 500));
+
+			// Redirect to targets list on success
+			await goto('/admin/targets');
 		} catch (error) {
 			console.error('Error creating target:', error);
-			alert('Failed to create target. Please try again.');
+			console.error('Error details:', JSON.stringify(error, null, 2));
+			const errorMessage =
+				error instanceof Error ? error.message : 'Unknown error. Check console for details.';
+			alert(`Failed to create target: ${errorMessage}`);
 		} finally {
 			isLoading = false;
 		}
