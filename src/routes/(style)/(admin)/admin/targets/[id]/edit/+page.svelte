@@ -1,14 +1,11 @@
 <script lang="ts">
-	import { get_z } from '$lib/z';
+	import { z } from '$lib/zero.svelte';
 	import { goto } from '$app/navigation';
 	import TargetForm, { type Target } from '../../TargetForm.svelte';
 	import { page } from '$app/state';
-	import { Query } from 'zero-svelte';
-
-	const z = get_z();
 
 	let isLoading = $state(false);
-	let target = new Query(
+	let target = z.createQuery(
 		z.query.targets.where('id', page?.params?.id || '').one()
 	);
 
@@ -41,19 +38,19 @@
 	}
 </script>
 
-<h1>Edit {target?.current?.name}</h1>
+<h1>Edit {target?.data?.name}</h1>
 
-{#if target.current}
+{#if target.data}
 	<img
-		src={target.current.image}
-		alt={target.current.name}
+		src={target.data.image}
+		alt={target.data.name}
 		style="max-width: 500px; "
 	/>
 
 	<TargetForm
 		submitText="Update Target"
 		{isLoading}
-		initial_target={target.current}
+		initial_target={target.data}
 		onsubmit={handleSubmit}
 		oncancel={handleCancel}
 	/>

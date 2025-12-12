@@ -1,11 +1,8 @@
 <script lang="ts">
 	import { BATTLE_AWARDS } from '$lib/constants';
-	import { get_z } from '$lib/z';
+	import { z } from '$lib/zero.svelte';
 	import type { Battle, Hax, Participants, User } from '$sync/schema';
 	import { remove_screaming } from '$utils/formatting';
-	import { Query } from 'zero-svelte';
-
-	const z = get_z();
 
 	const {
 		battle,
@@ -16,21 +13,20 @@
 	} = $props();
 	// TODO voting updating broken
 
-	let votes = $derived.by(
-		() =>
-			new Query(
-				z.query.battle_votes.where(({ and, cmp }) =>
-					and(
-						cmp('battle_id', battle?.id || ''),
-						cmp('voter_id', z.userID),
-						cmp('nominee_hax_id', participant?.hax?.id || '')
-					)
+	let votes = $derived.by(() =>
+		z.createQuery(
+			z.query.battle_votes.where(({ and, cmp }) =>
+				and(
+					cmp('battle_id', battle?.id || ''),
+					cmp('voter_id', z.userID),
+					cmp('nominee_hax_id', participant?.hax?.id || '')
 				)
 			)
+		)
 	);
 
 	function vote(award: (typeof BATTLE_AWARDS)[number], value: number) {
-		const current_vote = votes.current?.find((v) => v.award_type === award);
+		const current_vote = votes.data?.find((v) => v.award_type === award);
 		if (participant.hax.id) {
 			z.mutate.battle_votes
 				.upsert({
@@ -54,7 +50,7 @@
 		<div class="vote">
 			<label for="winner">{remove_screaming(award)}:</label>
 			<wa-rating
-				value={votes.current?.find((v) => v.award_type === award)?.value || 0}
+				value={votes.data?.find((v) => v.award_type === award)?.value || 0}
 				label="Rating"
 				style="font-size: 1.6rem;"
 				onchange={(e) => vote(award, e.target.value)}

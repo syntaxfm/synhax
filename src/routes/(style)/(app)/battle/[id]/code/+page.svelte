@@ -16,19 +16,16 @@
 
 <!-- Difference between battle and target? -->
 <script lang="ts">
-	import { Query } from 'zero-svelte';
 	import BattleMode from './BattleMode.svelte';
-	import { get_z } from '$lib/z';
+	import { z } from '$lib/zero.svelte';
 	import { page } from '$app/state';
 	import Countdown from '$lib/battle_mode/Countdown.svelte';
 	import { files } from '$lib/state/FileState.svelte';
 	import { to_snake_case } from '$lib/user/utils';
-
-	const z = get_z();
 	import Header from '$lib/battle_mode/Header.svelte';
 	import Modal from '$lib/ui/Modal.svelte';
 
-	let battle = new Query(
+	let battle = z.createQuery(
 		z.query.battles
 			.where('id', page?.params?.id || '')
 			.one()
@@ -37,26 +34,25 @@
 			.related('target')
 	);
 
-	let hax = $derived.by(
-		() =>
-			new Query(
-				z.query.hax
-					.where(({ cmp, and }) =>
-						and(
-							cmp('battle_id', battle?.current?.id || ''),
-							cmp('user_id', z.userID)
-						)
+	let hax = $derived.by(() =>
+		z.createQuery(
+			z.query.hax
+				.where(({ cmp, and }) =>
+					and(
+						cmp('battle_id', battle?.data?.id || ''),
+						cmp('user_id', z.userID)
 					)
-					.one()
-			)
+				)
+				.one()
+		)
 	);
 
 	// Modern Svelte 5 approach with runes
 	let poll_timer: NodeJS.Timeout | null = $state(null);
 
 	$effect(() => {
-		if (battle.current?.target?.name) {
-			files.load_hax_directory(to_snake_case(battle.current?.target.name));
+		if (battle.data?.target?.name) {
+			files.load_hax_directory(to_snake_case(battle.data?.target.name));
 		}
 	});
 
@@ -64,7 +60,7 @@
 		// Start the polling interval
 		poll_timer = setInterval(async () => {
 			try {
-				await files.read_and_apply_project_files(hax.current?.id, false, z);
+				await files.read_and_apply_project_files(hax.data?.id, false);
 			} catch (error) {
 				console.error('Error reading project files:', error);
 			}
@@ -80,18 +76,18 @@
 	});
 </script>
 
-{#if battle.current}
-	<Header battle={battle.current} target={false}>
+{#if battle.data}
+	<Header battle={battle.data} target={false}>
 		{#snippet detail()}{/snippet}
 		{#snippet countdown()}
-			{#if battle.current?.type === 'TIMED_MATCH'}
-				<Countdown battle={battle.current} view="CODE" />
+			{#if battle.data?.type === 'TIMED_MATCH'}
+				<Countdown battle={battle.data} view="CODE" />
 			{/if}
 		{/snippet}
 	</Header>
 
-	{#if hax.current && battle.current}
-		<BattleMode battle={battle.current} hax={hax.current} />
+	{#if hax.data && battle.data}
+		<BattleMode battle={battle.data} hax={hax.data} />
 	{/if}
 {/if}
 

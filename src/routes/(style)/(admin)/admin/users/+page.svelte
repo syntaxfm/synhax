@@ -1,13 +1,10 @@
 <script lang="ts">
 	import Table from '$lib/ui/Table.svelte';
-	import { get_z } from '$lib/z';
+	import { z } from '$lib/zero.svelte';
 	import type { User } from '$sync/schema';
 	import type { ColumnDef } from '@tanstack/svelte-table';
-	import { Query } from 'zero-svelte';
 
-	const z = get_z();
-
-	let users = new Query(z.query.user);
+	let users = z.createQuery(z.query.user);
 
 	const columns: ColumnDef<User, any>[] = [
 		{
@@ -37,5 +34,5 @@
 
 <div class="stack" style:--gap="40px;">
 	<h1>Users</h1>
-	<Table data={users.current} {columns} />
+	<Table data={users.data} {columns} />
 </div>

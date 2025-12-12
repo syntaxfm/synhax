@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { get_z } from '$lib/z';
-	const z = get_z();
+	import { z } from '$lib/zero.svelte';
 	import type { Battle } from '$sync/schema';
 	const { battle }: { battle: Battle } = $props();
 </script>

@@ -1,9 +1,7 @@
 <script lang="ts">
-	import { get_z } from '$lib/z';
+	import { z } from '$lib/zero.svelte';
 	import { goto } from '$app/navigation';
 	import TargetForm, { type Target } from '../TargetForm.svelte';
-
-	const z = get_z();
 
 	let isLoading = $state(false);
 
@@ -13,14 +11,16 @@
 		try {
 			console.log('Creating target with data:', { name, image, type, inspo });
 			console.log('User ID:', z.userID);
+			console.log('Zero connection status:', z);
 
 			if (!z.userID) {
 				throw new Error('User is not authenticated. Please log in and try again.');
 			}
 
 			const now = Date.now();
+			const targetId = crypto.randomUUID();
 			const targetData = {
-				id: crypto.randomUUID(),
+				id: targetId,
 				name,
 				image,
 				type,
@@ -40,8 +40,20 @@
 
 			console.log('Target created successfully:', result);
 
-			// Small delay to ensure sync completes
-			await new Promise((resolve) => setTimeout(resolve, 500));
+			// Wait for sync to propagate
+			await new Promise((resolve) => setTimeout(resolve, 1000));
+
+			// Verify the target was created by querying for it
+			const verifyTarget = await z.query.targets.where('id', targetId).one();
+			console.log('Verification query result:', verifyTarget);
+
+			if (!verifyTarget) {
+				throw new Error(
+					'Target mutation succeeded but target not found in database. This may be a Zero Sync issue.'
+				);
+			}
+
+			console.log('Target verified in database, redirecting...');
 
 			// Redirect to targets list on success
 			await goto('/admin/targets');

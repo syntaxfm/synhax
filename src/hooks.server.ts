@@ -13,7 +13,6 @@ import { drizzle } from 'drizzle-orm/postgres-js';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { admin, jwt } from 'better-auth/plugins';
 import { betterAuth } from 'better-auth';
-import type { BetterAuthOptions } from 'better-auth';
 
 // Sentry disabled on Cloudflare Workers due to edge runtime compatibility issues
 // TODO: Set up Sentry for Workers using @sentry/cloudflare-workers instead
@@ -74,6 +73,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 			const session = await auth.api.getSession({
 				headers: event.request.headers
 			});
+			console.log(session);
 			if (session) {
 				event.locals.session = session.session;
 				event.locals.user = {

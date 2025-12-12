@@ -1,15 +1,13 @@
 <script lang="ts">
-	import { Query } from 'zero-svelte';
-	import { get_z } from '$lib/z';
-	const z = get_z();
+	import { z } from '$lib/zero.svelte';
 	import TargetCard from './TargetCard.svelte';
 	let { limit = 0 }: { limit: number } = $props();
-	let targets = new Query(z.query.targets.related('ratings').limit(limit));
+	let targets = z.createQuery(z.query.targets.related('ratings').limit(limit));
 </script>
 
 <div class="scroll-wrapper">
 	<div class="latest-scroll">
-		{#each targets.current as target}
+		{#each targets.data as target}
 			<TargetCard {target} />
 		{/each}
 	</div>

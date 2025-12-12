@@ -1,19 +1,13 @@
 import { PUBLIC_SERVER } from '$env/static/public';
 import { Z } from 'zero-svelte';
-import { schema, type Schema } from './schema';
+import { schema, type Schema } from '$sync/schema';
 import { get_jwt } from '$lib/user/utils';
-// Schema is imported from wherever your Schema type lives.
-// via export type Schema = typeof schema;
 
 function decodeJWT(token: string) {
 	try {
-		// JWT has 3 parts separated by dots: header.payload.signature
 		const parts = token.split('.');
 		if (parts.length !== 3) return null;
-
-		// Decode the payload (second part)
 		const payload = parts[1];
-		// Add padding if needed for base64 decoding
 		const paddedPayload = payload + '==='.slice((payload.length + 3) % 4);
 		const decoded = atob(paddedPayload);
 		return JSON.parse(decoded);
@@ -23,20 +17,20 @@ function decodeJWT(token: string) {
 	}
 }
 
-export async function get_z_options() {
+async function get_z_options() {
 	const jwt = await get_jwt();
-	let userId = 'anon';
+	let userID = 'anon';
 
 	if (jwt) {
 		const decoded = decodeJWT(jwt);
-		userId = decoded?.sub || 'anon';
+		userID = decoded?.sub || 'anon';
 	}
 
 	return {
-		userID: userId,
+		userID,
 		server: PUBLIC_SERVER,
 		schema,
-		jwt: jwt || null
+		jwt: jwt || undefined
 	} as const;
 }
 

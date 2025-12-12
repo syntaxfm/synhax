@@ -1,16 +1,14 @@
 <script lang="ts">
 	import { generateAvatar } from '$lib/user/avatar.remote';
 	import Logout from '$lib/user/Logout.svelte';
-	import { get_z } from '$lib/z';
-	import { Query } from 'zero-svelte';
-	const z = get_z();
+	import { z } from '$lib/zero.svelte';
 	// - WHEN user is ID
 	// - CAN Change Theme
 	// - CAN Logout
 	// - CAN change ~~character~~
 	// - WHEN user is NOT ID
 	// - CANNOT access
-	const user = new Query(z.query.user.where('id', z.userID).one());
+	const user = z.createQuery(z.query.user.where('id', z.userID).one());
 
 	let isGenerating = $state(false);
 	let error = $state('');
@@ -31,7 +29,7 @@
 <a href="/" class="button">Back</a>
 <div class="stack">
 	<h1>Settings</h1>
-	<img src={user.current?.avatar} alt="{user.current?.name} Avatar" />
+	<img src={user.data?.avatar} alt="{user.data?.name} Avatar" />
 	{#if error}
 		<p class="error">{error}</p>
 	{/if}

@@ -3,11 +3,9 @@
 	import { files } from '$lib/state/FileState.svelte';
 	import Avatar from '$lib/ui/Avatar.svelte';
 	import { s, to_snake_case } from '$lib/user/utils';
-	import { get_z } from '$lib/z';
-	const z = get_z();
+	import { z } from '$lib/zero.svelte';
 	import { type Battle, type Participants, type Target } from '$sync/schema';
 	import { fade, fly } from 'svelte/transition';
-	import { Query } from 'zero-svelte';
 
 	const {
 		battle,
@@ -17,7 +15,7 @@
 		me_participant: Participants;
 	} = $props();
 
-	let me = new Query(z.query.user.where('id', z.userID).one());
+	let me = z.createQuery(z.query.user.where('id', z.userID).one());
 
 	function join_battle() {
 		// Make sure target actually exists
@@ -68,7 +66,7 @@
 </script>
 
 <div class="battler">
-	{#if me.current}
+	{#if me.data}
 		{#if !me_participant}
 			<div class="image-frame">
 				<Avatar avatar={'/unknown.png'} expression="NORMAL" />
@@ -82,8 +80,8 @@
 			</div>
 		{:else if me_participant?.status === 'PENDING'}
 			<div class="image-frame me" in:fade>
-				<Avatar avatar={s(me.current?.avatar)} expression="NORMAL" />
-				<h4>{me.current.name}</h4>
+				<Avatar avatar={s(me.data?.avatar)} expression="NORMAL" />
+				<h4>{me.data.name}</h4>
 				<div class="joining">
 					<button class="go_button big_button" onclick={lock_in}>Lock In</button
 					>

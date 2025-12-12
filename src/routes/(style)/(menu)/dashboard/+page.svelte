@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Query } from 'zero-svelte';
 	import LatestTargets from '$lib/targets/LatestTargets.svelte';
 	import { files } from '$lib/state/FileState.svelte';
 	import WelcomeModal from '$lib/user/WelcomeModal.svelte';
@@ -12,8 +11,7 @@
 		sound_on_click,
 		sound_on_interaction
 	} from '$lib/ui/sounds';
-	import { get_z } from '$lib/z';
-	const z = get_z();
+	import { z } from '$lib/zero.svelte';
 
 	const blip_sound = new Audio(blip);
 	const throw_sound = new Audio(throws);
@@ -24,14 +22,14 @@
 	throwforward_sound.preload = 'auto';
 	throwforward_sound.volume = 0.1;
 
-	const user = new Query(z.query.user.where('id', z.userID).one());
+	const user = z.createQuery(z.query.user.where('id', z.userID).one());
 
 	let battle_select = $state(false);
 	let show_welcome = $state(false);
 	files.check();
 	// Check if user needs to see welcome modal (no avatar set)
 	$effect(() => {
-		if (user.current && !user.current.avatar) {
+		if (user.data && !user.data.avatar) {
 			show_welcome = true;
 		}
 	});
@@ -100,8 +98,8 @@
 			battle_select = true;
 		}}>Battle</button
 	>
-	{#if user.current}
-		{#if user.current.role === 'syntax'}
+	{#if user.data}
+		{#if user.data.role === 'syntax'}
 			<a href="/admin/targets/init" {@attach sound_on_interaction(blip_sound)}
 				>New Target</a
 			>

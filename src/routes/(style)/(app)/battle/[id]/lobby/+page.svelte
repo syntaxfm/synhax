@@ -6,17 +6,14 @@
 	import Header from '$lib/battle_mode/Header.svelte';
 	// import RefBanner from '$lib/battle_mode/RefBanner.svelte';
 	import ShareLinks from '$lib/battle_mode/ShareLinks.svelte';
-	import { get_z } from '$lib/z';
+	import { z } from '$lib/zero.svelte';
 	import { remove_screaming } from '$utils/formatting';
-	import { Query } from 'zero-svelte';
-
-	const z = get_z();
 	// import lobby_song from '$lib/media/moonlight.mp3';
 	// const lobby_sound = new Audio(lobby_song);
 	// lobby_sound.preload = 'auto';
 	// lobby_sound.play();
 
-	let battle = new Query(
+	let battle = z.createQuery(
 		z.query.battles
 			.where('id', page?.params?.id || '')
 			.one()
@@ -28,34 +25,34 @@
 	);
 
 	$effect(() => {
-		if (battle?.current?.status === 'ACTIVE') {
+		if (battle?.data?.status === 'ACTIVE') {
 			goto(`/battle/${page.params.id}/code`);
 		}
 	});
 </script>
 
-{#if battle.current}
-	<Header battle={battle.current}>
+{#if battle.data}
+	<Header battle={battle.data}>
 		{#snippet detail()}
-			<h3>{remove_screaming(battle?.current?.type || '')}</h3>
-			<!-- <RefBanner battle={battle.current} /> -->
-			<!-- <p>Today's Referee: {battle?.current?.referee?.name}</p> -->
-			<ShareLinks battle={battle.current} code={false} />
+			<h3>{remove_screaming(battle?.data?.type || '')}</h3>
+			<!-- <RefBanner battle={battle.data} /> -->
+			<!-- <p>Today's Referee: {battle?.data?.referee?.name}</p> -->
+			<ShareLinks battle={battle.data} code={false} />
 		{/snippet}
 		{#snippet countdown()}
 			<div>
-				{#if battle.current?.type === 'TIMED_MATCH'}
-					<Countdown battle={battle.current} />
+				{#if battle.data?.type === 'TIMED_MATCH'}
+					<Countdown battle={battle.data} />
 				{/if}
 			</div>
 		{/snippet}
 	</Header>
 
-	<Battlers battle={battle.current} join={true} />
+	<Battlers battle={battle.data} join={true} />
 
-	{#if battle?.current?.status === 'ACTIVE'}
+	{#if battle?.data?.status === 'ACTIVE'}
 		<p>Battle is currently active.</p>
-		<a href={`/battle/${battle.current.id}/code`}>Go to Battle</a>
+		<a href={`/battle/${battle.data.id}/code`}>Go to Battle</a>
 	{/if}
 {/if}
 

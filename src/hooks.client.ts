@@ -14,13 +14,13 @@ Sentry.init({
 	//  performance
 	integrations: [
 		//  session-replay
-		Sentry.replayIntegration(),
+		Sentry.replayIntegration()
 		//  session-replay
 		//  user-feedback
-		Sentry.feedbackIntegration({
-			// Additional SDK configuration goes in here, for example:
-			colorScheme: 'system'
-		})
+		// Sentry.feedbackIntegration({
+		// 	// Additional SDK configuration goes in here, for example:
+		// 	colorScheme: 'system'
+		// })
 		//  user-feedback
 	],
 	//  session-replay

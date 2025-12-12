@@ -1,8 +1,6 @@
 import { CSS_TEMPLATE, HTML_TEMPLATE } from '$lib/constants';
-import type { Schema } from '$sync/schema';
 import { validate_and_load_project_files } from '$utils/filesystem';
-import { css } from 'svelte-highlight/languages';
-import type { Z } from 'zero-svelte';
+import { z } from '$lib/zero.svelte';
 
 export class FileState {
 	status: 'INITIAL' | 'NO_ACCESS' | 'ACCESS' | 'ERROR' = $state('INITIAL');
@@ -266,7 +264,7 @@ export class FileState {
 		}
 	}
 
-	async read_and_apply_project_files(id: string, force: boolean, z: Z<Schema>) {
+	async read_and_apply_project_files(id: string, force: boolean) {
 		if (
 			!this.project_directory_handle ||
 			!this.synhax_directory_handle ||
@@ -294,15 +292,15 @@ export class FileState {
 
 		if (html_changed) {
 			this.html_mtime = html_mtime;
-			this.save_html(id, html_text, z);
+			this.save_html(id, html_text);
 		}
 		if (css_changed) {
 			this.css_mtime = css_mtime;
-			this.save_css(id, css_text, z);
+			this.save_css(id, css_text);
 		}
 	}
 
-	async save_html(id: string, text: string, z: Z<Schema>) {
+	async save_html(id: string, text: string) {
 		z.mutate.hax.update({
 			id,
 			html: text,
@@ -310,7 +308,7 @@ export class FileState {
 		});
 	}
 
-	async save_css(id: string, text: string, z: Z<Schema>) {
+	async save_css(id: string, text: string) {
 		z.mutate.hax.update({
 			id,
 			css: text,

@@ -12,8 +12,7 @@
 	import JoinBattler from './JoinBattler.svelte';
 
 	import { copyToClipboard } from '$utils/clipboard';
-	import { get_z } from '$lib/z';
-	const z = get_z();
+	import { z } from '$lib/zero.svelte';
 
 	const {
 		battle,

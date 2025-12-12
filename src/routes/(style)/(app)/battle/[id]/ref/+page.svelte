@@ -7,13 +7,10 @@
 	import ShareLinks from '$lib/battle_mode/ShareLinks.svelte';
 	import Modal from '$lib/ui/Modal.svelte';
 	import ToggleButton from '$lib/ui/ToggleButton.svelte';
-	import { get_z } from '$lib/z';
+	import { z } from '$lib/zero.svelte';
 	import { fade } from 'svelte/transition';
-	import { Query } from 'zero-svelte';
 
-	const z = get_z();
-
-	let battle = new Query(
+	let battle = z.createQuery(
 		z.query.battles
 			.where('id', page?.params?.id || '')
 			.one()
@@ -26,11 +23,11 @@
 
 	let over_status: 'ACTIVE' | 'OVER' = $state('ACTIVE');
 	let controls_visible = $derived(
-		['PENDING', 'ACTIVE'].includes(battle.current?.status)
+		['PENDING', 'ACTIVE'].includes(battle.data?.status)
 	);
 
 	async function start() {
-		if (!battle.current) return;
+		if (!battle.data) return;
 
 		const now = Date.now();
 		const updates: any = {
@@ -40,95 +37,95 @@
 		};
 
 		// Set ends_at based on battle type
-		if (battle.current.type === 'TIME_TRIAL') {
+		if (battle.data.type === 'TIME_TRIAL') {
 			updates.ends_at = null;
-		} else if (battle.current.type === 'TIMED_MATCH') {
-			updates.ends_at = now + battle.current.total_time_seconds * 1000;
+		} else if (battle.data.type === 'TIMED_MATCH') {
+			updates.ends_at = now + battle.data.total_time_seconds * 1000;
 		}
 
 		await z.mutate.battles.update(updates);
 	}
 
 	async function toggle_privacy() {
-		if (!battle.current) return;
+		if (!battle.data) return;
 		const new_visibility =
-			battle.current.visibility === 'PUBLIC' ? 'PRIVATE' : 'PUBLIC';
+			battle.data.visibility === 'PUBLIC' ? 'PRIVATE' : 'PUBLIC';
 		await z.mutate.battles.update({
-			id: battle.current.id,
+			id: battle.data.id,
 			visibility: new_visibility
 		});
 	}
 
 	async function toggle_type() {
-		if (!battle.current) return;
+		if (!battle.data) return;
 		const new_type =
-			battle.current.type === 'TIME_TRIAL' ? 'TIMED_MATCH' : 'TIME_TRIAL';
+			battle.data.type === 'TIME_TRIAL' ? 'TIMED_MATCH' : 'TIME_TRIAL';
 		await z.mutate.battles.update({
-			id: battle.current.id,
+			id: battle.data.id,
 			type: new_type
 		});
 	}
 
 	async function add_overtime(ot: number) {
-		if (!battle.current) return;
+		if (!battle.data) return;
 
 		await z.mutate.battles.update({
-			id: battle.current.id,
+			id: battle.data.id,
 			overtime_seconds: ot * 60,
 			ends_at: Date.now() + ot * 60 * 1000
 		});
 	}
 
 	function update_time_limit(event: Event) {
-		if (!battle.current) return;
+		if (!battle.data) return;
 		const input = event.target as HTMLInputElement;
 		const new_time = parseFloat(input.value);
 		if (!isNaN(new_time)) {
 			z.mutate.battles.update({
-				id: battle.current.id,
+				id: battle.data.id,
 				total_time_seconds: new_time * 60
 			});
 		}
 	}
 
 	function finish_battle() {
-		if (!battle.current) return;
+		if (!battle.data) return;
 
 		z.mutate.battles.update({
-			id: battle.current.id,
+			id: battle.data.id,
 			status: 'COMPLETED'
 		});
 	}
 	let locked_in_participants = $derived(
-		battle.current?.participants.filter(
+		battle.data?.participants.filter(
 			(p) => p.user_id === z.userID && p.status === 'READY'
 		)
 	);
 </script>
 
-{#if battle.current}
-	<Header battle={battle.current}>
+{#if battle.data}
+	<Header battle={battle.data}>
 		{#snippet detail()}
 			<ShareLinks
-				battle={battle.current}
+				battle={battle.data}
 				code={false}
 				watch={controls_visible}
 				vote={!controls_visible}
 			/>
 		{/snippet}
 		{#snippet countdown()}
-			<!-- {#if battle.current.status === 'ACTIVE'} -->
-			<Countdown battle={battle.current} bind:status={over_status} view="REF" />
+			<!-- {#if battle.data.status === 'ACTIVE'} -->
+			<Countdown battle={battle.data} bind:status={over_status} view="REF" />
 			<!-- {/if} -->
 		{/snippet}
 	</Header>
 
-	{#if battle.current.status === 'PENDING'}
+	{#if battle.data.status === 'PENDING'}
 		<section class="settings" transition:fade>
 			<h2>Battle Settings</h2>
 
 			<ToggleButton
-				toggle={battle.current.visibility === 'PUBLIC'}
+				toggle={battle.data.visibility === 'PUBLIC'}
 				ontoggle={toggle_privacy}
 				on_text="Public"
 				off_text="Private"
@@ -136,18 +133,18 @@
 
 			{#if controls_visible}
 				<ToggleButton
-					disabled={['ACTIVE', 'COMPLETED'].includes(battle.current?.status)}
-					toggle={battle.current.type === 'TIME_TRIAL'}
+					disabled={['ACTIVE', 'COMPLETED'].includes(battle.data?.status)}
+					toggle={battle.data.type === 'TIME_TRIAL'}
 					ontoggle={toggle_type}
 					on_text="Time Trial"
 					off_text="Timed Match"
 				/>
 
-				{#if battle.current?.type === 'TIMED_MATCH'}
+				{#if battle.data?.type === 'TIMED_MATCH'}
 					<div class="time-limit-settings">
 						<label for="time-limit">Time Limit:</label>
 						<input
-							defaultValue={battle.current.total_time_seconds / 60 || 10}
+							defaultValue={battle.data.total_time_seconds / 60 || 10}
 							id="time-limit"
 							type="number"
 							placeholder="Enter time limit"
@@ -159,24 +156,24 @@
 				{/if}
 				<Participants
 					locked_in_participants={locked_in_participants || []}
-					participants={battle.current?.participants || []}
+					participants={battle.data?.participants || []}
 				/>
-				{#if battle.current?.status === 'PENDING'}
+				{#if battle.data?.status === 'PENDING'}
 					<button class="go_button" onclick={start}>Start Battle</button>
 				{/if}
 			{/if}
 		</section>
 	{/if}
-	<Battlers battle={battle.current} results={true} />
+	<Battlers battle={battle.data} results={true} />
 
-	{#if battle.current?.type === 'TIMED_MATCH'}
+	{#if battle.data?.type === 'TIMED_MATCH'}
 		<Modal
 			title="Time's Up!"
-			open={battle.current.status === 'ACTIVE' && over_status === 'OVER'}
+			open={battle.data.status === 'ACTIVE' && over_status === 'OVER'}
 		>
 			<button
 				class="go_button big_button"
-				disabled={battle.current?.status !== 'ACTIVE' && over_status !== 'OVER'}
+				disabled={battle.data?.status !== 'ACTIVE' && over_status !== 'OVER'}
 				onclick={finish_battle}>Finish Battle</button
 			>
 

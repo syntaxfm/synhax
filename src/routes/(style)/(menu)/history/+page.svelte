@@ -1,12 +1,9 @@
 <script lang="ts">
 	import Table from '$lib/ui/Table.svelte';
-	import { get_z } from '$lib/z';
+	import { z } from '$lib/zero.svelte';
 	import { user } from '$lib/auth-client';
-	import { Query } from 'zero-svelte';
 
-	const z = get_z();
-
-	const history = new Query(
+	const history = z.createQuery(
 		z.query.battle_participants
 			.where('user_id', z.userID)
 			.related('battle', (e) => e.related('target'))
@@ -15,7 +12,7 @@
 
 <h1>History</h1>
 
-{#if history.current.length === 0}
+{#if history.data.length === 0}
 	<p>No battles found.</p>
 {:else}
 	<table>
@@ -26,7 +23,7 @@
 			</tr>
 		</thead>
 		<tbody>
-			{#each history.current as participant}
+			{#each history.data as participant}
 				<tr>
 					<td><img src={participant.battle.target?.image} /></td>
 					<td

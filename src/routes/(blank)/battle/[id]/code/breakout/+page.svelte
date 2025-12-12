@@ -16,15 +16,11 @@
 
 <!-- Difference between battle and target? -->
 <script lang="ts">
-	import { Query } from 'zero-svelte';
-
-	import { get_z } from '$lib/z';
+	import { z } from '$lib/zero.svelte';
 	import { page } from '$app/state';
 	import { combine_html_and_css } from '$utils/code';
 
-	const z = get_z();
-
-	let battle = new Query(
+	let battle = z.createQuery(
 		z.query.battles
 			.where('id', page?.params?.id || '')
 			.one()
@@ -33,22 +29,21 @@
 			.related('target')
 	);
 
-	let hax = $derived.by(
-		() =>
-			new Query(
-				z.query.hax
-					.where(({ cmp, and }) =>
-						and(
-							cmp('battle_id', battle?.current?.id || ''),
-							cmp('user_id', z.userID)
-						)
+	let hax = $derived.by(() =>
+		z.createQuery(
+			z.query.hax
+				.where(({ cmp, and }) =>
+					and(
+						cmp('battle_id', battle?.data?.id || ''),
+						cmp('user_id', z.userID)
 					)
-					.one()
-			)
+				)
+				.one()
+		)
 	);
 
 	const code = $derived(
-		combine_html_and_css(hax?.current?.html, hax?.current?.css)
+		combine_html_and_css(hax?.data?.html, hax?.data?.css)
 	);
 </script>
 

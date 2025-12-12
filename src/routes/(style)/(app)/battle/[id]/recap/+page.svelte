@@ -2,17 +2,14 @@
 	import '@awesome.me/webawesome/dist/components/rating/rating.js';
 	import { page } from '$app/state';
 	import ShareLinks from '$lib/battle_mode/ShareLinks.svelte';
-	import { get_z } from '$lib/z';
+	import { z } from '$lib/zero.svelte';
 	import { remove_screaming } from '$utils/formatting';
-	import { Query } from 'zero-svelte';
 	import { BATTLE_RATINGS } from '$lib/constants';
 	import Battlers from '$lib/battle_mode/Battlers.svelte';
 	import Header from '$lib/battle_mode/Header.svelte';
 	import { compute_battle_scores } from '$utils/scores';
 
-	const z = get_z();
-
-	let battle = new Query(
+	let battle = z.createQuery(
 		z.query.battles
 			.where('id', page?.params?.id || '')
 			.one()
@@ -23,24 +20,23 @@
 			.related('target')
 	);
 
-	let rating = $derived.by(
-		() =>
-			new Query(
-				z.query.ratings
-					.where(({ cmp, and }) =>
-						and(
-							cmp('user_id', z.userID),
-							cmp('target_id', battle.current?.target?.id || '')
-						)
+	let rating = $derived.by(() =>
+		z.createQuery(
+			z.query.ratings
+				.where(({ cmp, and }) =>
+					and(
+						cmp('user_id', z.userID),
+						cmp('target_id', battle.data?.target?.id || '')
 					)
-					.one()
-					.related('user')
-					.related('target')
-			)
+				)
+				.one()
+				.related('user')
+				.related('target')
+		)
 	);
 
 	let scores = $derived(
-		compute_battle_scores(battle.current?.participants || [])
+		compute_battle_scores(battle.data?.participants || [])
 	);
 
 	function rate_battle(
@@ -53,13 +49,13 @@
 
 		z.mutate.ratings
 			.upsert({
-				id: rating.current?.id || crypto.randomUUID(),
+				id: rating.data?.id || crypto.randomUUID(),
 				user_id: z.userID,
-				target_id: battle.current?.target?.id || '',
-				difficulty: rating.current?.difficulty || 0,
-				creativity: rating.current?.creativity || 0,
-				fun: rating.current?.fun || 0,
-				coolness: rating.current?.coolness || 0,
+				target_id: battle.data?.target?.id || '',
+				difficulty: rating.data?.difficulty || 0,
+				creativity: rating.data?.creativity || 0,
+				fun: rating.data?.fun || 0,
+				coolness: rating.data?.coolness || 0,
 				...new_rating
 			})
 			.catch((error) => {
@@ -69,16 +65,16 @@
 	}
 </script>
 
-{#if battle.current && battle.current.visibility === 'PUBLIC'}
-	<Header battle={battle.current}>
+{#if battle.data && battle.data.visibility === 'PUBLIC'}
+	<Header battle={battle.data}>
 		{#snippet detail()}
-			<!-- <p>Today's Referee: {battle?.current?.referee?.name}</p>
-			<h3>{remove_screaming(battle?.current?.type || '')}</h3> -->
+			<!-- <p>Today's Referee: {battle?.data?.referee?.name}</p>
+			<h3>{remove_screaming(battle?.data?.type || '')}</h3> -->
 			<ShareLinks
 				code={false}
 				watch={false}
 				vote={true}
-				battle={battle.current}
+				battle={battle.data}
 			/>
 		{/snippet}
 		{#snippet countdown()}
@@ -91,7 +87,7 @@
 							<wa-rating
 								label="Rating"
 								style="font-size: 1.2rem;"
-								value={rating.current?.[rating_type] || 0}
+								value={rating.data?.[rating_type] || 0}
 								onchange={(e) => rate_battle(rating_type, e.target.value)}
 							></wa-rating>
 						</div>
@@ -101,7 +97,7 @@
 	</Header>
 
 	<section class="recap">
-		<Battlers battle={battle.current} results={true} {scores} />
+		<Battlers battle={battle.data} results={true} {scores} />
 	</section>
 {/if}
 

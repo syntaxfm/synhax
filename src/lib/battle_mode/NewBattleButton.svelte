@@ -2,10 +2,8 @@
 	import { customAlphabet } from 'nanoid';
 	import { files } from '$lib/state/FileState.svelte';
 	import { goto } from '$app/navigation';
-	import { get_z } from '$lib/z';
+	import { z } from '$lib/zero.svelte';
 	import RequestAccess from '$lib/files/RequestAccess.svelte';
-
-	const z = get_z();
 
 	let { target_id } = $props();
 
