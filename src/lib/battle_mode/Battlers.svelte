@@ -13,6 +13,7 @@
 
 	import { copyToClipboard } from '$utils/clipboard';
 	import { z } from '$lib/zero.svelte';
+	import { PUBLIC_APP_URL } from '$env/static/public';
 
 	const {
 		battle,
@@ -110,7 +111,7 @@
 			class="battler empty-seat"
 			type="button"
 			onclick={() =>
-				handleCopy(`http://localhost:5173/battle/${battle.id}/lobby`)}
+				handleCopy(`${PUBLIC_APP_URL}/battle/${battle.id}/lobby`)}
 		>
 			{#if battle.status === 'PENDING'}
 				<div class="image-frame">

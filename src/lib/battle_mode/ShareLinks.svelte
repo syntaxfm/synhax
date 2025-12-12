@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Copybutton from '$lib/ui/Copybutton.svelte';
 	import type { Battle } from '$sync/schema';
+	import { PUBLIC_APP_URL } from '$env/static/public';
 	const {
 		battle,
 		code = true,
@@ -19,7 +20,7 @@
 		<Copybutton
 			label="Code"
 			disabled={battle.status !== 'PENDING'}
-			link={`http://localhost:5173/battle/${battle.id}/lobby`}
+			link={`${PUBLIC_APP_URL}/battle/${battle.id}/lobby`}
 		/>
 	{/if}
 
@@ -27,7 +28,7 @@
 		<Copybutton
 			label="Watch"
 			disabled={battle.visibility !== 'PUBLIC' || battle.status === 'COMPLETED'}
-			link={`http://localhost:5173/battle/${battle.zero_room_id}/watch`}
+			link={`${PUBLIC_APP_URL}/battle/${battle.zero_room_id}/watch`}
 		/>
 	{/if}
 
@@ -35,7 +36,7 @@
 		<Copybutton
 			label="Vote"
 			disabled={battle.visibility !== 'PUBLIC' || battle.status !== 'COMPLETED'}
-			link="http://localhost:5173/battle/{battle.zero_room_id}/watch/vote"
+			link={`${PUBLIC_APP_URL}/battle/${battle.zero_room_id}/watch/vote`}
 		/>
 	{/if}
 </div>
