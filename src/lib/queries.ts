@@ -1,6 +1,6 @@
 import { createBuilder, defineQueries, defineQuery } from '@rocicorp/zero';
 import { schema, type Schema } from '$sync/schema';
-import { z } from 'zod';
+import { type } from 'arktype';
 
 /**
  * Battle Mode Synced Queries
@@ -22,19 +22,16 @@ export const queries = defineQueries({
 	// ==================
 	targets: {
 		/** Get all targets with their ratings */
-		withRatings: defineQuery(
-			z.object({ limit: z.number().optional() }),
-			({ args }) => {
-				const q = builder.targets.related('ratings');
-				return args.limit ? q.limit(args.limit) : q;
-			}
-		),
+		withRatings: defineQuery(type({ 'limit?': 'number' }), ({ args }) => {
+			const q = builder.targets.related('ratings');
+			return args.limit ? q.limit(args.limit) : q;
+		}),
 
 		/** Get all targets (admin) */
 		all: defineQuery(() => builder.targets),
 
 		/** Get a single target by ID */
-		byId: defineQuery(z.object({ id: z.string() }), ({ args }) =>
+		byId: defineQuery(type({ id: 'string' }), ({ args }) =>
 			builder.targets.where('id', args.id).one()
 		)
 	},
@@ -58,13 +55,13 @@ export const queries = defineQueries({
 	battles: {
 		/** Get battles by status with target */
 		byStatus: defineQuery(
-			z.object({ status: z.enum(['PENDING', 'ACTIVE', 'COMPLETED']) }),
+			type({ status: "'PENDING' | 'ACTIVE' | 'COMPLETED'" }),
 			({ args }) =>
 				builder.battles.where('status', args.status).related('target')
 		),
 
 		/** Get a battle by ID with full relations */
-		byId: defineQuery(z.object({ id: z.string() }), ({ args }) =>
+		byId: defineQuery(type({ id: 'string' }), ({ args }) =>
 			builder.battles
 				.where('id', args.id)
 				.one()
@@ -76,7 +73,7 @@ export const queries = defineQueries({
 		),
 
 		/** Get a battle by ID with participants (no hax votes - for code page) */
-		byIdSimple: defineQuery(z.object({ id: z.string() }), ({ args }) =>
+		byIdSimple: defineQuery(type({ id: 'string' }), ({ args }) =>
 			builder.battles
 				.where('id', args.id)
 				.one()
@@ -86,7 +83,7 @@ export const queries = defineQueries({
 		),
 
 		/** Get a battle by zero_room_id with full relations */
-		byRoomId: defineQuery(z.object({ zeroRoomId: z.string() }), ({ args }) =>
+		byRoomId: defineQuery(type({ zeroRoomId: 'string' }), ({ args }) =>
 			builder.battles
 				.where('zero_room_id', args.zeroRoomId)
 				.one()
@@ -119,7 +116,7 @@ export const queries = defineQueries({
 	battleVotes: {
 		/** Get votes for a specific nominee in a battle by the current user */
 		myVotesForNominee: defineQuery(
-			z.object({ battleId: z.string(), nomineeHaxId: z.string() }),
+			type({ battleId: 'string', nomineeHaxId: 'string' }),
 			({
 				args,
 				ctx
@@ -143,7 +140,7 @@ export const queries = defineQueries({
 	hax: {
 		/** Get user's hax for a specific battle */
 		myForBattle: defineQuery(
-			z.object({ battleId: z.string() }),
+			type({ battleId: 'string' }),
 			({ args, ctx }: { args: { battleId: string }; ctx: QueryContext }) =>
 				builder.hax
 					.where(({ and, cmp }) =>
@@ -162,7 +159,7 @@ export const queries = defineQueries({
 	ratings: {
 		/** Get user's rating for a specific target */
 		myForTarget: defineQuery(
-			z.object({ targetId: z.string() }),
+			type({ targetId: 'string' }),
 			({ args, ctx }: { args: { targetId: string }; ctx: QueryContext }) =>
 				builder.ratings
 					.where(({ and, cmp }) =>

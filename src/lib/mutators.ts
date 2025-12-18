@@ -1,5 +1,5 @@
 import { defineMutators, defineMutator } from '@rocicorp/zero';
-import { z } from 'zod';
+import { type } from 'arktype';
 import {
 	battle_status_enum,
 	visibility_enum,
@@ -17,14 +17,16 @@ import {
  * These run on both client (optimistically) and server (authoritatively).
  */
 
-// Create Zod enums from Drizzle pgEnum values
-const battleStatusEnum = z.enum(battle_status_enum.enumValues);
-const visibilityEnum = z.enum(visibility_enum.enumValues);
-const battleTypeEnum = z.enum(battle_type_enum.enumValues);
-const participantStatusEnum = z.enum(participant_status_enum.enumValues);
-const haxTypeEnum = z.enum(hax_type_enum.enumValues);
-const userAwardEnum = z.enum(user_award_enum.enumValues);
-const targetTypeEnum = z.enum(target_type_enum.enumValues);
+// Create ArkType enums from Drizzle pgEnum values
+const battleStatusEnum = type.enumerated(...battle_status_enum.enumValues);
+const visibilityEnum = type.enumerated(...visibility_enum.enumValues);
+const battleTypeEnum = type.enumerated(...battle_type_enum.enumValues);
+const participantStatusEnum = type.enumerated(
+	...participant_status_enum.enumValues
+);
+const haxTypeEnum = type.enumerated(...hax_type_enum.enumValues);
+const userAwardEnum = type.enumerated(...user_award_enum.enumValues);
+const targetTypeEnum = type.enumerated(...target_type_enum.enumValues);
 
 export const mutators = defineMutators({
 	// ==================
@@ -32,18 +34,18 @@ export const mutators = defineMutators({
 	// ==================
 	battles: {
 		insert: defineMutator(
-			z.object({
-				id: z.string(),
-				target_id: z.string(),
-				zero_room_id: z.string(),
-				referee_id: z.string(),
+			type({
+				id: 'string',
+				target_id: 'string',
+				zero_room_id: 'string',
+				referee_id: 'string',
 				type: battleTypeEnum,
-				total_time_seconds: z.number(),
-				overtime_seconds: z.number().optional(),
-				status: battleStatusEnum.optional(),
-				visibility: visibilityEnum.optional(),
-				starts_at: z.number().optional(),
-				ends_at: z.number().optional()
+				total_time_seconds: 'number',
+				'overtime_seconds?': 'number',
+				'status?': battleStatusEnum,
+				'visibility?': visibilityEnum,
+				'starts_at?': 'number',
+				'ends_at?': 'number'
 			}),
 			async ({ tx, args }) => {
 				await tx.mutate.battles.insert({
@@ -62,16 +64,16 @@ export const mutators = defineMutators({
 			}
 		),
 		update: defineMutator(
-			z.object({
-				id: z.string(),
-				status: battleStatusEnum.optional(),
-				visibility: visibilityEnum.optional(),
-				type: battleTypeEnum.optional(),
-				total_time_seconds: z.number().optional(),
-				overtime_seconds: z.number().optional(),
-				starts_at: z.number().nullable().optional(),
-				ends_at: z.number().nullable().optional(),
-				revealed_at: z.number().nullable().optional()
+			type({
+				id: 'string',
+				'status?': battleStatusEnum,
+				'visibility?': visibilityEnum,
+				'type?': battleTypeEnum,
+				'total_time_seconds?': 'number',
+				'overtime_seconds?': 'number',
+				'starts_at?': 'number | null',
+				'ends_at?': 'number | null',
+				'revealed_at?': 'number | null'
 			}),
 			async ({ tx, args }) => {
 				await tx.mutate.battles.update({
@@ -94,12 +96,12 @@ export const mutators = defineMutators({
 	// ==================
 	battle_participants: {
 		insert: defineMutator(
-			z.object({
-				id: z.string(),
-				battle_id: z.string(),
-				user_id: z.string(),
-				status: participantStatusEnum.optional(),
-				display_order: z.number().optional()
+			type({
+				id: 'string',
+				battle_id: 'string',
+				user_id: 'string',
+				'status?': participantStatusEnum,
+				'display_order?': 'number'
 			}),
 			async ({ tx, args }) => {
 				await tx.mutate.battle_participants.insert({
@@ -112,11 +114,11 @@ export const mutators = defineMutators({
 			}
 		),
 		update: defineMutator(
-			z.object({
-				id: z.string(),
-				status: participantStatusEnum.optional(),
-				display_order: z.number().optional(),
-				finished_at: z.number().optional()
+			type({
+				id: 'string',
+				'status?': participantStatusEnum,
+				'display_order?': 'number',
+				'finished_at?': 'number'
 			}),
 			async ({ tx, args }) => {
 				await tx.mutate.battle_participants.update({
@@ -128,12 +130,12 @@ export const mutators = defineMutators({
 			}
 		),
 		upsert: defineMutator(
-			z.object({
-				id: z.string(),
-				battle_id: z.string(),
-				user_id: z.string(),
-				status: participantStatusEnum.optional(),
-				display_order: z.number().optional()
+			type({
+				id: 'string',
+				battle_id: 'string',
+				user_id: 'string',
+				'status?': participantStatusEnum,
+				'display_order?': 'number'
 			}),
 			async ({ tx, args }) => {
 				await tx.mutate.battle_participants.upsert({
@@ -146,8 +148,8 @@ export const mutators = defineMutators({
 			}
 		),
 		delete: defineMutator(
-			z.object({
-				id: z.string()
+			type({
+				id: 'string'
 			}),
 			async ({ tx, args }) => {
 				await tx.mutate.battle_participants.delete({ id: args.id });
@@ -160,13 +162,13 @@ export const mutators = defineMutators({
 	// ==================
 	hax: {
 		insert: defineMutator(
-			z.object({
-				id: z.string(),
-				user_id: z.string(),
-				target_id: z.string(),
-				battle_id: z.string().optional(),
-				html: z.string(),
-				css: z.string(),
+			type({
+				id: 'string',
+				user_id: 'string',
+				target_id: 'string',
+				'battle_id?': 'string',
+				html: 'string',
+				css: 'string',
 				type: haxTypeEnum
 			}),
 			async ({ tx, args }) => {
@@ -182,13 +184,13 @@ export const mutators = defineMutators({
 			}
 		),
 		update: defineMutator(
-			z.object({
-				id: z.string(),
-				html: z.string().optional(),
-				css: z.string().optional(),
-				is_final: z.boolean().optional(),
-				submitted_at: z.number().optional(),
-				updated_at: z.number().optional()
+			type({
+				id: 'string',
+				'html?': 'string',
+				'css?': 'string',
+				'is_final?': 'boolean',
+				'submitted_at?': 'number',
+				'updated_at?': 'number'
 			}),
 			async ({ tx, args }) => {
 				await tx.mutate.hax.update({
@@ -208,13 +210,13 @@ export const mutators = defineMutators({
 	// ==================
 	battle_votes: {
 		upsert: defineMutator(
-			z.object({
-				id: z.string(),
-				battle_id: z.string(),
-				voter_id: z.string(),
-				nominee_hax_id: z.string(),
+			type({
+				id: 'string',
+				battle_id: 'string',
+				voter_id: 'string',
+				nominee_hax_id: 'string',
 				award_type: userAwardEnum,
-				value: z.number()
+				value: 'number'
 			}),
 			async ({ tx, args }) => {
 				await tx.mutate.battle_votes.upsert({
@@ -234,14 +236,14 @@ export const mutators = defineMutators({
 	// ==================
 	ratings: {
 		upsert: defineMutator(
-			z.object({
-				id: z.string(),
-				user_id: z.string(),
-				target_id: z.string(),
-				difficulty: z.number(),
-				creativity: z.number(),
-				fun: z.number(),
-				coolness: z.number()
+			type({
+				id: 'string',
+				user_id: 'string',
+				target_id: 'string',
+				difficulty: 'number',
+				creativity: 'number',
+				fun: 'number',
+				coolness: 'number'
 			}),
 			async ({ tx, args }) => {
 				await tx.mutate.ratings.upsert({
@@ -262,13 +264,13 @@ export const mutators = defineMutators({
 	// ==================
 	targets: {
 		insert: defineMutator(
-			z.object({
-				id: z.string(),
-				name: z.string(),
-				image: z.string(),
+			type({
+				id: 'string',
+				name: 'string',
+				image: 'string',
 				type: targetTypeEnum,
-				inspo: z.string(),
-				created_by: z.string()
+				inspo: 'string',
+				created_by: 'string'
 			}),
 			async ({ tx, args }) => {
 				await tx.mutate.targets.insert({
@@ -282,13 +284,13 @@ export const mutators = defineMutators({
 			}
 		),
 		update: defineMutator(
-			z.object({
-				id: z.string(),
-				name: z.string().optional(),
-				image: z.string().optional(),
-				type: targetTypeEnum.optional(),
-				inspo: z.string().optional(),
-				is_active: z.boolean().optional()
+			type({
+				id: 'string',
+				'name?': 'string',
+				'image?': 'string',
+				'type?': targetTypeEnum,
+				'inspo?': 'string',
+				'is_active?': 'boolean'
 			}),
 			async ({ tx, args }) => {
 				await tx.mutate.targets.update({
@@ -308,12 +310,12 @@ export const mutators = defineMutators({
 	// ==================
 	user: {
 		update: defineMutator(
-			z.object({
-				id: z.string(),
-				name: z.string().optional(),
-				avatar: z.string().optional(),
-				bio: z.string().optional(),
-				theme: z.string().optional()
+			type({
+				id: 'string',
+				'name?': 'string',
+				'avatar?': 'string',
+				'bio?': 'string',
+				'theme?': 'string'
 			}),
 			async ({ tx, args }) => {
 				await tx.mutate.user.update({
