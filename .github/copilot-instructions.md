@@ -2,9 +2,11 @@
 
 ## Project Overview
 
-**beads** (command: `bd`) is a Git-backed issue tracker designed for AI-supervised coding workflows. We dogfood our own tool for all task tracking.
+**beads** (command: `bd`) is a Git-backed issue tracker designed for
+AI-supervised coding workflows. We dogfood our own tool for all task tracking.
 
 **Key Features:**
+
 - Dependency-aware issue tracking
 - Auto-sync with Git via JSONL
 - AI-optimized CLI with JSON output
@@ -23,25 +25,29 @@
 ## Coding Guidelines
 
 ### Testing
+
 - Always write tests for new features
 - Use `BEADS_DB=/tmp/test.db` to avoid polluting production database
 - Run `go test -short ./...` before committing
 - Never create test issues in production DB (use temporary DB)
 
 ### Code Style
+
 - Run `golangci-lint run ./...` before committing
 - Follow existing patterns in `cmd/bd/` for new commands
 - Add `--json` flag to all commands for programmatic use
 - Update docs when changing behavior
 
 ### Git Workflow
+
 - Always commit `.beads/issues.jsonl` with code changes
 - Run `bd sync` at end of work sessions
 - Install git hooks: `bd hooks install` (ensures DB ↔ JSONL consistency)
 
 ## Issue Tracking with bd
 
-**CRITICAL**: This project uses **bd** for ALL task tracking. Do NOT create markdown TODO lists.
+**CRITICAL**: This project uses **bd** for ALL task tracking. Do NOT create
+markdown TODO lists.
 
 ### Essential Commands
 
@@ -69,7 +75,8 @@ bd sync  # Force immediate export/commit/push
 1. **Check ready work**: `bd ready --json`
 2. **Claim task**: `bd update <id> --status in_progress`
 3. **Work on it**: Implement, test, document
-4. **Discover new work?** `bd create "Found bug" -p 1 --deps discovered-from:<parent-id> --json`
+4. **Discover new work?**
+   `bd create "Found bug" -p 1 --deps discovered-from:<parent-id> --json`
 5. **Complete**: `bd close <id> --reason "Done" --json`
 6. **Sync**: `bd sync` (flushes changes to git immediately)
 
@@ -102,26 +109,32 @@ beads/
 ## Available Resources
 
 ### MCP Server (Recommended)
+
 Use the beads MCP server for native function calls instead of shell commands:
+
 - Install: `pip install beads-mcp`
 - Functions: `mcp__beads__ready()`, `mcp__beads__create()`, etc.
 - See `integrations/beads-mcp/README.md`
 
 ### Scripts
-- `./scripts/bump-version.sh <version> --commit` - Update all version files atomically
+
+- `./scripts/bump-version.sh <version> --commit` - Update all version files
+  atomically
 - `./scripts/release.sh <version>` - Complete release workflow
 - `./scripts/update-homebrew.sh <version>` - Update Homebrew formula
 
 ### Key Documentation
-- **AGENTS.md** - Comprehensive AI agent guide (detailed workflows, advanced features)
+
+- **AGENTS.md** - Comprehensive AI agent guide (detailed workflows, advanced
+  features)
 - **AGENT_INSTRUCTIONS.md** - Development procedures, testing, releases
 - **README.md** - User-facing documentation
 - **docs/CLI_REFERENCE.md** - Complete command reference
 
 ## CLI Help
 
-Run `bd <command> --help` to see all available flags for any command.
-For example: `bd create --help` shows `--parent`, `--deps`, `--assignee`, etc.
+Run `bd <command> --help` to see all available flags for any command. For
+example: `bd create --help` shows `--parent`, `--deps`, `--assignee`, etc.
 
 ## Important Rules
 

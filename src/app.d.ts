@@ -12,7 +12,13 @@ declare global {
 		}
 		// interface PageData {}
 		// interface PageState {}
-		// interface Platform {}
+		interface Platform {
+			env?: {
+				HYPERDRIVE?: {
+					connectionString: string;
+				};
+			};
+		}
 	}
 
 	// File System Access API types
@@ -29,7 +35,10 @@ declare global {
 	interface FileSystemDirectoryHandle extends FileSystemHandle {
 		kind: 'directory';
 		entries(): AsyncIterableIterator<[string, FileSystemHandle]>;
-		getFileHandle(name: string, options?: { create?: boolean }): Promise<FileSystemFileHandle>;
+		getFileHandle(
+			name: string,
+			options?: { create?: boolean }
+		): Promise<FileSystemFileHandle>;
 		getDirectoryHandle(
 			name: string,
 			options?: { create?: boolean }
@@ -37,12 +46,20 @@ declare global {
 		queryPermission(options?: {
 			mode?: 'read' | 'readwrite';
 		}): Promise<'granted' | 'denied' | 'prompt'>;
-		requestPermission(options?: { mode?: 'read' | 'readwrite' }): Promise<'granted' | 'denied'>;
+		requestPermission(options?: {
+			mode?: 'read' | 'readwrite';
+		}): Promise<'granted' | 'denied'>;
 	}
 
 	interface ShowDirectoryPickerOptions {
 		id?: string;
-		startIn?: 'desktop' | 'documents' | 'downloads' | 'music' | 'pictures' | 'videos';
+		startIn?:
+			| 'desktop'
+			| 'documents'
+			| 'downloads'
+			| 'music'
+			| 'pictures'
+			| 'videos';
 	}
 
 	function showDirectoryPicker(

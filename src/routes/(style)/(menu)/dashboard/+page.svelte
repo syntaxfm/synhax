@@ -1,7 +1,6 @@
 <script lang="ts">
 	import LatestTargets from '$lib/targets/LatestTargets.svelte';
 	import { files } from '$lib/state/FileState.svelte';
-	import WelcomeModal from '$lib/user/WelcomeModal.svelte';
 	// import BattlesInProgress from '$lib/battle_mode/BattlesInProgress.svelte'
 	import blip from '$lib/ui/blip.mp3';
 	import throws from '$lib/ui/throw.mp3';
@@ -25,14 +24,7 @@
 	const user = z.createQuery(z.query.user.where('id', z.userID).one());
 
 	let battle_select = $state(false);
-	let show_welcome = $state(false);
 	files.check();
-	// Check if user needs to see welcome modal (no avatar set)
-	$effect(() => {
-		if (user.data && !user.data.avatar) {
-			show_welcome = true;
-		}
-	});
 
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.key === 'Escape') {
@@ -110,8 +102,6 @@
 </div>
 
 <LatestTargets {battle_select} />
-
-<WelcomeModal bind:open={show_welcome} />
 
 <style>
 	svg {
