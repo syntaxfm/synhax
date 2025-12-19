@@ -1,13 +1,7 @@
 <script lang="ts">
-	import Table from '$lib/ui/Table.svelte';
-	import { z } from '$lib/zero.svelte';
-	import { user } from '$lib/auth-client';
+	import { z, queries } from '$lib/zero.svelte';
 
-	const history = z.createQuery(
-		z.query.battle_participants
-			.where('user_id', z.userID)
-			.related('battle', (e) => e.related('target'))
-	);
+	const history = z.createQuery(queries.battleParticipants.myHistory());
 </script>
 
 <h1>History</h1>
@@ -24,14 +18,18 @@
 		</thead>
 		<tbody>
 			{#each history.data as participant}
-				<tr>
-					<td><img src={participant.battle.target?.image} /></td>
-					<td
-						><a href={`/battle/${participant.battle.id}/recap`}
-							>{new Date(participant.battle.created_at).toLocaleString()}</a
-						></td
-					>
-				</tr>
+				{#if participant.battle}
+					<tr>
+						<td><img src={participant.battle.target?.image} alt="Target" /></td>
+						<td
+							><a href={`/battle/${participant.battle.id}/recap`}
+								>{participant.battle.created_at
+									? new Date(participant.battle.created_at).toLocaleString()
+									: 'Unknown'}</a
+							></td
+						>
+					</tr>
+				{/if}
 			{/each}
 		</tbody>
 	</table>

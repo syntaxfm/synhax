@@ -6,15 +6,10 @@ import { type } from 'arktype';
  * Battle Mode Synced Queries
  *
  * All read operations for the application defined as synced queries.
- * These are validated on the server and can be used with permissions.
+ * Context type (ZeroContext) is registered globally via declare module '@rocicorp/zero' in schema.ts
  */
 
 const builder = createBuilder<Schema>(schema);
-
-type QueryContext = {
-	userID: string;
-	userRole: string | undefined;
-};
 
 export const queries = defineQueries({
 	// ==================
@@ -41,7 +36,7 @@ export const queries = defineQueries({
 	// ==================
 	user: {
 		/** Get current user by ID */
-		current: defineQuery(({ ctx }: { ctx: QueryContext }) =>
+		current: defineQuery(({ ctx }) =>
 			builder.user.where('id', ctx.userID).one()
 		),
 
@@ -103,7 +98,7 @@ export const queries = defineQueries({
 	// ==================
 	battleParticipants: {
 		/** Get user's battle history */
-		myHistory: defineQuery(({ ctx }: { ctx: QueryContext }) =>
+		myHistory: defineQuery(({ ctx }) =>
 			builder.battle_participants
 				.where('user_id', ctx.userID)
 				.related('battle', (b) => b.related('target'))
@@ -117,13 +112,7 @@ export const queries = defineQueries({
 		/** Get votes for a specific nominee in a battle by the current user */
 		myVotesForNominee: defineQuery(
 			type({ battleId: 'string', nomineeHaxId: 'string' }),
-			({
-				args,
-				ctx
-			}: {
-				args: { battleId: string; nomineeHaxId: string };
-				ctx: QueryContext;
-			}) =>
+			({ args, ctx }) =>
 				builder.battle_votes.where(({ and, cmp }) =>
 					and(
 						cmp('battle_id', args.battleId),
@@ -139,14 +128,12 @@ export const queries = defineQueries({
 	// ==================
 	hax: {
 		/** Get user's hax for a specific battle */
-		myForBattle: defineQuery(
-			type({ battleId: 'string' }),
-			({ args, ctx }: { args: { battleId: string }; ctx: QueryContext }) =>
-				builder.hax
-					.where(({ and, cmp }) =>
-						and(cmp('battle_id', args.battleId), cmp('user_id', ctx.userID))
-					)
-					.one()
+		myForBattle: defineQuery(type({ battleId: 'string' }), ({ args, ctx }) =>
+			builder.hax
+				.where(({ and, cmp }) =>
+					and(cmp('battle_id', args.battleId), cmp('user_id', ctx.userID))
+				)
+				.one()
 		),
 
 		/** Get all hax (admin) */
@@ -158,16 +145,14 @@ export const queries = defineQueries({
 	// ==================
 	ratings: {
 		/** Get user's rating for a specific target */
-		myForTarget: defineQuery(
-			type({ targetId: 'string' }),
-			({ args, ctx }: { args: { targetId: string }; ctx: QueryContext }) =>
-				builder.ratings
-					.where(({ and, cmp }) =>
-						and(cmp('user_id', ctx.userID), cmp('target_id', args.targetId))
-					)
-					.one()
-					.related('user')
-					.related('target')
+		myForTarget: defineQuery(type({ targetId: 'string' }), ({ args, ctx }) =>
+			builder.ratings
+				.where(({ and, cmp }) =>
+					and(cmp('user_id', ctx.userID), cmp('target_id', args.targetId))
+				)
+				.one()
+				.related('user')
+				.related('target')
 		)
 	}
 });

@@ -94,7 +94,7 @@ queries:
 
 ```ts
 import { createBuilder, defineQueries, defineQuery } from '@rocicorp/zero';
-import { type } from 'arktype'; // or zod for validation
+import { type } from 'arktype'; 
 
 export const zql = createBuilder(schema);
 

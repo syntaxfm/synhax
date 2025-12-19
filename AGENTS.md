@@ -152,3 +152,42 @@ example: `bd create --help` shows `--parent`, `--deps`, `--assignee`, etc.
 - ❌ Do NOT clutter repo root with planning documents
 
 For more details, see README.md and QUICKSTART.md.
+
+## Zero Query & Mutation Architecture
+
+This project uses Zero 0.25+ with **custom query and mutation endpoints** that
+provide auth context to every operation.
+
+### Query Context
+
+All queries receive `ctx: { userID, userRole }` from the server:
+
+```ts
+// src/routes/api/query/+server.ts
+return query.fn({ args, ctx: { userID, userRole } });
+```
+
+### Mutation Context
+
+All mutations receive `ctx: { userId, userRole }` from the server:
+
+```ts
+// src/routes/api/mutate/+server.ts
+return mutator.fn({ args, tx, ctx: { userId, userRole } });
+```
+
+### Key Files
+
+- `src/lib/queries.ts` - All query definitions using `defineQueries`
+- `src/lib/mutators.ts` - All mutation definitions using `defineMutators`
+- `src/routes/api/query/+server.ts` - Query endpoint (passes context)
+- `src/routes/api/mutate/+server.ts` - Mutation endpoint (passes context)
+
+### Important Notes
+
+- **DO NOT** use `definePermissions` from Zero - we handle permissions in
+  query/mutation definitions via context
+- Every query/mutation has access to `userID` and `userRole` via context
+- The context is populated from `locals.user` (set by BetterAuth in hooks)
+- Anonymous users have `userID: 'anon'` and `userRole: undefined`
+- Admin role is `'syntax'`

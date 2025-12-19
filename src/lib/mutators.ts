@@ -15,6 +15,8 @@ import {
  *
  * All write operations for the application.
  * These run on both client (optimistically) and server (authoritatively).
+ *
+ * Context type (ZeroContext) is registered globally via declare module '@rocicorp/zero' in schema.ts
  */
 
 // Create ArkType enums from Drizzle pgEnum values
@@ -158,6 +160,32 @@ export const mutators = defineMutators({
 	},
 
 	// ==================
+	// BATTLE VOTES
+	// ==================
+	battle_votes: {
+		upsert: defineMutator(
+			type({
+				id: 'string',
+				battle_id: 'string',
+				voter_id: 'string',
+				nominee_hax_id: 'string',
+				award_type: userAwardEnum,
+				value: 'number'
+			}),
+			async ({ tx, args }) => {
+				await tx.mutate.battle_votes.upsert({
+					id: args.id,
+					battle_id: args.battle_id,
+					voter_id: args.voter_id,
+					nominee_hax_id: args.nominee_hax_id,
+					award_type: args.award_type,
+					value: args.value
+				});
+			}
+		)
+	},
+
+	// ==================
 	// HAX (Code Submissions)
 	// ==================
 	hax: {
@@ -206,26 +234,54 @@ export const mutators = defineMutators({
 	},
 
 	// ==================
-	// BATTLE VOTES
+	// TARGETS (admin only - enforced server-side via ctx)
 	// ==================
-	battle_votes: {
-		upsert: defineMutator(
+	targets: {
+		insert: defineMutator(
 			type({
 				id: 'string',
-				battle_id: 'string',
-				voter_id: 'string',
-				nominee_hax_id: 'string',
-				award_type: userAwardEnum,
-				value: 'number'
+				name: 'string',
+				image: 'string',
+				type: targetTypeEnum,
+				inspo: 'string',
+				created_by: 'string'
 			}),
-			async ({ tx, args }) => {
-				await tx.mutate.battle_votes.upsert({
+			async ({ tx, args, ctx }) => {
+				// Admin check - ctx is typed via DefaultTypes in schema.ts
+				if (ctx.userRole !== 'syntax') {
+					throw new Error('Only admins can create targets');
+				}
+				await tx.mutate.targets.insert({
 					id: args.id,
-					battle_id: args.battle_id,
-					voter_id: args.voter_id,
-					nominee_hax_id: args.nominee_hax_id,
-					award_type: args.award_type,
-					value: args.value
+					name: args.name,
+					image: args.image,
+					type: args.type,
+					inspo: args.inspo,
+					created_by: args.created_by
+				});
+			}
+		),
+		update: defineMutator(
+			type({
+				id: 'string',
+				'name?': 'string',
+				'image?': 'string',
+				'type?': targetTypeEnum,
+				'inspo?': 'string',
+				'is_active?': 'boolean'
+			}),
+			async ({ tx, args, ctx }) => {
+				// Admin check - ctx is typed via DefaultTypes in schema.ts
+				if (ctx.userRole !== 'syntax') {
+					throw new Error('Only admins can update targets');
+				}
+				await tx.mutate.targets.update({
+					id: args.id,
+					name: args.name,
+					image: args.image,
+					type: args.type,
+					inspo: args.inspo,
+					is_active: args.is_active
 				});
 			}
 		)
@@ -254,52 +310,6 @@ export const mutators = defineMutators({
 					creativity: args.creativity,
 					fun: args.fun,
 					coolness: args.coolness
-				});
-			}
-		)
-	},
-
-	// ==================
-	// TARGETS
-	// ==================
-	targets: {
-		insert: defineMutator(
-			type({
-				id: 'string',
-				name: 'string',
-				image: 'string',
-				type: targetTypeEnum,
-				inspo: 'string',
-				created_by: 'string'
-			}),
-			async ({ tx, args }) => {
-				await tx.mutate.targets.insert({
-					id: args.id,
-					name: args.name,
-					image: args.image,
-					type: args.type,
-					inspo: args.inspo,
-					created_by: args.created_by
-				});
-			}
-		),
-		update: defineMutator(
-			type({
-				id: 'string',
-				'name?': 'string',
-				'image?': 'string',
-				'type?': targetTypeEnum,
-				'inspo?': 'string',
-				'is_active?': 'boolean'
-			}),
-			async ({ tx, args }) => {
-				await tx.mutate.targets.update({
-					id: args.id,
-					name: args.name,
-					image: args.image,
-					type: args.type,
-					inspo: args.inspo,
-					is_active: args.is_active
 				});
 			}
 		)

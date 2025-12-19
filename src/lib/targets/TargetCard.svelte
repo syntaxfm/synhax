@@ -11,7 +11,7 @@
 		target
 	}: {
 		target: Target & {
-			ratings: Rating[];
+			ratings: readonly Rating[];
 		};
 	} = $props();
 
@@ -71,12 +71,20 @@
 		</span>
 		<span>
 			Fun:
-			<wa-rating readonly value={averaged_ratings.fun} label="Rating" style="font-size: 1rem;"
+			<wa-rating
+				readonly
+				value={averaged_ratings.fun}
+				label="Rating"
+				style="font-size: 1rem;"
 			></wa-rating>
 		</span>
 		<span>
 			Coolness:
-			<wa-rating readonly value={averaged_ratings.coolness} label="Rating" style="font-size: 1rem;"
+			<wa-rating
+				readonly
+				value={averaged_ratings.coolness}
+				label="Rating"
+				style="font-size: 1rem;"
 			></wa-rating>
 		</span>
 	</div>

@@ -1,9 +1,11 @@
 import { PUBLIC_SERVER } from '$env/static/public';
 import { Z } from 'zero-svelte';
-import { schema, type Schema } from '$sync/schema';
+import { schema, type Schema, type ZeroContext } from '$sync/schema';
 import { get_jwt } from '$lib/user/utils';
+import { queries } from '$lib/queries';
+import { mutators } from '$lib/mutators';
 
-function decodeJWT(token: string) {
+function decodeJWT(token: string): { sub?: string; role?: string } | null {
 	try {
 		const parts = token.split('.');
 		if (parts.length !== 3) return null;
@@ -20,18 +22,30 @@ function decodeJWT(token: string) {
 async function get_z_options() {
 	const jwt = await get_jwt();
 	let userID = 'anon';
+	let userRole: string | undefined = undefined;
 
 	if (jwt) {
 		const decoded = decodeJWT(jwt);
 		userID = decoded?.sub || 'anon';
+		userRole = decoded?.role;
 	}
+
+	const context: ZeroContext = {
+		userID,
+		userRole
+	};
 
 	return {
 		userID,
 		server: PUBLIC_SERVER,
 		schema,
+		mutators,
+		context,
 		jwt: jwt || undefined
 	} as const;
 }
 
 export const z = new Z<Schema>(await get_z_options());
+
+// Re-export queries and mutators for convenient access
+export { queries, mutators };

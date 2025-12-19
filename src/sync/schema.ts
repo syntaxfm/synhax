@@ -17,7 +17,19 @@ export type Participants = Row<typeof schema.tables.battle_participants>;
 export type Hax = Row<typeof schema.tables.hax>;
 export type Votes = Row<typeof schema.tables.battle_votes>;
 
-type AuthData = {
-	// The logged-in user.
-	sub: string;
+/**
+ * Zero Context - passed to queries and mutators for auth/permissions
+ * On client: populated from JWT
+ * On server: populated from locals.user in the API endpoints
+ */
+export type ZeroContext = {
+	userID: string;
+	userRole: string | undefined;
 };
+
+// Register context type with Zero
+declare module '@rocicorp/zero' {
+	interface DefaultTypes {
+		context: ZeroContext;
+	}
+}

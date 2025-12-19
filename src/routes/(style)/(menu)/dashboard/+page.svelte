@@ -10,7 +10,7 @@
 		sound_on_click,
 		sound_on_interaction
 	} from '$lib/ui/sounds';
-	import { z } from '$lib/zero.svelte';
+	import { z, queries } from '$lib/zero.svelte';
 
 	const blip_sound = new Audio(blip);
 	const throw_sound = new Audio(throws);
@@ -21,7 +21,7 @@
 	throwforward_sound.preload = 'auto';
 	throwforward_sound.volume = 0.1;
 
-	const user = z.createQuery(z.query.user.where('id', z.userID).one());
+	const user = z.createQuery(queries.user.current());
 
 	let battle_select = $state(false);
 	files.check();

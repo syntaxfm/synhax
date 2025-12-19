@@ -1,10 +1,10 @@
 <script lang="ts">
 	import Table from '$lib/ui/Table.svelte';
-	import { z } from '$lib/zero.svelte';
+	import { z, queries } from '$lib/zero.svelte';
 	import type { User } from '$sync/schema';
 	import type { ColumnDef } from '@tanstack/svelte-table';
 
-	let users = z.createQuery(z.query.user);
+	let users = z.createQuery(queries.user.all());
 
 	const columns: ColumnDef<User, any>[] = [
 		{

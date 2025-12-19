@@ -1,11 +1,9 @@
 <script lang="ts">
-	import { z } from '$lib/zero.svelte';
+	import { z, queries } from '$lib/zero.svelte';
 
-	let battle = z.createQuery(
-		z.query.battles.where('status', 'PENDING').related('target')
-	);
+	let battle = z.createQuery(queries.battles.byStatus({ status: 'PENDING' }));
 	let battles_started = z.createQuery(
-		z.query.battles.where('status', 'ACTIVE').related('target')
+		queries.battles.byStatus({ status: 'ACTIVE' })
 	);
 </script>
 

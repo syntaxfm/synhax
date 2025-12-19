@@ -1,10 +1,10 @@
 <script lang="ts">
 	import Table from '$lib/ui/Table.svelte';
-	import { z } from '$lib/zero.svelte';
+	import { z, queries } from '$lib/zero.svelte';
 	import type { Target } from '$sync/schema';
 	import type { ColumnDef } from '@tanstack/svelte-table';
 
-	let targets = z.createQuery(z.query.targets);
+	let targets = z.createQuery(queries.targets.all());
 	const columns: ColumnDef<Target, any>[] = [
 		{
 			accessorKey: 'image',

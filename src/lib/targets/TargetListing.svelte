@@ -1,8 +1,11 @@
 <script lang="ts">
-	import { z } from '$lib/zero.svelte';
+	import { z, queries } from '$lib/zero.svelte';
 	import TargetCard from './TargetCard.svelte';
 	let { limit = 0 }: { limit: number } = $props();
-	let targets = z.createQuery(z.query.targets.related('ratings').limit(limit));
+	// Use $derived so query updates if limit prop changes
+	let targets = $derived(
+		z.createQuery(queries.targets.withRatings({ limit: limit || undefined }))
+	);
 </script>
 
 <div class="scroll-wrapper">

@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { z } from '$lib/zero.svelte';
+	import { z, queries, mutators } from '$lib/zero.svelte';
 	import { goto } from '$app/navigation';
 	import TargetForm, { type Target } from '../../TargetForm.svelte';
 	import { page } from '$app/state';
 
 	let isLoading = $state(false);
-	let target = z.createQuery(
-		z.query.targets.where('id', page?.params?.id || '').one()
+	let target = $derived(
+		z.createQuery(queries.targets.byId({ id: page?.params?.id || '' }))
 	);
 
 	async function handleSubmit({ name, image, type, inspo }: Target) {
@@ -14,20 +14,21 @@
 
 		try {
 			if (page.params.id) {
-				// Create new target using zero-sync mutation
-				await z.mutate.targets.update({
-					id: page.params.id,
-					name,
-					image,
-					type,
-					inspo,
-					created_by: z.userID,
-					is_active: true
-				});
+				// Update target using zero-sync mutation
+				await z.mutate(
+					mutators.targets.update({
+						id: page.params.id,
+						name,
+						image,
+						type,
+						inspo,
+						is_active: true
+					})
+				).server;
 			}
 		} catch (error) {
-			console.error('Error creating target:', error);
-			alert('Failed to create target. Please try again.');
+			console.error('Error updating target:', error);
+			alert('Failed to update target. Please try again.');
 		} finally {
 			isLoading = false;
 		}

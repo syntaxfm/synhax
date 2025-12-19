@@ -1,12 +1,12 @@
 <script lang="ts">
 	import Logout from '$lib/user/Logout.svelte';
-	import { z } from '$lib/zero.svelte';
+	import { z, queries } from '$lib/zero.svelte';
 	// - WHEN user is ID
 	// - CAN Change Theme
 	// - CAN Logout
 	// - WHEN user is NOT ID
 	// - CANNOT access
-	const user = z.createQuery(z.query.user.where('id', z.userID).one());
+	const user = z.createQuery(queries.user.current());
 </script>
 
 <a href="/" class="button">Back</a>

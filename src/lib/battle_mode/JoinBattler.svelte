@@ -3,7 +3,7 @@
 	import { files } from '$lib/state/FileState.svelte';
 	import Avatar from '$lib/ui/Avatar.svelte';
 	import { s, to_snake_case } from '$lib/user/utils';
-	import { z } from '$lib/zero.svelte';
+	import { z, queries, mutators } from '$lib/zero.svelte';
 	import { type Battle, type Participants, type Target } from '$sync/schema';
 	import { fade, fly } from 'svelte/transition';
 
@@ -15,52 +15,60 @@
 		me_participant: Participants;
 	} = $props();
 
-	let me = z.createQuery(z.query.user.where('id', z.userID).one());
+	let me = z.createQuery(queries.user.current());
 
 	function join_battle() {
 		// Make sure target actually exists
 		if (battle?.target?.name) {
 			// Create hax with files
-			z.mutate.hax.insert({
-				id: crypto.randomUUID(),
-				user_id: z.userID,
-				target_id: battle?.target_id || '',
-				battle_id: battle?.id || '',
-				html: HTML_TEMPLATE,
-				css: CSS_TEMPLATE,
-				type: 'BATTLE'
-			});
+			z.mutate(
+				mutators.hax.insert({
+					id: crypto.randomUUID(),
+					user_id: z.userID,
+					target_id: battle?.target_id || '',
+					battle_id: battle?.id || '',
+					html: HTML_TEMPLATE,
+					css: CSS_TEMPLATE,
+					type: 'BATTLE'
+				})
+			);
 
 			// First create file structure for battle
 			files.create_hax_directory(to_snake_case(battle.target.name));
 
 			// Add self as a participant
-			z.mutate.battle_participants.insert({
-				id: crypto.randomUUID(),
-				battle_id: battle?.id || '',
-				user_id: z.userID,
-				status: 'PENDING' as const,
-				display_order: battle?.participants.length || 0
-			});
+			z.mutate(
+				mutators.battle_participants.insert({
+					id: crypto.randomUUID(),
+					battle_id: battle?.id || '',
+					user_id: z.userID,
+					status: 'PENDING' as const,
+					display_order: battle?.participants.length || 0
+				})
+			);
 		}
 	}
 
 	function leave_battle() {
 		if (me_participant && battle?.id) {
-			z.mutate.battle_participants.delete({
-				id: me_participant.id
-			});
+			z.mutate(
+				mutators.battle_participants.delete({
+					id: me_participant.id
+				})
+			);
 		}
 	}
 
 	function lock_in() {
 		if (me_participant) {
-			z.mutate.battle_participants.upsert({
-				id: me_participant.id,
-				battle_id: battle?.id || '',
-				user_id: z.userID,
-				status: 'READY' as const
-			});
+			z.mutate(
+				mutators.battle_participants.upsert({
+					id: me_participant.id,
+					battle_id: battle?.id || '',
+					user_id: z.userID,
+					status: 'READY' as const
+				})
+			);
 		}
 	}
 </script>

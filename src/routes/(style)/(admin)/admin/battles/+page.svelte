@@ -1,10 +1,10 @@
 <script lang="ts">
 	import Table from '$lib/ui/Table.svelte';
-	import { z } from '$lib/zero.svelte';
+	import { z, queries } from '$lib/zero.svelte';
 	import type { Battle } from '$sync/schema';
 	import type { ColumnDef } from '@tanstack/svelte-table';
 
-	let battles = z.createQuery(z.query.battles);
+	let battles = z.createQuery(queries.battles.all());
 
 	const columns: ColumnDef<Battle, any>[] = [
 		{
