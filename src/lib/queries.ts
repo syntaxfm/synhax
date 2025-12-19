@@ -1,5 +1,5 @@
-import { createBuilder, defineQueries, defineQuery } from '@rocicorp/zero';
-import { schema, type Schema } from '$sync/schema';
+import { defineQueries, defineQuery } from '@rocicorp/zero';
+import { zql } from '$sync/zero-schema.gen';
 import { type } from 'arktype';
 
 /**
@@ -9,8 +9,6 @@ import { type } from 'arktype';
  * Context type (ZeroContext) is registered globally via declare module '@rocicorp/zero' in schema.ts
  */
 
-const builder = createBuilder<Schema>(schema);
-
 export const queries = defineQueries({
 	// ==================
 	// TARGETS
@@ -18,16 +16,16 @@ export const queries = defineQueries({
 	targets: {
 		/** Get all targets with their ratings */
 		withRatings: defineQuery(type({ 'limit?': 'number' }), ({ args }) => {
-			const q = builder.targets.related('ratings');
+			const q = zql.targets.related('ratings');
 			return args.limit ? q.limit(args.limit) : q;
 		}),
 
 		/** Get all targets (admin) */
-		all: defineQuery(() => builder.targets),
+		all: defineQuery(() => zql.targets),
 
 		/** Get a single target by ID */
 		byId: defineQuery(type({ id: 'string' }), ({ args }) =>
-			builder.targets.where('id', args.id).one()
+			zql.targets.where('id', args.id).one()
 		)
 	},
 
@@ -36,12 +34,12 @@ export const queries = defineQueries({
 	// ==================
 	user: {
 		/** Get current user by ID */
-		current: defineQuery(({ ctx }) =>
-			builder.user.where('id', ctx.userID).one()
-		),
+		current: defineQuery(({ ctx }) => {
+			return zql.user.where('id', ctx.userID).one();
+		}),
 
 		/** Get all users (admin) */
-		all: defineQuery(() => builder.user)
+		all: defineQuery(() => zql.user)
 	},
 
 	// ==================
@@ -51,13 +49,12 @@ export const queries = defineQueries({
 		/** Get battles by status with target */
 		byStatus: defineQuery(
 			type({ status: "'PENDING' | 'ACTIVE' | 'COMPLETED'" }),
-			({ args }) =>
-				builder.battles.where('status', args.status).related('target')
+			({ args }) => zql.battles.where('status', args.status).related('target')
 		),
 
 		/** Get a battle by ID with full relations */
 		byId: defineQuery(type({ id: 'string' }), ({ args }) =>
-			builder.battles
+			zql.battles
 				.where('id', args.id)
 				.one()
 				.related('referee')
@@ -69,7 +66,7 @@ export const queries = defineQueries({
 
 		/** Get a battle by ID with participants (no hax votes - for code page) */
 		byIdSimple: defineQuery(type({ id: 'string' }), ({ args }) =>
-			builder.battles
+			zql.battles
 				.where('id', args.id)
 				.one()
 				.related('referee')
@@ -79,7 +76,7 @@ export const queries = defineQueries({
 
 		/** Get a battle by zero_room_id with full relations */
 		byRoomId: defineQuery(type({ zeroRoomId: 'string' }), ({ args }) =>
-			builder.battles
+			zql.battles
 				.where('zero_room_id', args.zeroRoomId)
 				.one()
 				.related('referee')
@@ -90,7 +87,7 @@ export const queries = defineQueries({
 		),
 
 		/** Get all battles (admin) */
-		all: defineQuery(() => builder.battles)
+		all: defineQuery(() => zql.battles)
 	},
 
 	// ==================
@@ -99,7 +96,7 @@ export const queries = defineQueries({
 	battleParticipants: {
 		/** Get user's battle history */
 		myHistory: defineQuery(({ ctx }) =>
-			builder.battle_participants
+			zql.battle_participants
 				.where('user_id', ctx.userID)
 				.related('battle', (b) => b.related('target'))
 		)
@@ -113,7 +110,7 @@ export const queries = defineQueries({
 		myVotesForNominee: defineQuery(
 			type({ battleId: 'string', nomineeHaxId: 'string' }),
 			({ args, ctx }) =>
-				builder.battle_votes.where(({ and, cmp }) =>
+				zql.battle_votes.where(({ and, cmp }) =>
 					and(
 						cmp('battle_id', args.battleId),
 						cmp('voter_id', ctx.userID),
@@ -129,7 +126,7 @@ export const queries = defineQueries({
 	hax: {
 		/** Get user's hax for a specific battle */
 		myForBattle: defineQuery(type({ battleId: 'string' }), ({ args, ctx }) =>
-			builder.hax
+			zql.hax
 				.where(({ and, cmp }) =>
 					and(cmp('battle_id', args.battleId), cmp('user_id', ctx.userID))
 				)
@@ -137,7 +134,7 @@ export const queries = defineQueries({
 		),
 
 		/** Get all hax (admin) */
-		all: defineQuery(() => builder.hax)
+		all: defineQuery(() => zql.hax)
 	},
 
 	// ==================
@@ -146,7 +143,7 @@ export const queries = defineQueries({
 	ratings: {
 		/** Get user's rating for a specific target */
 		myForTarget: defineQuery(type({ targetId: 'string' }), ({ args, ctx }) =>
-			builder.ratings
+			zql.ratings
 				.where(({ and, cmp }) =>
 					and(cmp('user_id', ctx.userID), cmp('target_id', args.targetId))
 				)

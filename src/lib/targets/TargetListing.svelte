@@ -6,6 +6,8 @@
 	let targets = $derived(
 		z.createQuery(queries.targets.withRatings({ limit: limit || undefined }))
 	);
+
+	let t = z.createQuery(queries.targets.all());
 </script>
 
 <div class="scroll-wrapper">

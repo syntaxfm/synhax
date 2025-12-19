@@ -2,11 +2,7 @@
 	import '@awesome.me/webawesome/dist/components/rating/rating.js';
 	import NewBattleButton from '$lib/battle_mode/NewBattleButton.svelte';
 	import { type Rating, type Target } from '$sync/schema';
-	import blip from '$lib/ui/blip.mp3';
-	import { sound_on_interaction } from '$lib/ui/sounds';
 
-	const blip_sound = new Audio(blip);
-	blip_sound.preload = 'auto';
 	const {
 		target
 	}: {
@@ -44,7 +40,7 @@
 	});
 </script>
 
-<article {@attach sound_on_interaction(blip_sound)}>
+<article>
 	<header>
 		<h2>{target.name}</h2>
 	</header>

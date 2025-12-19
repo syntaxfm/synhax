@@ -2,25 +2,20 @@
 	import '@awesome.me/webawesome/dist/components/rating/rating.js';
 	import { page } from '$app/state';
 	import ShareLinks from '$lib/battle_mode/ShareLinks.svelte';
-	import { z } from '$lib/zero.svelte';
+	import { z, queries } from '$lib/zero.svelte';
 	import { remove_screaming } from '$utils/formatting';
 	import Battlers from '$lib/battle_mode/Battlers.svelte';
 	import Header from '$lib/battle_mode/Header.svelte';
 	import { compute_battle_scores } from '$utils/scores';
 
-	let battle = z.createQuery(
-		z.query.battles
-			.where('zero_room_id', page?.params?.zero_room_id || '')
-			.one()
-			.related('referee')
-			.related('participants', (q) =>
-				q.related('user').related('hax', (h) => h.related('votes'))
-			)
-			.related('target')
+	let battle = $derived(
+		z.createQuery(
+			queries.battles.byRoomId({
+				zeroRoomId: page?.params?.zero_room_id || ''
+			})
+		)
 	);
-	let scores = $derived(
-		compute_battle_scores(battle.data?.participants || [])
-	);
+	let scores = $derived(compute_battle_scores(battle.data?.participants || []));
 </script>
 
 {#if battle.data && battle.data.visibility === 'PUBLIC'}

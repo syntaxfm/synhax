@@ -2,42 +2,24 @@
 	import '@awesome.me/webawesome/dist/components/rating/rating.js';
 	import { page } from '$app/state';
 	import ShareLinks from '$lib/battle_mode/ShareLinks.svelte';
-	import { z } from '$lib/zero.svelte';
+	import { z, queries, mutators } from '$lib/zero.svelte';
 	import { remove_screaming } from '$utils/formatting';
 	import { BATTLE_RATINGS } from '$lib/constants';
 	import Battlers from '$lib/battle_mode/Battlers.svelte';
 	import Header from '$lib/battle_mode/Header.svelte';
 	import { compute_battle_scores } from '$utils/scores';
 
-	let battle = z.createQuery(
-		z.query.battles
-			.where('id', page?.params?.id || '')
-			.one()
-			.related('referee')
-			.related('participants', (q) =>
-				q.related('user').related('hax', (h) => h.related('votes'))
-			)
-			.related('target')
+	let battle = $derived(
+		z.createQuery(queries.battles.byId({ id: page?.params?.id || '' }))
 	);
 
-	let rating = $derived.by(() =>
+	let rating = $derived(
 		z.createQuery(
-			z.query.ratings
-				.where(({ cmp, and }) =>
-					and(
-						cmp('user_id', z.userID),
-						cmp('target_id', battle.data?.target?.id || '')
-					)
-				)
-				.one()
-				.related('user')
-				.related('target')
+			queries.ratings.myForTarget({ targetId: battle.data?.target?.id || '' })
 		)
 	);
 
-	let scores = $derived(
-		compute_battle_scores(battle.data?.participants || [])
-	);
+	let scores = $derived(compute_battle_scores(battle.data?.participants || []));
 
 	function rate_battle(
 		rating_type: (typeof BATTLE_RATINGS)[number],
@@ -47,8 +29,8 @@
 			[rating_type]: rating_value
 		};
 
-		z.mutate.ratings
-			.upsert({
+		z.mutate(
+			mutators.ratings.upsert({
 				id: rating.data?.id || crypto.randomUUID(),
 				user_id: z.userID,
 				target_id: battle.data?.target?.id || '',
@@ -58,10 +40,10 @@
 				coolness: rating.data?.coolness || 0,
 				...new_rating
 			})
-			.catch((error) => {
-				console.error('Error rating battle:', error);
-				alert('Failed to submit rating. Please try again.');
-			});
+		).catch((error) => {
+			console.error('Error rating battle:', error);
+			alert('Failed to submit rating. Please try again.');
+		});
 	}
 </script>
 
@@ -70,12 +52,7 @@
 		{#snippet detail()}
 			<!-- <p>Today's Referee: {battle?.data?.referee?.name}</p>
 			<h3>{remove_screaming(battle?.data?.type || '')}</h3> -->
-			<ShareLinks
-				code={false}
-				watch={false}
-				vote={true}
-				battle={battle.data}
-			/>
+			<ShareLinks code={false} watch={false} vote={true} battle={battle.data} />
 		{/snippet}
 		{#snippet countdown()}
 			<div>

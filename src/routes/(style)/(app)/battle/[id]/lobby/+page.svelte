@@ -6,22 +6,15 @@
 	import Header from '$lib/battle_mode/Header.svelte';
 	// import RefBanner from '$lib/battle_mode/RefBanner.svelte';
 	import ShareLinks from '$lib/battle_mode/ShareLinks.svelte';
-	import { z } from '$lib/zero.svelte';
+	import { z, queries } from '$lib/zero.svelte';
 	import { remove_screaming } from '$utils/formatting';
 	// import lobby_song from '$lib/media/moonlight.mp3';
 	// const lobby_sound = new Audio(lobby_song);
 	// lobby_sound.preload = 'auto';
 	// lobby_sound.play();
 
-	let battle = z.createQuery(
-		z.query.battles
-			.where('id', page?.params?.id || '')
-			.one()
-			.related('referee')
-			.related('participants', (q) =>
-				q.related('user').related('hax', (h) => h.related('votes'))
-			)
-			.related('target')
+	let battle = $derived(
+		z.createQuery(queries.battles.byId({ id: page?.params?.id || '' }))
 	);
 
 	$effect(() => {

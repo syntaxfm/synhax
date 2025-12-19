@@ -23,13 +23,15 @@
 		join = false
 	}: {
 		battle: Battle & {
-			participants: Array<
-				Participants & { user: User; hax: Hax & { votes: Votes[] } }
-			>;
+			participants: readonly (Participants & {
+				user: User;
+				hax: Hax & { votes: readonly Votes[] };
+			})[];
 		};
 		votes?: boolean;
 		scores?: ParticipantScores[];
 		results?: boolean;
+		join?: boolean;
 	} = $props();
 
 	let me_participant = $derived(
@@ -110,8 +112,7 @@
 		<div
 			class="battler empty-seat"
 			type="button"
-			onclick={() =>
-				handleCopy(`${PUBLIC_APP_URL}/battle/${battle.id}/lobby`)}
+			onclick={() => handleCopy(`${PUBLIC_APP_URL}/battle/${battle.id}/lobby`)}
 		>
 			{#if battle.status === 'PENDING'}
 				<div class="image-frame">

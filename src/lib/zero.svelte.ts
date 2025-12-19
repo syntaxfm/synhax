@@ -1,6 +1,6 @@
 import { PUBLIC_SERVER } from '$env/static/public';
 import { Z } from 'zero-svelte';
-import { schema, type Schema, type ZeroContext } from '$sync/schema';
+import { schema } from '$sync/schema';
 import { get_jwt } from '$lib/user/utils';
 import { queries } from '$lib/queries';
 import { mutators } from '$lib/mutators';
@@ -30,7 +30,7 @@ async function get_z_options() {
 		userRole = decoded?.role;
 	}
 
-	const context: ZeroContext = {
+	const context = {
 		userID,
 		userRole
 	};
@@ -45,7 +45,7 @@ async function get_z_options() {
 	} as const;
 }
 
-export const z = new Z<Schema>(await get_z_options());
+export const z = new Z(await get_z_options());
 
 // Re-export queries and mutators for convenient access
 export { queries, mutators };

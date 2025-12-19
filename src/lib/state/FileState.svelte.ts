@@ -1,6 +1,6 @@
 import { CSS_TEMPLATE, HTML_TEMPLATE } from '$lib/constants';
 import { validate_and_load_project_files } from '$utils/filesystem';
-import { z } from '$lib/zero.svelte';
+import { z, mutators } from '$lib/zero.svelte';
 
 export class FileState {
 	status: 'INITIAL' | 'NO_ACCESS' | 'ACCESS' | 'ERROR' = $state('INITIAL');
@@ -301,19 +301,23 @@ export class FileState {
 	}
 
 	async save_html(id: string, text: string) {
-		z.mutate.hax.update({
-			id,
-			html: text,
-			updated_at: Date.now()
-		});
+		z.mutate(
+			mutators.hax.update({
+				id,
+				html: text,
+				updated_at: Date.now()
+			})
+		);
 	}
 
 	async save_css(id: string, text: string) {
-		z.mutate.hax.update({
-			id,
-			css: text,
-			updated_at: Date.now()
-		});
+		z.mutate(
+			mutators.hax.update({
+				id,
+				css: text,
+				updated_at: Date.now()
+			})
+		);
 	}
 
 	async check() {

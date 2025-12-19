@@ -17,7 +17,7 @@
 <!-- Difference between battle and target? -->
 <script lang="ts">
 	import BattleMode from './BattleMode.svelte';
-	import { z } from '$lib/zero.svelte';
+	import { z, queries } from '$lib/zero.svelte';
 	import { page } from '$app/state';
 	import Countdown from '$lib/battle_mode/Countdown.svelte';
 	import { files } from '$lib/state/FileState.svelte';
@@ -25,26 +25,12 @@
 	import Header from '$lib/battle_mode/Header.svelte';
 	import Modal from '$lib/ui/Modal.svelte';
 
-	let battle = z.createQuery(
-		z.query.battles
-			.where('id', page?.params?.id || '')
-			.one()
-			.related('referee')
-			.related('participants', (q) => q.related('user'))
-			.related('target')
+	let battle = $derived(
+		z.createQuery(queries.battles.byIdSimple({ id: page?.params?.id || '' }))
 	);
 
-	let hax = $derived.by(() =>
-		z.createQuery(
-			z.query.hax
-				.where(({ cmp, and }) =>
-					and(
-						cmp('battle_id', battle?.data?.id || ''),
-						cmp('user_id', z.userID)
-					)
-				)
-				.one()
-		)
+	let hax = $derived(
+		z.createQuery(queries.hax.myForBattle({ battleId: battle?.data?.id || '' }))
 	);
 
 	// Modern Svelte 5 approach with runes

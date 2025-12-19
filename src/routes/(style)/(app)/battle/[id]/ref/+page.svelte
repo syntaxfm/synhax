@@ -7,18 +7,11 @@
 	import ShareLinks from '$lib/battle_mode/ShareLinks.svelte';
 	import Modal from '$lib/ui/Modal.svelte';
 	import ToggleButton from '$lib/ui/ToggleButton.svelte';
-	import { z } from '$lib/zero.svelte';
+	import { z, queries, mutators } from '$lib/zero.svelte';
 	import { fade } from 'svelte/transition';
 
-	let battle = z.createQuery(
-		z.query.battles
-			.where('id', page?.params?.id || '')
-			.one()
-			.related('referee')
-			.related('participants', (q) =>
-				q.related('user').related('hax', (h) => h.related('votes'))
-			)
-			.related('target')
+	let battle = $derived(
+		z.createQuery(queries.battles.byId({ id: page?.params?.id || '' }))
 	);
 
 	let over_status: 'ACTIVE' | 'OVER' = $state('ACTIVE');
@@ -43,37 +36,43 @@
 			updates.ends_at = now + battle.data.total_time_seconds * 1000;
 		}
 
-		await z.mutate.battles.update(updates);
+		await z.mutate(mutators.battles.update(updates));
 	}
 
 	async function toggle_privacy() {
 		if (!battle.data) return;
 		const new_visibility =
 			battle.data.visibility === 'PUBLIC' ? 'PRIVATE' : 'PUBLIC';
-		await z.mutate.battles.update({
-			id: battle.data.id,
-			visibility: new_visibility
-		});
+		await z.mutate(
+			mutators.battles.update({
+				id: battle.data.id,
+				visibility: new_visibility
+			})
+		);
 	}
 
 	async function toggle_type() {
 		if (!battle.data) return;
 		const new_type =
 			battle.data.type === 'TIME_TRIAL' ? 'TIMED_MATCH' : 'TIME_TRIAL';
-		await z.mutate.battles.update({
-			id: battle.data.id,
-			type: new_type
-		});
+		await z.mutate(
+			mutators.battles.update({
+				id: battle.data.id,
+				type: new_type
+			})
+		);
 	}
 
 	async function add_overtime(ot: number) {
 		if (!battle.data) return;
 
-		await z.mutate.battles.update({
-			id: battle.data.id,
-			overtime_seconds: ot * 60,
-			ends_at: Date.now() + ot * 60 * 1000
-		});
+		await z.mutate(
+			mutators.battles.update({
+				id: battle.data.id,
+				overtime_seconds: ot * 60,
+				ends_at: Date.now() + ot * 60 * 1000
+			})
+		);
 	}
 
 	function update_time_limit(event: Event) {
@@ -81,20 +80,24 @@
 		const input = event.target as HTMLInputElement;
 		const new_time = parseFloat(input.value);
 		if (!isNaN(new_time)) {
-			z.mutate.battles.update({
-				id: battle.data.id,
-				total_time_seconds: new_time * 60
-			});
+			z.mutate(
+				mutators.battles.update({
+					id: battle.data.id,
+					total_time_seconds: new_time * 60
+				})
+			);
 		}
 	}
 
 	function finish_battle() {
 		if (!battle.data) return;
 
-		z.mutate.battles.update({
-			id: battle.data.id,
-			status: 'COMPLETED'
-		});
+		z.mutate(
+			mutators.battles.update({
+				id: battle.data.id,
+				status: 'COMPLETED'
+			})
+		);
 	}
 	let locked_in_participants = $derived(
 		battle.data?.participants.filter(

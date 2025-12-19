@@ -35,6 +35,10 @@ body {
 	color: var(--white);
 	min-height: 100vh;
 	scrollbar-width: none;
+	margin: 0;
+	> div {
+		min-height: 100vh;
+	}
 }
 
 iframe {

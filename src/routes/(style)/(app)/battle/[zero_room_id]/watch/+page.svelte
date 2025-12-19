@@ -4,18 +4,15 @@
 	import Countdown from '$lib/battle_mode/Countdown.svelte';
 	import Header from '$lib/battle_mode/Header.svelte';
 	import ShareLinks from '$lib/battle_mode/ShareLinks.svelte';
-	import { z } from '$lib/zero.svelte';
+	import { z, queries } from '$lib/zero.svelte';
 	import { remove_screaming } from '$utils/formatting';
 
-	let battle = z.createQuery(
-		z.query.battles
-			.where('zero_room_id', page?.params?.zero_room_id || '')
-			.one()
-			.related('referee')
-			.related('participants', (q) =>
-				q.related('user').related('hax', (h) => h.related('votes'))
-			)
-			.related('target')
+	let battle = $derived(
+		z.createQuery(
+			queries.battles.byRoomId({
+				zeroRoomId: page?.params?.zero_room_id || ''
+			})
+		)
 	);
 </script>
 
