@@ -6,11 +6,12 @@ const config = {
 	// Consult https://svelte.dev/docs/kit/integrations
 	// for more information about preprocessors
 	preprocess: vitePreprocess(),
-	compilerOptions: {
-		experimental: {
-			async: true
-		}
-	},
+	// Disabled: experimental.async breaks SvelteKit client-side navigation
+	// compilerOptions: {
+	// 	experimental: {
+	// 		async: true
+	// 	}
+	// },
 
 	kit: {
 		adapter: adapter(),

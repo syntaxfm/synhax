@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { queries } from '$lib/queries';
 	import { z } from '$lib/zero.svelte';
 
@@ -62,24 +62,23 @@
 			<nav class="sidebar-nav">
 				<a
 					href="/dashboard"
-					aria-current={$page.url.pathname === '/dashboard'
-						? 'page'
-						: undefined}>Battles</a
+					aria-current={page.url.pathname === '/dashboard' ? 'page' : undefined}
+					>Battles</a
 				>
 				<a
 					href="/history"
-					aria-current={$page.url.pathname === '/history' ? 'page' : undefined}
+					aria-current={page.url.pathname === '/history' ? 'page' : undefined}
 					>History</a
 				>
 				<a
 					href="/settings"
-					aria-current={$page.url.pathname === '/settings' ? 'page' : undefined}
+					aria-current={page.url.pathname === '/settings' ? 'page' : undefined}
 					>Settings</a
 				>
 				{#if user.data?.role === 'syntax'}
 					<a
 						href="/admin/"
-						aria-current={$page.url.pathname.startsWith('/admin')
+						aria-current={page.url.pathname.startsWith('/admin')
 							? 'page'
 							: undefined}>Admin</a
 					>

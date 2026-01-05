@@ -49,6 +49,5 @@
 	<div class="actions">
 		<a href="/admin/targets/init" class="button go_button">Create Target</a>
 	</div>
-
 	<Table data={targets.data} {columns} />
 </div>

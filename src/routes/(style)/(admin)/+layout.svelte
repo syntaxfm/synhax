@@ -1,11 +1,10 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import Bread from '$lib/ui/Bread.svelte';
 	import { queries } from '$lib/queries';
 	import { z } from '$lib/zero.svelte';
-	import type { Snippet } from 'svelte';
 
-	const { children }: { children: Snippet } = $props();
+	const { children } = $props();
 
 	const user = z.createQuery(queries.user.current());
 
@@ -73,7 +72,7 @@
 				{#each links as link}
 					<a
 						href={link.href}
-						aria-current={$page.url.pathname === link.href ? 'page' : undefined}
+						aria-current={page.url.pathname === link.href ? 'page' : undefined}
 						>{link.label}</a
 					>
 				{/each}

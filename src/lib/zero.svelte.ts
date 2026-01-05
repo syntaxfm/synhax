@@ -37,16 +37,24 @@ async function get_z_options() {
 
 	return {
 		userID,
-		kvStore: 'mem',
+		kvStore: 'mem' as const,
 		server: PUBLIC_SERVER,
 		schema,
 		mutators,
 		context,
-		jwt: jwt || undefined
-	} as const;
+		auth: jwt || undefined
+	};
 }
 
+// Top-level await to initialize Z with proper auth context
+// This works correctly when experimental.async is DISABLED
 export const z = new Z(await get_z_options());
+
+// Function to reinitialize Z with fresh JWT (call after login)
+export async function reinitializeZ() {
+	const options = await get_z_options();
+	z.build(options);
+}
 
 // Re-export queries and mutators for convenient access
 export { queries, mutators };
