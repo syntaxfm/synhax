@@ -11,10 +11,12 @@
 
 <div class:disabled>
 	<label for="join-link">{label}: </label>
-	<input {disabled} readonly id="join-link" value={link} />
-	<button onclick={() => copy(link)} class="go_button" {disabled}
-		>{@html link_svg}</button
-	>
+	<div>
+		<input {disabled} readonly id="join-link" value={link} />
+		<button onclick={() => copy(link)} class="go_button" {disabled}
+			>{@html link_svg}</button
+		>
+	</div>
 </div>
 
 <style>

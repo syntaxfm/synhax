@@ -20,6 +20,7 @@ Battle Mode is built with:
 - **drizzle-zero** to generate Zero schemas from Drizzle
 - **BetterAuth** for authentication (GitHub OAuth)
 - **Cloudflare** (R2 for storage, deployment target)
+- **Graffiti UI** for CSS utilities and components
 
 ## Key Directories
 
@@ -91,6 +92,13 @@ Use for:
 - A participant's HTML/CSS submission for a battle
 - Can be BATTLE (in a battle) or SOLO (practice)
 - Synced in real-time during battles
+
+## Graffiti UI
+
+This project uses [Graffiti UI](https://graffiti-ui.com) for CSS utilities and
+components. **Before writing any HTML or CSS**, check
+https://graffiti-ui.com/llms.txt for the proper Graffiti patterns and utility
+classes.
 
 ## Svelte 5 Rules
 

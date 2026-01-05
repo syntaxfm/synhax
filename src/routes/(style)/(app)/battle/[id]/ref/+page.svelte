@@ -19,31 +19,13 @@
 		['PENDING', 'ACTIVE'].includes(battle.data?.status)
 	);
 
-	async function start() {
-		if (!battle.data) return;
 
-		const now = Date.now();
-		const updates: any = {
-			id: page.params.id,
-			status: 'ACTIVE' as const,
-			starts_at: now
-		};
-
-		// Set ends_at based on battle type
-		if (battle.data.type === 'TIME_TRIAL') {
-			updates.ends_at = null;
-		} else if (battle.data.type === 'TIMED_MATCH') {
-			updates.ends_at = now + battle.data.total_time_seconds * 1000;
-		}
-
-		await z.mutate(mutators.battles.update(updates));
-	}
 
 	async function toggle_privacy() {
 		if (!battle.data) return;
 		const new_visibility =
 			battle.data.visibility === 'PUBLIC' ? 'PRIVATE' : 'PUBLIC';
-		await z.mutate(
+		z.mutate(
 			mutators.battles.update({
 				id: battle.data.id,
 				visibility: new_visibility
@@ -51,43 +33,17 @@
 		);
 	}
 
-	async function toggle_type() {
-		if (!battle.data) return;
-		const new_type =
-			battle.data.type === 'TIME_TRIAL' ? 'TIMED_MATCH' : 'TIME_TRIAL';
-		await z.mutate(
-			mutators.battles.update({
-				id: battle.data.id,
-				type: new_type
-			})
-		);
-	}
-
 	async function add_overtime(ot: number) {
 		if (!battle.data) return;
 
-		await z.mutate(
+		z.mutate(
 			mutators.battles.update({
 				id: battle.data.id,
 				overtime_seconds: ot * 60,
 				ends_at: Date.now() + ot * 60 * 1000
 			})
 		);
-	}
 
-	function update_time_limit(event: Event) {
-		if (!battle.data) return;
-		const input = event.target as HTMLInputElement;
-		const new_time = parseFloat(input.value);
-		if (!isNaN(new_time)) {
-			z.mutate(
-				mutators.battles.update({
-					id: battle.data.id,
-					total_time_seconds: new_time * 60
-				})
-			);
-		}
-	}
 
 	function finish_battle() {
 		if (!battle.data) return;
@@ -135,35 +91,10 @@
 			/>
 
 			{#if controls_visible}
-				<ToggleButton
-					disabled={['ACTIVE', 'COMPLETED'].includes(battle.data?.status)}
-					toggle={battle.data.type === 'TIME_TRIAL'}
-					ontoggle={toggle_type}
-					on_text="Time Trial"
-					off_text="Timed Match"
-				/>
-
-				{#if battle.data?.type === 'TIMED_MATCH'}
-					<div class="time-limit-settings">
-						<label for="time-limit">Time Limit:</label>
-						<input
-							defaultValue={battle.data.total_time_seconds / 60 || 10}
-							id="time-limit"
-							type="number"
-							placeholder="Enter time limit"
-							required
-							step="any"
-							onchange={update_time_limit}
-						/>minutes
-					</div>
-				{/if}
 				<Participants
 					locked_in_participants={locked_in_participants || []}
 					participants={battle.data?.participants || []}
 				/>
-				{#if battle.data?.status === 'PENDING'}
-					<button class="go_button" onclick={start}>Start Battle</button>
-				{/if}
 			{/if}
 		</section>
 	{/if}

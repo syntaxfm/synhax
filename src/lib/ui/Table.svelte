@@ -60,7 +60,9 @@
 				columnFilters
 			},
 			onColumnFiltersChange: (
-				updater: ColumnFiltersState | ((prev: ColumnFiltersState) => ColumnFiltersState)
+				updater:
+					| ColumnFiltersState
+					| ((prev: ColumnFiltersState) => ColumnFiltersState)
 			) => {
 				if (typeof updater === 'function') {
 					columnFilters = updater(columnFilters);
@@ -82,57 +84,48 @@
 
 <input type="text" bind:value={globalFilter} placeholder="Search..." />
 {#if data && $table}
-	<table>
-		<thead>
-			{#each $table.getHeaderGroups() as headerGroup}
-				<tr>
-					{#each headerGroup.headers as header}
-						<th>
-							{#if !header.isPlaceholder}
-								{@html flexRender(header.column.columnDef.header, header.getContext())}
-							{/if}
-						</th>
-					{/each}
-				</tr>
-			{/each}
-		</thead>
-		<tbody>
-			{#each $table.getRowModel().rows as row}
-				<tr>
-					{#each row.getVisibleCells() as cell}
-						<td>
-							{#if cell.column.id === 'image'}
-								<img
-									width="200px"
-									src={flexRender(cell.column.columnDef.cell, cell.getContext())}
-								/>
-							{:else}
-								{@html flexRender(cell.column.columnDef.cell, cell.getContext())}
-							{/if}
-						</td>
-					{/each}
-				</tr>
-			{/each}
-		</tbody>
-	</table>
+	<div class="table">
+		<table>
+			<thead>
+				{#each $table.getHeaderGroups() as headerGroup}
+					<tr>
+						{#each headerGroup.headers as header}
+							<th>
+								{#if !header.isPlaceholder}
+									{@html flexRender(
+										header.column.columnDef.header,
+										header.getContext()
+									)}
+								{/if}
+							</th>
+						{/each}
+					</tr>
+				{/each}
+			</thead>
+			<tbody>
+				{#each $table.getRowModel().rows as row}
+					<tr>
+						{#each row.getVisibleCells() as cell}
+							<td>
+								{#if cell.column.id === 'image'}
+									<img
+										width="200px"
+										src={flexRender(
+											cell.column.columnDef.cell,
+											cell.getContext()
+										)}
+									/>
+								{:else}
+									{@html flexRender(
+										cell.column.columnDef.cell,
+										cell.getContext()
+									)}
+								{/if}
+							</td>
+						{/each}
+					</tr>
+				{/each}
+			</tbody>
+		</table>
+	</div>
 {/if}
-
-<style>
-	table {
-		width: 100%;
-		border-collapse: collapse;
-		:global(input) {
-			width: 100%;
-		}
-	}
-	th,
-	td {
-		padding: 0.5rem;
-		border: 1px solid rgb(255 255 255 / 0.1);
-	}
-	th {
-		background-color: rgb(255 255 255 / 0.05);
-		font-size: 14px;
-		text-align: left;
-	}
-</style>

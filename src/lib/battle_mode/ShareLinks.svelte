@@ -15,7 +15,7 @@
 	} = $props();
 </script>
 
-<div class="links">
+<div class="stack">
 	{#if code}
 		<Copybutton
 			label="Code"

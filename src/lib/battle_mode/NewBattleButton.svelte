@@ -12,7 +12,7 @@
 	async function new_battle() {
 		const id = crypto.randomUUID();
 		const zero_room_id = nanoid();
-		await z.mutate(
+		z.mutate(
 			mutators.battles.insert({
 				id,
 				target_id,
@@ -23,7 +23,7 @@
 				referee_id: z.userID
 			})
 		);
-		goto(`/battle/${id}/ref`);
+		goto(`/lobby/${id}`);
 	}
 </script>
 

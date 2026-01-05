@@ -80,9 +80,8 @@ export class FileState {
 		}
 	}
 
-	// Try to restore directory handle from persistence
-	// Try to restore directory handle from IndexedDB
-	async restore_directory_handle() {
+	// Get the stored handle from IndexedDB (without requesting permission)
+	private async get_stored_handle(): Promise<FileSystemDirectoryHandle | null> {
 		try {
 			const db = await new Promise<IDBDatabase>((resolve, reject) => {
 				const request = indexedDB.open('synhax', 1);
@@ -108,53 +107,72 @@ export class FileState {
 			);
 
 			db.close();
+			return handle || null;
+		} catch (error) {
+			console.warn('Error getting stored handle:', error);
+			return null;
+		}
+	}
 
-			if (handle) {
-				// Check current permission status without requesting
+	// Check if we already have permission (called on page load, no user gesture needed)
+	async check_existing_permission(): Promise<boolean> {
+		const handle = await this.get_stored_handle();
+		if (!handle) return false;
+
+		try {
+			const permission = await handle.queryPermission({ mode: 'readwrite' });
+
+			if (permission === 'granted') {
+				// Permission already granted, verify directory is accessible
 				try {
-					const permission = await handle.queryPermission({ mode: 'read' });
+					const entries = handle.entries();
+					await entries.next(); // Just check if we can iterate
 
-					if (permission === 'granted') {
-						// Permission already granted, verify directory is accessible
-						try {
-							// Try to read the directory to verify it's still valid
-							const entries = handle.entries();
-							await entries.next(); // Just check if we can iterate
+					this.synhax_directory_handle = handle;
+					this.set_status('ACCESS');
+					return true;
+				} catch (accessError) {
+					console.warn('Directory no longer accessible:', accessError);
+				}
+			}
+			// If permission is 'prompt' or 'denied', we need user interaction
+		} catch (error) {
+			console.warn('Error checking permission:', error);
+		}
+		return false;
+	}
 
-							this.synhax_directory_handle = handle;
-							this.set_status('ACCESS');
-							return true;
-						} catch (accessError) {
-							console.warn('Directory no longer accessible:', accessError);
-						}
-					} else if (permission === 'prompt') {
-						// Permission needs to be requested again (happens after page refresh)
-						try {
-							const requestedPermission = await handle.requestPermission({
-								mode: 'read'
-							});
-							if (requestedPermission === 'granted') {
-								// Try to read the directory to verify it's still valid
-								const entries = handle.entries();
-								await entries.next(); // Just check if we can iterate
+	// Request permission (must be called from user gesture like button click)
+	async restore_directory_handle(): Promise<boolean> {
+		const handle = await this.get_stored_handle();
+		if (!handle) {
+			// No stored handle, user needs to pick a directory
+			await this.setup_synhax_directory();
+			return this.status === 'ACCESS';
+		}
 
-								this.synhax_directory_handle = handle;
-								this.set_status('ACCESS');
-								return true;
-							}
-						} catch (requestError) {
-							console.warn(
-								'User denied permission or error requesting:',
-								requestError
-							);
-						}
-					}
-				} catch (error) {
-					console.warn('Error restoring directory handle:', error);
+		try {
+			// Request permission - this requires a user gesture
+			const permission = await handle.requestPermission({ mode: 'readwrite' });
+
+			if (permission === 'granted') {
+				// Verify directory is accessible
+				try {
+					const entries = handle.entries();
+					await entries.next();
+
+					this.synhax_directory_handle = handle;
+					this.set_status('ACCESS');
+					return true;
+				} catch (accessError) {
+					console.warn('Directory no longer accessible:', accessError);
+					// Directory was deleted or moved, need to pick a new one
+					await this.setup_synhax_directory();
+					return this.status === 'ACCESS';
 				}
 			}
 		} catch (error) {
-			console.warn('Error restoring directory handle:', error);
+			console.warn('Error requesting permission:', error);
 		}
 		return false;
 	}
@@ -322,9 +340,9 @@ export class FileState {
 
 	async check() {
 		// Check to see if handle exists and is valid.
-		// Try to restore directory handle
-		const restored = await this.restore_directory_handle();
-		if (restored) {
+		// Only checks existing permission, does NOT request (no user gesture needed)
+		const hasAccess = await this.check_existing_permission();
+		if (hasAccess) {
 			this.set_status('ACCESS');
 		} else {
 			this.set_status('NO_ACCESS');

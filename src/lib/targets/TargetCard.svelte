@@ -42,7 +42,7 @@
 
 <article>
 	<header>
-		<h2>{target.name}</h2>
+		<h2 class="h5">{target.name}</h2>
 	</header>
 	<div class="frame">
 		<img src={target.image} alt={target.name} />
@@ -88,39 +88,6 @@
 </article>
 
 <style>
-	article {
-		border: 4px solid var(--purp);
-		text-align: center;
-		position: relative;
-		background: var(--purp);
-		:global(button) {
-			font-size: 36px;
-			margin: 1rem 0;
-		}
-		&:after {
-			content: '';
-			display: block;
-			position: absolute;
-			background: var(--purp);
-			inset: 0;
-			scale: 1.05;
-			rotate: 1deg;
-			z-index: -1;
-			box-shadow: 0 0 15px var(--black);
-			transition: all 0.2s ease;
-		}
-		&:hover {
-			&:after {
-				box-shadow: 0 0 25px var(--black);
-				rotate: -1deg;
-			}
-		}
-	}
-	header {
-		text-align: center;
-		padding: 5px;
-	}
-
 	.frame {
 		overflow: hidden;
 		width: 100%;
