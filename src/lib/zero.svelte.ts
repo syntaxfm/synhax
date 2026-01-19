@@ -9,7 +9,7 @@ function decodeJWT(token: string): { sub?: string; role?: string } | null {
 	try {
 		const parts = token.split('.');
 		if (parts.length !== 3) return null;
-		const payload = parts[1];
+		const payload = parts[1].replace(/-/g, '+').replace(/_/g, '/');
 		const paddedPayload = payload + '==='.slice((payload.length + 3) % 4);
 		const decoded = atob(paddedPayload);
 		return JSON.parse(decoded);

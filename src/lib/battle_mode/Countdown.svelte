@@ -5,16 +5,18 @@
 	let {
 		battle,
 		onover = () => null,
+		onautoend,
 		status = $bindable('ACTIVE'),
 		view = 'WATCH'
 	}: {
 		battle: Battle;
 		onover?: () => void;
+		onautoend?: () => void;
 		status?: 'ACTIVE' | 'OVER';
 		view?: 'WATCH' | 'CODE' | 'REF';
 	} = $props();
 
-	let countdown = $derived(battle.total_time_seconds);
+	let countdown = $state(battle.total_time_seconds ?? 600);
 	let timer: ReturnType<typeof setInterval> | null = null;
 
 	$effect(() => {
@@ -25,16 +27,17 @@
 		if (
 			battle &&
 			battle.type === 'TIMED_MATCH' &&
-			['ACTIVE', 'COMPLETED'].includes(battle.status)
+			['ACTIVE', 'COMPLETED'].includes(battle.status ?? '')
 		) {
 			timer = setInterval(() => {
 				const now = Date.now();
 				if (battle.ends_at && battle.ends_at > now) {
 					status = 'ACTIVE';
 					countdown = (battle.ends_at - now) / 1000;
-				} else {
+				} else if (battle.ends_at && battle.ends_at <= now) {
 					make_over();
 				}
+				// If ends_at is not set yet, keep showing initial countdown value
 			}, 100);
 		}
 
@@ -50,6 +53,11 @@
 		countdown = 0;
 		status = 'OVER';
 		onover();
+		// If auto-end is enabled (allow_time_extension is false), trigger the callback
+		// @ts-expect-error - allow_time_extension is newly added, types may need refresh
+		if (battle.allow_time_extension === false && onautoend) {
+			onautoend();
+		}
 	}
 
 	function formatTime(seconds: number): string {
@@ -72,7 +80,7 @@
 	</div>
 </div>
 
-{#if view !== 'REF'}
+{#if view !== 'REF' && (battle as any).allow_time_extension !== false}
 	<Modal
 		title={view === 'CODE' ? 'Pencils Down!' : 'Battle Over'}
 		open={status === 'OVER' && ['ACTIVE', 'COMPLETED'].includes(battle.status)}
@@ -82,14 +90,15 @@
 			<a
 				class="go_button button big_button"
 				class:disabled={battle.status !== 'COMPLETED'}
-				href={`/battle/${battle.id}/recap`}>Battle Recap</a
+				href={`/recap/${battle.id}`}>Battle Recap</a
 			>
 		{/if}
 		{#if view === 'WATCH'}
 			<a
 				class="go_button button big_button"
 				class:disabled={battle.status !== 'COMPLETED'}
-				href={`/battle/${battle.zero_room_id}/watch/vote`}>Vote for the winner</a
+				href={`/battle/${battle.zero_room_id}/watch/vote`}
+				>Vote for the winner</a
 			>
 		{/if}
 	</Modal>

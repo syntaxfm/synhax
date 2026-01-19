@@ -14,7 +14,18 @@ export const auth = betterAuth({
 	socialProviders: {
 		github: {
 			clientId: GITHUB_CLIENT_ID,
-			clientSecret: GITHUB_CLIENT_SECRET
+			clientSecret: GITHUB_CLIENT_SECRET,
+			mapProfileToUser: (profile) => ({
+				username: profile.login
+			})
+		}
+	},
+	user: {
+		additionalFields: {
+			username: {
+				type: 'string',
+				required: false
+			}
 		}
 	},
 	plugins: [admin(), jwt()]

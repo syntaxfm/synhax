@@ -1,9 +1,12 @@
 import { defineMutators, defineMutator } from '@rocicorp/zero';
 import { type } from 'arktype';
+import { type ZeroContext } from '$sync/schema';
+import { zql } from '$sync/zero-schema.gen';
 import {
 	battle_status_enum,
 	visibility_enum,
 	battle_type_enum,
+	win_condition_enum,
 	participant_status_enum,
 	hax_type_enum,
 	user_award_enum,
@@ -23,12 +26,138 @@ import {
 const battleStatusEnum = type.enumerated(...battle_status_enum.enumValues);
 const visibilityEnum = type.enumerated(...visibility_enum.enumValues);
 const battleTypeEnum = type.enumerated(...battle_type_enum.enumValues);
+const winConditionEnum = type.enumerated(...win_condition_enum.enumValues);
 const participantStatusEnum = type.enumerated(
 	...participant_status_enum.enumValues
 );
 const haxTypeEnum = type.enumerated(...hax_type_enum.enumValues);
 const userAwardEnum = type.enumerated(...user_award_enum.enumValues);
 const targetTypeEnum = type.enumerated(...target_type_enum.enumValues);
+
+const AUTH_ERROR = 'Authentication required';
+
+function assertAuthenticated(ctx: ZeroContext) {
+	if (!ctx.userID || ctx.userID === 'anon') {
+		throw new Error(AUTH_ERROR);
+	}
+}
+
+function isAdmin(ctx: ZeroContext) {
+	return ctx.userRole === 'syntax';
+}
+
+type RunTx = { run: (...args: any[]) => Promise<any> };
+
+async function runOne(tx: RunTx, query: unknown) {
+	const result = await tx.run(query);
+	return Array.isArray(result) ? result[0] : result;
+}
+
+async function getBattle(tx: RunTx, battleId: string) {
+	return runOne(tx, zql.battles.where('id', battleId).one());
+}
+
+async function getParticipant(tx: RunTx, participantId: string) {
+	return runOne(tx, zql.battle_participants.where('id', participantId).one());
+}
+
+async function getHax(tx: RunTx, haxId: string) {
+	return runOne(tx, zql.hax.where('id', haxId).one());
+}
+
+async function getVote(tx: RunTx, voteId: string) {
+	return runOne(tx, zql.battle_votes.where('id', voteId).one());
+}
+
+async function getRating(tx: RunTx, ratingId: string) {
+	return runOne(tx, zql.ratings.where('id', ratingId).one());
+}
+
+async function assertBattleOwner(
+	tx: RunTx,
+	ctx: ZeroContext,
+	update: {
+		id: string;
+		winner_hax_id?: string | null;
+		status?: string | null;
+	}
+) {
+	const battle = (await getBattle(tx, update.id)) as {
+		referee_id?: string;
+		win_condition?: string | null;
+	} | null;
+	if (!battle?.referee_id) {
+		throw new Error('Battle not found');
+	}
+	if (isAdmin(ctx) || battle.referee_id === ctx.userID) {
+		return;
+	}
+	if (
+		battle.win_condition === 'FIRST_TO_PERFECT' &&
+		update.status === 'COMPLETED' &&
+		update.winner_hax_id
+	) {
+		const hax = (await getHax(tx, update.winner_hax_id)) as {
+			user_id?: string;
+		} | null;
+		if (hax?.user_id === ctx.userID) {
+			return;
+		}
+	}
+	throw new Error('Only the referee can update this battle');
+}
+
+async function assertParticipantOwner(
+	tx: RunTx,
+	ctx: ZeroContext,
+	participantId: string
+) {
+	const participant = (await getParticipant(tx, participantId)) as {
+		user_id?: string;
+	} | null;
+	if (!participant?.user_id) {
+		throw new Error('Participant not found');
+	}
+	if (!isAdmin(ctx) && participant.user_id !== ctx.userID) {
+		throw new Error('Participants can only be updated for yourself');
+	}
+}
+
+async function assertHaxOwner(tx: RunTx, ctx: ZeroContext, haxId: string) {
+	const hax = (await getHax(tx, haxId)) as { user_id?: string } | null;
+	if (!hax?.user_id) {
+		throw new Error('Hax not found');
+	}
+	if (!isAdmin(ctx) && hax.user_id !== ctx.userID) {
+		throw new Error('Hax can only be updated for yourself');
+	}
+}
+
+async function assertVoteOwner(tx: RunTx, ctx: ZeroContext, voteId: string) {
+	const vote = (await getVote(tx, voteId)) as { voter_id?: string } | null;
+	if (!vote?.voter_id) {
+		return null;
+	}
+	if (!isAdmin(ctx) && vote.voter_id !== ctx.userID) {
+		throw new Error('Votes can only be submitted for yourself');
+	}
+	return vote;
+}
+
+async function assertRatingOwner(
+	tx: RunTx,
+	ctx: ZeroContext,
+	ratingId: string
+) {
+	const rating = (await getRating(tx, ratingId)) as { user_id?: string } | null;
+	if (!rating?.user_id) {
+		return null;
+	}
+	if (!isAdmin(ctx) && rating.user_id !== ctx.userID) {
+		throw new Error('Ratings can only be submitted for yourself');
+	}
+	return rating;
+}
 
 export const mutators = defineMutators({
 	// ==================
@@ -42,6 +171,7 @@ export const mutators = defineMutators({
 				zero_room_id: 'string',
 				referee_id: 'string',
 				type: battleTypeEnum,
+				'win_condition?': winConditionEnum,
 				total_time_seconds: 'number',
 				'overtime_seconds?': 'number',
 				'status?': battleStatusEnum,
@@ -49,13 +179,19 @@ export const mutators = defineMutators({
 				'starts_at?': 'number',
 				'ends_at?': 'number'
 			}),
-			async ({ tx, args }) => {
+			async ({ tx, args, ctx }) => {
+				assertAuthenticated(ctx);
+				if (!isAdmin(ctx) && args.referee_id !== ctx.userID) {
+					throw new Error('Referee must match the authenticated user');
+				}
+				const refereeId = isAdmin(ctx) ? args.referee_id : ctx.userID;
 				await tx.mutate.battles.insert({
 					id: args.id,
 					target_id: args.target_id,
 					zero_room_id: args.zero_room_id,
-					referee_id: args.referee_id,
+					referee_id: refereeId,
 					type: args.type,
+					win_condition: args.win_condition,
 					total_time_seconds: args.total_time_seconds,
 					overtime_seconds: args.overtime_seconds,
 					status: args.status,
@@ -71,23 +207,35 @@ export const mutators = defineMutators({
 				'status?': battleStatusEnum,
 				'visibility?': visibilityEnum,
 				'type?': battleTypeEnum,
+				'win_condition?': winConditionEnum,
 				'total_time_seconds?': 'number',
 				'overtime_seconds?': 'number',
 				'starts_at?': 'number | null',
 				'ends_at?': 'number | null',
-				'revealed_at?': 'number | null'
+				'allow_time_extension?': 'boolean',
+				'revealed_at?': 'number | null',
+				'winner_hax_id?': 'string | null'
 			}),
-			async ({ tx, args }) => {
+			async ({ tx, args, ctx }) => {
+				assertAuthenticated(ctx);
+				await assertBattleOwner(tx, ctx, {
+					id: args.id,
+					status: args.status,
+					winner_hax_id: args.winner_hax_id
+				});
 				await tx.mutate.battles.update({
 					id: args.id,
 					status: args.status,
 					visibility: args.visibility,
 					type: args.type,
+					win_condition: args.win_condition,
 					total_time_seconds: args.total_time_seconds,
 					overtime_seconds: args.overtime_seconds,
 					starts_at: args.starts_at,
 					ends_at: args.ends_at,
-					revealed_at: args.revealed_at
+					allow_time_extension: args.allow_time_extension,
+					revealed_at: args.revealed_at,
+					winner_hax_id: args.winner_hax_id
 				});
 			}
 		)
@@ -105,11 +253,16 @@ export const mutators = defineMutators({
 				'status?': participantStatusEnum,
 				'display_order?': 'number'
 			}),
-			async ({ tx, args }) => {
+			async ({ tx, args, ctx }) => {
+				assertAuthenticated(ctx);
+				if (!isAdmin(ctx) && args.user_id !== ctx.userID) {
+					throw new Error('Participants can only be created for yourself');
+				}
+				const userId = isAdmin(ctx) ? args.user_id : ctx.userID;
 				await tx.mutate.battle_participants.insert({
 					id: args.id,
 					battle_id: args.battle_id,
-					user_id: args.user_id,
+					user_id: userId,
 					status: args.status,
 					display_order: args.display_order
 				});
@@ -122,7 +275,9 @@ export const mutators = defineMutators({
 				'display_order?': 'number',
 				'finished_at?': 'number'
 			}),
-			async ({ tx, args }) => {
+			async ({ tx, args, ctx }) => {
+				assertAuthenticated(ctx);
+				await assertParticipantOwner(tx, ctx, args.id);
 				await tx.mutate.battle_participants.update({
 					id: args.id,
 					status: args.status,
@@ -139,11 +294,20 @@ export const mutators = defineMutators({
 				'status?': participantStatusEnum,
 				'display_order?': 'number'
 			}),
-			async ({ tx, args }) => {
+			async ({ tx, args, ctx }) => {
+				assertAuthenticated(ctx);
+				const existing = await getParticipant(tx, args.id);
+				if (existing) {
+					await assertParticipantOwner(tx, ctx, args.id);
+				}
+				if (!isAdmin(ctx) && args.user_id !== ctx.userID) {
+					throw new Error('Participants can only be updated for yourself');
+				}
+				const userId = isAdmin(ctx) ? args.user_id : ctx.userID;
 				await tx.mutate.battle_participants.upsert({
 					id: args.id,
 					battle_id: args.battle_id,
-					user_id: args.user_id,
+					user_id: userId,
 					status: args.status,
 					display_order: args.display_order
 				});
@@ -153,7 +317,9 @@ export const mutators = defineMutators({
 			type({
 				id: 'string'
 			}),
-			async ({ tx, args }) => {
+			async ({ tx, args, ctx }) => {
+				assertAuthenticated(ctx);
+				await assertParticipantOwner(tx, ctx, args.id);
 				await tx.mutate.battle_participants.delete({ id: args.id });
 			}
 		)
@@ -172,11 +338,17 @@ export const mutators = defineMutators({
 				award_type: userAwardEnum,
 				value: 'number'
 			}),
-			async ({ tx, args }) => {
+			async ({ tx, args, ctx }) => {
+				assertAuthenticated(ctx);
+				const existing = await assertVoteOwner(tx, ctx, args.id);
+				if (!existing && !isAdmin(ctx) && args.voter_id !== ctx.userID) {
+					throw new Error('Votes can only be submitted for yourself');
+				}
+				const voterId = isAdmin(ctx) ? args.voter_id : ctx.userID;
 				await tx.mutate.battle_votes.upsert({
 					id: args.id,
 					battle_id: args.battle_id,
-					voter_id: args.voter_id,
+					voter_id: voterId,
 					nominee_hax_id: args.nominee_hax_id,
 					award_type: args.award_type,
 					value: args.value
@@ -199,10 +371,15 @@ export const mutators = defineMutators({
 				css: 'string',
 				type: haxTypeEnum
 			}),
-			async ({ tx, args }) => {
+			async ({ tx, args, ctx }) => {
+				assertAuthenticated(ctx);
+				if (!isAdmin(ctx) && args.user_id !== ctx.userID) {
+					throw new Error('Hax can only be created for yourself');
+				}
+				const userId = isAdmin(ctx) ? args.user_id : ctx.userID;
 				await tx.mutate.hax.insert({
 					id: args.id,
-					user_id: args.user_id,
+					user_id: userId,
 					target_id: args.target_id,
 					battle_id: args.battle_id,
 					html: args.html,
@@ -214,20 +391,62 @@ export const mutators = defineMutators({
 		update: defineMutator(
 			type({
 				id: 'string',
+				'user_id?': 'string',
 				'html?': 'string',
 				'css?': 'string',
 				'is_final?': 'boolean',
 				'submitted_at?': 'number',
-				'updated_at?': 'number'
+				'updated_at?': 'number',
+				'diff_score?': 'number'
 			}),
-			async ({ tx, args }) => {
+			async ({ tx, args, ctx }) => {
+				assertAuthenticated(ctx);
+				await assertHaxOwner(tx, ctx, args.id);
 				await tx.mutate.hax.update({
 					id: args.id,
 					html: args.html,
 					css: args.css,
 					is_final: args.is_final,
 					submitted_at: args.submitted_at,
-					updated_at: args.updated_at
+					updated_at: args.updated_at,
+					// Clamp diff_score to 0-100 and update timestamp when provided
+					diff_score:
+						args.diff_score !== undefined
+							? Math.round(Math.max(0, Math.min(100, args.diff_score)))
+							: undefined,
+					diff_score_updated_at:
+						args.diff_score !== undefined ? Date.now() : undefined
+				});
+			}
+		)
+	},
+
+	// ==================
+	// HAX HISTORY (for playback/replay)
+	// ==================
+	hax_history: {
+		insert: defineMutator(
+			type({
+				id: 'string',
+				hax_id: 'string',
+				html: 'string',
+				css: 'string',
+				elapsed_ms: 'number',
+				sequence: 'number'
+			}),
+			async ({ tx, args, ctx }) => {
+				assertAuthenticated(ctx);
+				await assertHaxOwner(tx, ctx, args.hax_id);
+				// Note: Ownership check happens via the hax FK constraint -
+				// only valid hax_ids can be inserted, and the client only
+				// calls this for the user's own hax
+				await tx.mutate.hax_history.insert({
+					id: args.id,
+					hax_id: args.hax_id,
+					html: args.html,
+					css: args.css,
+					elapsed_ms: args.elapsed_ms,
+					sequence: args.sequence
 				});
 			}
 		)
@@ -248,7 +467,7 @@ export const mutators = defineMutators({
 			}),
 			async ({ tx, args, ctx }) => {
 				// Admin check - ctx is typed via DefaultTypes in schema.ts
-				if (ctx.userRole !== 'syntax') {
+				if (!isAdmin(ctx)) {
 					throw new Error('Only admins can create targets');
 				}
 				await tx.mutate.targets.insert({
@@ -272,7 +491,7 @@ export const mutators = defineMutators({
 			}),
 			async ({ tx, args, ctx }) => {
 				// Admin check - ctx is typed via DefaultTypes in schema.ts
-				if (ctx.userRole !== 'syntax') {
+				if (!isAdmin(ctx)) {
 					throw new Error('Only admins can update targets');
 				}
 				await tx.mutate.targets.update({
@@ -301,10 +520,16 @@ export const mutators = defineMutators({
 				fun: 'number',
 				coolness: 'number'
 			}),
-			async ({ tx, args }) => {
+			async ({ tx, args, ctx }) => {
+				assertAuthenticated(ctx);
+				const existing = await assertRatingOwner(tx, ctx, args.id);
+				if (!existing && !isAdmin(ctx) && args.user_id !== ctx.userID) {
+					throw new Error('Ratings can only be submitted for yourself');
+				}
+				const userId = isAdmin(ctx) ? args.user_id : ctx.userID;
 				await tx.mutate.ratings.upsert({
 					id: args.id,
-					user_id: args.user_id,
+					user_id: userId,
 					target_id: args.target_id,
 					difficulty: args.difficulty,
 					creativity: args.creativity,
@@ -327,9 +552,14 @@ export const mutators = defineMutators({
 				'bio?': 'string',
 				'theme?': 'string'
 			}),
-			async ({ tx, args }) => {
+			async ({ tx, args, ctx }) => {
+				assertAuthenticated(ctx);
+				if (!isAdmin(ctx) && args.id !== ctx.userID) {
+					throw new Error('Users can only update their own profile');
+				}
+				const userId = isAdmin(ctx) ? args.id : ctx.userID;
 				await tx.mutate.user.update({
-					id: args.id,
+					id: userId,
 					name: args.name,
 					avatar: args.avatar,
 					bio: args.bio,

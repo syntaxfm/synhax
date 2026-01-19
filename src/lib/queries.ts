@@ -21,7 +21,11 @@ export const queries = defineQueries({
 		}),
 
 		/** Get all targets (admin) */
-		all: defineQuery(() => zql.targets),
+		all: defineQuery(({ ctx }) =>
+			ctx.userRole === 'syntax'
+				? zql.targets
+				: zql.targets.where('id', '__admin_only__')
+		),
 
 		/** Get a single target by ID */
 		byId: defineQuery(type({ id: 'string' }), ({ args }) =>
@@ -39,7 +43,11 @@ export const queries = defineQueries({
 		}),
 
 		/** Get all users (admin) */
-		all: defineQuery(() => zql.user)
+		all: defineQuery(({ ctx }) =>
+			ctx.userRole === 'syntax'
+				? zql.user
+				: zql.user.where('id', '__admin_only__')
+		)
 	},
 
 	// ==================
@@ -64,13 +72,13 @@ export const queries = defineQueries({
 				.related('target')
 		),
 
-		/** Get a battle by ID with participants (no hax votes - for code page) */
+		/** Get a battle by ID with participants and their hax (for code page with live scores) */
 		byIdSimple: defineQuery(type({ id: 'string' }), ({ args }) =>
 			zql.battles
 				.where('id', args.id)
 				.one()
 				.related('referee')
-				.related('participants', (q) => q.related('user'))
+				.related('participants', (q) => q.related('user').related('hax'))
 				.related('target')
 		),
 
@@ -87,7 +95,11 @@ export const queries = defineQueries({
 		),
 
 		/** Get all battles (admin) */
-		all: defineQuery(() => zql.battles)
+		all: defineQuery(({ ctx }) =>
+			ctx.userRole === 'syntax'
+				? zql.battles
+				: zql.battles.where('id', '__admin_only__')
+		)
 	},
 
 	// ==================
@@ -134,7 +146,21 @@ export const queries = defineQueries({
 		),
 
 		/** Get all hax (admin) */
-		all: defineQuery(() => zql.hax)
+		all: defineQuery(({ ctx }) =>
+			ctx.userRole === 'syntax'
+				? zql.hax
+				: zql.hax.where('id', '__admin_only__')
+		)
+	},
+
+	// ==================
+	// HAX HISTORY (for playback/replay)
+	// ==================
+	haxHistory: {
+		/** Get all history entries for a hax, ordered by sequence for playback */
+		forHax: defineQuery(type({ haxId: 'string' }), ({ args }) =>
+			zql.hax_history.where('hax_id', args.haxId).orderBy('sequence', 'asc')
+		)
 	},
 
 	// ==================

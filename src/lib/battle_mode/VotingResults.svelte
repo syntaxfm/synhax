@@ -1,14 +1,14 @@
 <script lang="ts">
-	import type { ParticipantScores } from '$utils/scores';
+	import type { ParticipantScore } from '$utils/scores';
 	import { fly } from 'svelte/transition';
 
-	const { score }: { score: ParticipantScores } = $props();
+	const { score }: { score: ParticipantScore } = $props();
 </script>
 
 <div class="voting">
 	<div class="vote score">
 		<span class="label">Score:</span>
-		<div class="digits" score={score.place}>
+		<div class="digits" data-score={score.place}>
 			{#each score.total_score.toFixed(2).toString().split('') as digit}
 				{#key digit}
 					<span class="digit" in:fly={{ y: 50, duration: 200 }}>{digit}</span>
@@ -62,10 +62,10 @@
 		display: flex;
 		transform-origin: bottom left;
 		transition: 0.2s ease scale;
-		&[score='1'] {
+		&[data-score='1'] {
 			scale: 1.5;
 		}
-		&[score='2'] {
+		&[data-score='2'] {
 			scale: 1.3;
 		}
 	}

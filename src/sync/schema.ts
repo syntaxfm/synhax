@@ -15,6 +15,7 @@ export type Rating = Row<typeof schema.tables.ratings>;
 export type Battle = Row<typeof schema.tables.battles>;
 export type Participants = Row<typeof schema.tables.battle_participants>;
 export type Hax = Row<typeof schema.tables.hax>;
+export type HaxHistory = Row<typeof schema.tables.hax_history>;
 export type Votes = Row<typeof schema.tables.battle_votes>;
 
 /**

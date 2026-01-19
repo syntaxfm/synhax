@@ -1,5 +1,6 @@
 :root {
-	--white: #fff;
+	color-scheme: dark;
+	--white: #f0efea;
 	--grey: #ddd;
 	--border: 1px solid var(--grey);
 
@@ -9,7 +10,6 @@
 	--tan: #f5eeda;
 	--hot: #ff45a8;
 	--teal: #00fff5;
-	--white: #f0efea;
 	--yellow: #fabf47;
 	--purp: #6e47ae;
 	--pink: #ef467d;
@@ -39,6 +39,7 @@
 body {
 	min-height: 100vh;
 	scrollbar-width: none;
+	background-image: url('/bg.png');
 	margin: 0;
 	> div {
 		min-height: 100vh;
@@ -63,20 +64,13 @@ iframe {
 	}
 }
 
-input {
-	background: transparent;
-	color: var(--white);
-	border: solid 1px rgb(255 255 255/ 0.4);
-	border-radius: 4px;
-	padding: 4px 8px;
-}
-
 .go_button {
 	background: var(--red);
 	border: 0;
 	padding: 8px 40px;
-	box-shadow: 0 3px 5px hsl(from #1c55fc h s 30 / 0.2);
-	box-shadow: 1px -4px rgb(255 255 255/ 0.1) inset;
+	box-shadow:
+		0 3px 5px hsl(from #1c55fc h s 30 / 0.2),
+		1px -4px rgb(255 255 255 / 0.1) inset;
 	text-shadow: 0.5px 0.5px 1px rgb(0 0 0 / 0.3);
 	&:hover {
 		background: hsl(from var(--red) h s 62%);
@@ -138,4 +132,388 @@ label {
 
 table {
 	font-size: 14px;
+}
+
+/* Status utilities - for battle/participant status indicators */
+.status-text {
+	text-transform: uppercase;
+	font-weight: 700;
+	font-size: 0.8rem;
+}
+
+.status-text.pending,
+.status-pending {
+	color: var(--yellow);
+}
+
+.status-text.active,
+.status-active {
+	color: var(--green, #22c55e);
+}
+
+.status-text.completed,
+.status-completed {
+	color: var(--primary);
+}
+
+.status-text.ready,
+.status-ready {
+	color: var(--green, #22c55e);
+}
+
+.status-text.dropped,
+.status-dropped {
+	color: var(--red);
+}
+
+/* Status badge - small uppercase label */
+.status-badge {
+	font-size: 0.75rem;
+	text-transform: uppercase;
+	font-weight: 600;
+}
+
+.status-badge.success,
+.status-badge.ready {
+	color: var(--green, #22c55e);
+}
+
+.status-badge.warning,
+.status-badge.pending {
+	color: var(--yellow);
+}
+
+.status-badge.error,
+.status-badge.dropped {
+	color: var(--red);
+}
+
+.card {
+	--blue: #eeeeee;
+	--blue-2: lch(from var(--blue) 60 c h);
+	padding: 10px;
+	background: linear-gradient(
+		-45deg,
+		var(--blue) 0%,
+		var(--blue-2) 50%,
+		var(--blue) 100%
+	);
+	border: solid 8px var(--blue);
+	border-bottom-color: var(--blue-2);
+	border-right-color: var(--blue-2);
+	overflow: hidden;
+	color: black;
+	&:hover {
+		transform: 0 1px;
+	}
+}
+
+/* Battle UI primitives */
+.battle-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	width: 100%;
+	margin: 0;
+	padding: 12px 16px;
+	text-transform: none;
+	border-top: 1px solid hsl(from var(--black) h s 2%);
+	border-bottom: 1px solid hsl(from var(--black) h s 2%);
+	background: linear-gradient(
+		180deg,
+		hsl(from var(--black) h s 10%),
+		hsl(from var(--black) h s 2%)
+	);
+	color: var(--fg);
+	box-shadow:
+		0 12px 30px rgb(0 0 0 / 0.35),
+		0 1px 0 rgb(255 255 255 / 0.05) inset;
+}
+
+.battle-header__title {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.battle-header__label {
+	font-size: 14px;
+	letter-spacing: 0.08em;
+	font-weight: 700;
+	text-transform: uppercase;
+}
+
+.battle-header__meta {
+	font-size: 10px;
+	opacity: 0.6;
+	font-weight: normal;
+}
+
+.battle-header__actions {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.battle-controls {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 18px;
+	align-items: center;
+}
+
+.battle-control {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.battle-control__label {
+	font-size: 11px;
+	letter-spacing: 0.12em;
+	font-weight: 600;
+	text-transform: uppercase;
+	color: var(--fg);
+	opacity: 0.55;
+}
+
+.battle-chip {
+	font-size: 13px;
+	padding: 6px 16px;
+	border-radius: 999px;
+	border: 1px solid rgb(255 255 255 / 0.2);
+	background: hsl(from var(--black) h s 8%);
+	color: var(--fg);
+	transition:
+		transform 0.15s ease,
+		box-shadow 0.2s ease,
+		background 0.2s ease;
+}
+
+.battle-chip.selected {
+	background: var(--yellow);
+	color: #111;
+	box-shadow: 0 0 0 1px rgb(255 255 255 / 0.1);
+	transform: translateY(-1px);
+}
+
+.battle-chip:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 6px 16px rgb(0 0 0 / 0.35);
+}
+
+.battle-icon-button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 36px;
+	height: 36px;
+	border-radius: 999px;
+	border: 1px solid rgb(255 255 255 / 0.15);
+	background: hsl(from var(--black) h s 8%);
+	color: var(--fg);
+	box-shadow: 0 6px 16px rgb(0 0 0 / 0.3);
+	transition:
+		transform 0.15s ease,
+		box-shadow 0.2s ease,
+		background 0.2s ease;
+}
+
+.battle-icon-button:hover {
+	transform: translateY(-1px);
+	background: hsl(from var(--black) h s 12%);
+	box-shadow: 0 10px 18px rgb(0 0 0 / 0.35);
+}
+
+.battle-icon-button svg {
+	width: 18px;
+	height: 18px;
+}
+
+.battle-opacity {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.battle-slider {
+	--thumb-size: 18px;
+	--track-height: 10px;
+	width: 180px;
+	min-width: 150px;
+	height: var(--thumb-size);
+	appearance: none;
+	background: transparent;
+	border-radius: 999px;
+	cursor: pointer;
+	padding: 0;
+	margin: 0;
+	border: 0;
+	outline: none;
+}
+
+.battle-slider::-webkit-slider-runnable-track {
+	height: var(--track-height);
+	background: linear-gradient(-90deg, var(--yellow), var(--yellow-2));
+	border-radius: 999px;
+	box-shadow: 0 0 0 1px rgb(255 255 255 / 0.15);
+	margin: 0 calc(var(--thumb-size) / -2);
+}
+
+.battle-slider::-webkit-slider-thumb {
+	appearance: none;
+	width: var(--thumb-size);
+	height: var(--thumb-size);
+	border-radius: 50%;
+	background: var(--white);
+	border: 2px solid var(--yellow);
+	box-shadow: 0 6px 12px rgb(0 0 0 / 0.4);
+	margin-top: calc((var(--track-height) - var(--thumb-size)) / 2);
+}
+
+.battle-slider::-moz-range-thumb {
+	width: var(--thumb-size);
+	height: var(--thumb-size);
+	border-radius: 50%;
+	background: var(--white);
+	border: 2px solid var(--yellow);
+	box-shadow: 0 6px 12px rgb(0 0 0 / 0.4);
+}
+
+.battle-slider::-moz-range-track {
+	height: var(--track-height);
+	background: linear-gradient(90deg, var(--yellow), var(--hot));
+	border-radius: 999px;
+	box-shadow: 0 0 0 1px rgb(255 255 255 / 0.15);
+}
+
+.battle-slider::-moz-range-progress {
+	height: var(--track-height);
+	background: linear-gradient(90deg, var(--yellow), var(--hot));
+	border-radius: 999px;
+}
+
+.battle-frame {
+	flex-shrink: 0;
+	overflow: hidden;
+	box-shadow:
+		0 0 0 1px rgb(255 255 255 / 0.1),
+		0 18px 30px rgb(0 0 0 / 0.35);
+	position: relative;
+}
+
+.battle-frame img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+}
+
+.battle-frame-shell {
+	flex: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	overflow: auto;
+	background: var(--black);
+	padding: var(--pad-m);
+}
+
+.battle-surface {
+	background: linear-gradient(
+		180deg,
+		hsl(from var(--black) h s 8%),
+		hsl(from var(--black) h s 2%)
+	);
+	border: 1px solid rgb(255 255 255 / 0.06);
+	box-shadow:
+		0 24px 40px rgb(0 0 0 / 0.35),
+		0 1px 0 rgb(255 255 255 / 0.04) inset;
+	border-radius: var(--br-xxl);
+	padding: clamp(1.5rem, 4vw, 3rem);
+	clip-path: path(
+		'M 0 12 C 0 5.4 5.4 0 12 0 L calc(100% - 12px) 0 C calc(100% - 5.4px) 0 100% 5.4px 100% 12 L 100% calc(100% - 12px) C 100% calc(100% - 5.4px) calc(100% - 5.4px) 100% calc(100% - 12px) 100% L 12px 100% C 5.4px 100% 0 calc(100% - 5.4px) 0 calc(100% - 12px) Z'
+	);
+}
+
+.battle-panel {
+	padding: clamp(1rem, 3vw, 2rem);
+	border-radius: var(--br-m);
+	background: hsl(from var(--black) h s 3%);
+	box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.04);
+}
+
+.battle-frame--bordered {
+	border-radius: var(--br-s);
+	border: 1px solid rgb(255 255 255 / 0.1);
+}
+
+.battle-panel {
+	padding: clamp(1rem, 3vw, 2rem);
+	border-radius: var(--br-m);
+	background: hsl(from var(--black) h s 3%);
+	box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.04);
+}
+
+.battle-button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem;
+	padding: 0.65rem 1.4rem;
+	border-radius: 999px;
+	border: 1px solid rgb(255 255 255 / 0.18);
+	background: hsl(from var(--black) h s 6%);
+	color: var(--yellow);
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	font-size: 0.85rem;
+	box-shadow:
+		0 10px 20px rgb(0 0 0 / 0.35),
+		0 1px 0 rgb(255 255 255 / 0.08) inset;
+	transition:
+		transform 0.15s ease,
+		box-shadow 0.2s ease,
+		background 0.2s ease;
+}
+
+.battle-button:hover {
+	background: hsl(from var(--black) h s 10%);
+	transform: translateY(-1px);
+	box-shadow:
+		0 14px 24px rgb(0 0 0 / 0.4),
+		0 1px 0 rgb(255 255 255 / 0.1) inset;
+}
+
+.battle-button--ghost {
+	background: transparent;
+	color: var(--fg);
+	border-color: rgb(255 255 255 / 0.12);
+	box-shadow: none;
+}
+
+.battle-button--ghost:hover {
+	background: hsl(from var(--black) h s 10%);
+	box-shadow: 0 8px 16px rgb(0 0 0 / 0.3);
+}
+
+.battle-card {
+	padding: var(--pad-m);
+	border-radius: var(--br-m);
+	background: hsl(from var(--black) h s 4%);
+	border: 1px solid rgb(255 255 255 / 0.08);
+	box-shadow:
+		0 12px 24px rgb(0 0 0 / 0.35),
+		0 1px 0 rgb(255 255 255 / 0.05) inset;
+}
+
+.battle-frame--bordered {
+	border-radius: var(--br-s);
+	border: 1px solid rgb(255 255 255 / 0.1);
+}
+
+.battle-frame-shell--surface {
+	background: hsl(from var(--black) h s 6%);
 }

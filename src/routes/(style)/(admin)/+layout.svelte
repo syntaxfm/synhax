@@ -82,7 +82,7 @@
 				<small>Admin Panel</small>
 			</div>
 		</aside>
-		<section class="stack" style="padding: var(--pad-l);">
+		<section class="stack battle-surface" style="padding: var(--pad-l);">
 			<Bread />
 			{@render children()}
 		</section>
@@ -99,7 +99,6 @@
 	aside {
 		padding: var(--pad-m);
 		border-radius: var(--br-m);
-		background: light-dark(var(--tan), var(--bg));
 	}
 
 	.avatar {

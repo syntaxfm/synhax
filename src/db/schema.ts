@@ -15,11 +15,29 @@ import {
 /* =========================
    Enums
    ========================= */
-export const relationship_type_enum = pgEnum('relationship_type', ['FOLLOW', 'FRIEND']);
-export const target_type_enum = pgEnum('target_type', ['CODE', 'IMAGE', 'VIDEO']);
-export const battle_status_enum = pgEnum('battle_status', ['PENDING', 'ACTIVE', 'COMPLETED']);
+export const relationship_type_enum = pgEnum('relationship_type', [
+	'FOLLOW',
+	'FRIEND'
+]);
+export const target_type_enum = pgEnum('target_type', [
+	'CODE',
+	'IMAGE',
+	'VIDEO'
+]);
+export const battle_status_enum = pgEnum('battle_status', [
+	'PENDING',
+	'ACTIVE',
+	'COMPLETED'
+]);
 export const visibility_enum = pgEnum('visibility', ['PUBLIC', 'PRIVATE']);
-export const battle_type_enum = pgEnum('battle_type', ['TIME_TRIAL', 'TIMED_MATCH']);
+export const battle_type_enum = pgEnum('battle_type', [
+	'TIME_TRIAL',
+	'TIMED_MATCH'
+]);
+export const win_condition_enum = pgEnum('win_condition', [
+	'VOTING', // Traditional: battle ends, then voting determines winner
+	'FIRST_TO_PERFECT' // Race: first to 100% diff_score wins instantly
+]);
 export const participant_status_enum = pgEnum('participant_status', [
 	'PENDING',
 	'READY',
@@ -28,8 +46,16 @@ export const participant_status_enum = pgEnum('participant_status', [
 	'FINISHED'
 ]);
 
-export const user_award_enum = pgEnum('user_award', ['MOST_ACCURATE', 'REAL_WORLD', 'BEST_FEEL']);
-export const award_outcome_enum = pgEnum('award_outcome', ['AWARDED', 'VOID_TIE', 'VOID_OTHER']);
+export const user_award_enum = pgEnum('user_award', [
+	'MOST_ACCURATE',
+	'REAL_WORLD',
+	'BEST_FEEL'
+]);
+export const award_outcome_enum = pgEnum('award_outcome', [
+	'AWARDED',
+	'VOID_TIE',
+	'VOID_OTHER'
+]);
 export const hax_type_enum = pgEnum('hax_type', ['BATTLE', 'SOLO']);
 
 /* =========================
@@ -38,6 +64,7 @@ export const hax_type_enum = pgEnum('hax_type', ['BATTLE', 'SOLO']);
 export const user = pgTable('user', {
 	id: text('id').primaryKey(),
 	name: text().notNull(),
+	username: text(),
 	email: text().notNull().unique(),
 	emailVerified: boolean('email_verified')
 		.$defaultFn(() => false)
@@ -96,8 +123,12 @@ export const verification = pgTable('verification', {
 	identifier: text('identifier').notNull(),
 	value: text('value').notNull(),
 	expiresAt: timestamp('expires_at').notNull(),
-	createdAt: timestamp('created_at').$defaultFn(() => /* @__PURE__ */ new Date()),
-	updatedAt: timestamp('updated_at').$defaultFn(() => /* @__PURE__ */ new Date())
+	createdAt: timestamp('created_at').$defaultFn(
+		() => /* @__PURE__ */ new Date()
+	),
+	updatedAt: timestamp('updated_at').$defaultFn(
+		() => /* @__PURE__ */ new Date()
+	)
 });
 
 /* =========================
@@ -114,11 +145,20 @@ export const user_relationships = pgTable(
 			.notNull()
 			.references(() => user.id, { onDelete: 'cascade' }),
 		type: relationship_type_enum('type').notNull(),
-		created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow()
+		created_at: timestamp('created_at', { withTimezone: true })
+			.notNull()
+			.defaultNow()
 	},
 	(t) => [
-		uniqueIndex('user_relationships_unique').on(t.user_id, t.related_user_id, t.type),
-		check('user_relationships_no_self', sql`${t.user_id} <> ${t.related_user_id}`)
+		uniqueIndex('user_relationships_unique').on(
+			t.user_id,
+			t.related_user_id,
+			t.type
+		),
+		check(
+			'user_relationships_no_self',
+			sql`${t.user_id} <> ${t.related_user_id}`
+		)
 	]
 );
 
@@ -166,11 +206,15 @@ export const battles = pgTable(
 		visibility: visibility_enum().notNull().default('PRIVATE'),
 		zero_room_id: text().notNull(),
 		type: battle_type_enum().notNull(),
+		win_condition: win_condition_enum().notNull().default('FIRST_TO_PERFECT'),
 		total_time_seconds: integer().notNull(),
 		overtime_seconds: integer(),
 		starts_at: timestamp({ withTimezone: true }),
 		ends_at: timestamp({ withTimezone: true }),
+		allow_time_extension: boolean().notNull().default(true),
 		revealed_at: timestamp({ withTimezone: true }),
+		// Winner tracking (for FIRST_TO_PERFECT mode) - stores the hax.id of the winner
+		winner_hax_id: uuid(),
 		created_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
 		updated_at: timestamp({ withTimezone: true }).notNull().defaultNow()
 	},
@@ -229,6 +273,9 @@ export const hax = pgTable(
 		submission_locked_at: timestamp({ withTimezone: true }),
 		is_final: boolean().notNull().default(false),
 		rendered_preview_url: text(),
+		// Live diff score (0-100) comparing user output to target
+		diff_score: integer(),
+		diff_score_updated_at: timestamp({ withTimezone: true }),
 		created_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
 		updated_at: timestamp({ withTimezone: true }).notNull().defaultNow()
 	},
@@ -247,6 +294,31 @@ export const hax_unique_user_target_solo = sql`
   on "hax" ("user_id","target_id")
   where "type" = 'SOLO';
 `;
+
+/* =========================
+   HAX_HISTORY (for playback/replay)
+   ========================= */
+export const hax_history = pgTable(
+	'hax_history',
+	{
+		id: uuid().primaryKey().defaultRandom(),
+		hax_id: uuid()
+			.notNull()
+			.references(() => hax.id, { onDelete: 'cascade' }),
+		html: text().notNull(),
+		css: text().notNull(),
+		// Milliseconds since battle started - for playback timing
+		elapsed_ms: integer().notNull(),
+		// Sequence number for ordering saves within a hax
+		sequence: integer().notNull(),
+		created_at: timestamp({ withTimezone: true }).notNull().defaultNow()
+	},
+	(t) => [
+		index('hax_history_by_hax').on(t.hax_id),
+		// Composite index for efficient playback queries (ordered by sequence)
+		index('hax_history_playback').on(t.hax_id, t.sequence)
+	]
+);
 
 /* =========================
    RATINGS
@@ -333,7 +405,10 @@ export const awards = pgTable(
 		updated_at: timestamp({ withTimezone: true }).notNull().defaultNow()
 	},
 	(t) => [
-		uniqueIndex('awards_unique_battle_award_type').on(t.battle_id, t.award_type),
+		uniqueIndex('awards_unique_battle_award_type').on(
+			t.battle_id,
+			t.award_type
+		),
 		index('awards_user_idx').on(t.user_id),
 		index('awards_battle_idx').on(t.battle_id)
 	]
@@ -382,18 +457,21 @@ export const user_relations = relations(user, ({ many }) => ({
 }));
 
 // UserRelationships → User
-export const user_relationships_relations = relations(user_relationships, ({ one }) => ({
-	user: one(user, {
-		fields: [user_relationships.user_id],
-		references: [user.id],
-		relationName: 'fromUser'
-	}),
-	relatedUser: one(user, {
-		fields: [user_relationships.related_user_id],
-		references: [user.id],
-		relationName: 'toUser'
+export const user_relationships_relations = relations(
+	user_relationships,
+	({ one }) => ({
+		user: one(user, {
+			fields: [user_relationships.user_id],
+			references: [user.id],
+			relationName: 'fromUser'
+		}),
+		relatedUser: one(user, {
+			fields: [user_relationships.related_user_id],
+			references: [user.id],
+			relationName: 'toUser'
+		})
 	})
-}));
+);
 
 // Battles → Target and Referee (User)
 export const battle_relations = relations(battles, ({ one, many }) => ({
@@ -410,22 +488,25 @@ export const battle_relations = relations(battles, ({ one, many }) => ({
 }));
 
 // BattleParticipants → Battle + User + Hax
-export const battle_participants_relations = relations(battle_participants, ({ one }) => ({
-	battle: one(battles, {
-		fields: [battle_participants.battle_id],
-		references: [battles.id]
-	}),
-	user: one(user, {
-		fields: [battle_participants.user_id],
-		references: [user.id]
-	}),
-	hax: one(hax, {
-		fields: [battle_participants.user_id, battle_participants.battle_id],
-		references: [hax.user_id, hax.battle_id]
+export const battle_participants_relations = relations(
+	battle_participants,
+	({ one }) => ({
+		battle: one(battles, {
+			fields: [battle_participants.battle_id],
+			references: [battles.id]
+		}),
+		user: one(user, {
+			fields: [battle_participants.user_id],
+			references: [user.id]
+		}),
+		hax: one(hax, {
+			fields: [battle_participants.user_id, battle_participants.battle_id],
+			references: [hax.user_id, hax.battle_id]
+		})
 	})
-}));
+);
 
-// Hax → User, Battle, Target, Votes
+// Hax → User, Battle, Target, Votes, History
 export const hax_relations = relations(hax, ({ one, many }) => ({
 	user: one(user, {
 		fields: [hax.user_id],
@@ -439,7 +520,16 @@ export const hax_relations = relations(hax, ({ one, many }) => ({
 		fields: [hax.target_id],
 		references: [targets.id]
 	}),
-	votes: many(battle_votes)
+	votes: many(battle_votes),
+	history: many(hax_history)
+}));
+
+// HaxHistory → Hax
+export const hax_history_relations = relations(hax_history, ({ one }) => ({
+	hax: one(hax, {
+		fields: [hax_history.hax_id],
+		references: [hax.id]
+	})
 }));
 
 // --- Ratings relations

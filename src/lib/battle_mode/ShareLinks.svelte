@@ -6,12 +6,16 @@
 		battle,
 		code = true,
 		watch = true,
-		vote = false
+		vote = false,
+		ref = false,
+		alwaysEnabled = false
 	}: {
 		battle: Battle;
 		code?: boolean;
 		watch?: boolean;
 		vote?: boolean;
+		ref?: boolean;
+		alwaysEnabled?: boolean;
 	} = $props();
 </script>
 
@@ -19,7 +23,7 @@
 	{#if code}
 		<Copybutton
 			label="Code"
-			disabled={battle.status !== 'PENDING'}
+			disabled={!alwaysEnabled && battle.status !== 'PENDING'}
 			link={`${PUBLIC_APP_URL}/battle/${battle.id}/lobby`}
 		/>
 	{/if}
@@ -27,7 +31,8 @@
 	{#if watch}
 		<Copybutton
 			label="Watch"
-			disabled={battle.visibility !== 'PUBLIC' || battle.status === 'COMPLETED'}
+			disabled={!alwaysEnabled &&
+				(battle.visibility !== 'PUBLIC' || battle.status === 'COMPLETED')}
 			link={`${PUBLIC_APP_URL}/battle/${battle.zero_room_id}/watch`}
 		/>
 	{/if}
@@ -35,8 +40,17 @@
 	{#if vote}
 		<Copybutton
 			label="Vote"
-			disabled={battle.visibility !== 'PUBLIC' || battle.status !== 'COMPLETED'}
+			disabled={!alwaysEnabled &&
+				(battle.visibility !== 'PUBLIC' || battle.status !== 'COMPLETED')}
 			link={`${PUBLIC_APP_URL}/battle/${battle.zero_room_id}/watch/vote`}
+		/>
+	{/if}
+
+	{#if ref}
+		<Copybutton
+			label="Ref"
+			disabled={!alwaysEnabled && battle.status === 'COMPLETED'}
+			link={`${PUBLIC_APP_URL}/ref/${battle.id}`}
 		/>
 	{/if}
 </div>

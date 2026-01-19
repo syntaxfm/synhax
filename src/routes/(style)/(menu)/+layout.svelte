@@ -1,16 +1,28 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
 	import { page } from '$app/state';
 	import { queries } from '$lib/queries';
 	import { z } from '$lib/zero.svelte';
+	import { files } from '$lib/state/FileState.svelte';
 
 	const { children } = $props();
 
 	const user = z.createQuery(queries.user.current());
+	const hideSidebarByDefault = $derived(
+		page.url.pathname.startsWith('/recap') ||
+			page.url.pathname.startsWith('/ref')
+	);
+
+	// Silently check if user already has file system permission
+	// This uses queryPermission() which doesn't require user interaction
+	if (browser) {
+		files.check();
+	}
 </script>
 
 <div class="fill-wrapper">
 	<header class="header">
-		<div class="logo">
+		<a class="logo" href="/dashboard">
 			<svg
 				width="200"
 				viewBox="0 0 948 177"
@@ -50,15 +62,19 @@
 					fill="var(--primary)"
 				/>
 			</svg>
-		</div>
+		</a>
 
 		<button class="avatar bordered" popovertarget="user-menu-1">
 			<img src={user.data?.image} alt={user?.data?.name} />
 		</button>
 	</header>
 
-	<div class="layout-sidebar fill" style="--layout-gap: 0; height: 100%;">
-		<aside class="split vertical">
+	<div
+		class="layout-sidebar fill"
+		class:sidebar-hidden={hideSidebarByDefault}
+		style="height: 100%;"
+	>
+		<aside class="split vertical battle-surface">
 			<nav class="sidebar-nav">
 				<a
 					href="/dashboard"
@@ -88,7 +104,7 @@
 				<small>v0.0.1</small>
 			</div>
 		</aside>
-		<section class="stack" style="padding: var(--pad-l);">
+		<section>
 			{@render children()}
 		</section>
 	</div>
@@ -97,18 +113,42 @@
 <style>
 	.fill-wrapper {
 		display: grid;
-		height: stretch;
+		min-height: 100vh;
+		height: 100vh;
 		grid-template-rows: auto 1fr;
 	}
 
+	.layout-sidebar {
+		min-height: 0;
+	}
+
+	.layout-sidebar > section {
+		min-height: 0;
+		display: flex;
+		flex-direction: column;
+	}
+
 	aside {
-		padding: var(--pad-m);
-		border-radius: var(--br-m);
-		background: light-dark(var(--tan), var(--bg));
+		padding: var(--pad-s);
+		a {
+			border-radius: var(--br-xxl);
+		}
+	}
+
+	.sidebar-nav {
+		gap: var(--vs-s);
 	}
 
 	.avatar {
 		border-color: var(--primary);
 		border-width: 2px;
+	}
+
+	.layout-sidebar.sidebar-hidden {
+		grid-template-columns: 1fr;
+	}
+
+	.layout-sidebar.sidebar-hidden > aside {
+		display: none;
 	}
 </style>

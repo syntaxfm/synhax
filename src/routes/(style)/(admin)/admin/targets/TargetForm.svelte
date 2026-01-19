@@ -8,6 +8,8 @@
 </script>
 
 <script lang="ts">
+	import { parseTargetCode, serializeTargetCode } from '$utils/code';
+
 	type Props = {
 		submitText?: string;
 		isLoading?: boolean;
@@ -29,10 +31,16 @@
 		}
 	}: Props = $props();
 
+	const initialCode = parseTargetCode(initial_target.inspo);
+
 	let name = $state(initial_target.name);
 	let image = $state(initial_target.image);
 	let type: 'CODE' | 'IMAGE' | 'VIDEO' = $state(initial_target.type);
 	let inspo = $state(initial_target.inspo);
+	let code_html = $state(
+		initial_target.type === 'CODE' ? initialCode.html : ''
+	);
+	let code_css = $state(initial_target.type === 'CODE' ? initialCode.css : '');
 
 	let imageUploading = $state(false);
 	let imageUploadError = $state('');
@@ -61,7 +69,8 @@
 			const { transform_url } = await uploadRes.json();
 			return transform_url;
 		} catch (error) {
-			imageUploadError = error instanceof Error ? error.message : 'Upload failed';
+			imageUploadError =
+				error instanceof Error ? error.message : 'Upload failed';
 			throw error;
 		} finally {
 			imageUploading = false;
@@ -90,7 +99,8 @@
 			const { raw_key } = await uploadRes.json();
 			return raw_key;
 		} catch (error) {
-			inspoUploadError = error instanceof Error ? error.message : 'Upload failed';
+			inspoUploadError =
+				error instanceof Error ? error.message : 'Upload failed';
 			throw error;
 		} finally {
 			inspoUploading = false;
@@ -128,16 +138,42 @@
 	function handleSubmit(e: Event) {
 		e.preventDefault();
 
-		if (!name || !image || !type || !inspo) {
+		const trimmedName = name.trim();
+		const trimmedImage = image.trim();
+		const trimmedInspo = inspo.trim();
+		const trimmedHtml = code_html.trim();
+		const trimmedCss = code_css.trim();
+
+		if (!trimmedName || !trimmedImage || !type) {
+			alert('Please fill out all fields');
+			return;
+		}
+
+		if (type === 'CODE') {
+			if (!trimmedHtml && !trimmedCss) {
+				alert('Please provide target HTML or CSS');
+				return;
+			}
+
+			onsubmit({
+				name: trimmedName,
+				image: trimmedImage,
+				type,
+				inspo: serializeTargetCode(trimmedHtml, trimmedCss)
+			});
+			return;
+		}
+
+		if (!trimmedInspo) {
 			alert('Please fill out all fields');
 			return;
 		}
 
 		onsubmit({
-			name,
-			image,
+			name: trimmedName,
+			image: trimmedImage,
 			type,
-			inspo
+			inspo: trimmedInspo
 		});
 	}
 
@@ -275,13 +311,22 @@
 		</div>
 	{:else}
 		<div class="field">
-			<label for="inspo">Inspiration</label>
+			<label for="code-html">Target HTML</label>
 			<textarea
-				id="inspo"
-				placeholder="Paste code snippet"
-				bind:value={inspo}
-				rows="4"
-				required
+				id="code-html"
+				placeholder="HTML for the target body"
+				bind:value={code_html}
+				rows="6"
+				disabled={isLoading}
+			></textarea>
+		</div>
+		<div class="field">
+			<label for="code-css">Target CSS</label>
+			<textarea
+				id="code-css"
+				placeholder="CSS for the target (no <style> tags)"
+				bind:value={code_css}
+				rows="6"
 				disabled={isLoading}
 			></textarea>
 		</div>
@@ -291,7 +336,12 @@
 		<button class="go_button" type="submit" disabled={isLoading}>
 			{isLoading ? 'Saving...' : submitText}
 		</button>
-		<button class="go_button red" type="button" onclick={handleCancel} disabled={isLoading}>
+		<button
+			class="go_button red"
+			type="button"
+			onclick={handleCancel}
+			disabled={isLoading}
+		>
 			Cancel
 		</button>
 	</div>

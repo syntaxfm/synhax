@@ -15,7 +15,7 @@ import { admin, jwt } from 'better-auth/plugins';
 import { betterAuth } from 'better-auth';
 
 // Sentry disabled on Cloudflare Workers due to edge runtime compatibility issues
-// TODO: Set up Sentry for Workers using @sentry/cloudflare-workers instead
+// See beads issue battle_mode-pfd for @sentry/cloudflare-workers setup
 
 const myErrorHandler = ({
 	error,
@@ -58,7 +58,18 @@ export const handle: Handle = async ({ event, resolve }) => {
 		socialProviders: {
 			github: {
 				clientId: GITHUB_CLIENT_ID,
-				clientSecret: GITHUB_CLIENT_SECRET
+				clientSecret: GITHUB_CLIENT_SECRET,
+				mapProfileToUser: (profile) => ({
+					username: profile.login
+				})
+			}
+		},
+		user: {
+			additionalFields: {
+				username: {
+					type: 'string',
+					required: false
+				}
 			}
 		},
 		plugins: [admin(), jwt()]

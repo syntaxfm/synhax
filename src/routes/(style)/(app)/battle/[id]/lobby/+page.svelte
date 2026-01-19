@@ -18,36 +18,49 @@
 	);
 
 	$effect(() => {
-		if (battle?.data?.status === 'ACTIVE') {
+		if (!battle.data) return;
+
+		if (battle.data.status === 'ACTIVE') {
 			goto(`/battle/${page.params.id}/code`);
+			return;
+		}
+
+		if (
+			battle.data.status === 'COMPLETED' &&
+			battle.data.win_condition === 'FIRST_TO_PERFECT'
+		) {
+			goto(`/recap/${page.params.id}`);
 		}
 	});
 </script>
 
-{#if battle.data}
-	<Header battle={battle.data}>
-		{#snippet detail()}
-			<h3>{remove_screaming(battle?.data?.type || '')}</h3>
-			<!-- <RefBanner battle={battle.data} /> -->
-			<!-- <p>Today's Referee: {battle?.data?.referee?.name}</p> -->
-			<ShareLinks battle={battle.data} code={false} />
-		{/snippet}
-		{#snippet countdown()}
-			<div>
-				{#if battle.data?.type === 'TIMED_MATCH'}
-					<Countdown battle={battle.data} />
-				{/if}
-			</div>
-		{/snippet}
-	</Header>
+<div class="card">
+	{#if battle.data}
+		{@const battleData = battle.data}
+		<Header battle={battleData} target>
+			{#snippet detail()}
+				<h3>{remove_screaming(battleData.type ?? '')}</h3>
+				<!-- <RefBanner battle={battle.data} /> -->
+				<!-- <p>Today's Referee: {battle?.data?.referee?.name}</p> -->
+				<ShareLinks battle={battleData} code={false} />
+			{/snippet}
+			{#snippet countdown()}
+				<div>
+					{#if battleData.type === 'TIMED_MATCH'}
+						<Countdown battle={battleData} />
+					{/if}
+				</div>
+			{/snippet}
+		</Header>
 
-	<Battlers battle={battle.data} join={true} />
+		<Battlers battle={battleData} join={true} />
 
-	{#if battle?.data?.status === 'ACTIVE'}
-		<p>Battle is currently active.</p>
-		<a href={`/battle/${battle.data.id}/code`}>Go to Battle</a>
+		{#if battleData.status === 'ACTIVE'}
+			<p>Battle is currently active.</p>
+			<a href={`/battle/${battleData.id}/code`}>Go to Battle</a>
+		{/if}
 	{/if}
-{/if}
+</div>
 
 <style>
 	h3 {

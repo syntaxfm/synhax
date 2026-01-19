@@ -2,24 +2,42 @@
 	import { CSS_TEMPLATE, HTML_TEMPLATE } from '$lib/constants';
 	import { files } from '$lib/state/FileState.svelte';
 	import Avatar from '$lib/ui/Avatar.svelte';
-	import { s, to_snake_case } from '$lib/user/utils';
+	import { s } from '$lib/user/utils';
 	import { z, queries, mutators } from '$lib/zero.svelte';
-	import { type Battle, type Participants, type Target } from '$sync/schema';
 	import { fade, fly } from 'svelte/transition';
+
+	type ParticipantStatus =
+		| 'PENDING'
+		| 'ACTIVE'
+		| 'READY'
+		| 'DROPPED'
+		| 'FINISHED'
+		| null;
+
+	type BattleJoin = {
+		id: string;
+		target_id: string | null;
+		participants: readonly { id: string }[];
+	};
+
+	type Participant = {
+		id: string;
+		status: ParticipantStatus;
+	};
 
 	const {
 		battle,
 		me_participant
 	}: {
-		battle: Battle & { participants: Participants[]; target: Target };
-		me_participant: Participants;
+		battle: BattleJoin;
+		me_participant?: Participant | null;
 	} = $props();
 
 	let me = z.createQuery(queries.user.current());
 
 	function join_battle() {
 		// Make sure target actually exists
-		if (battle?.target?.name) {
+		if (battle.target_id) {
 			// Create hax with files
 			z.mutate(
 				mutators.hax.insert({
@@ -33,8 +51,8 @@
 				})
 			);
 
-			// First create file structure for battle
-			files.create_hax_directory(to_snake_case(battle.target.name));
+			// First create file structure for battle (use battle ID for unique folders)
+			files.create_hax_directory(battle.id);
 
 			// Add self as a participant
 			z.mutate(

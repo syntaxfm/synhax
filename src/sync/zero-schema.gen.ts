@@ -282,6 +282,11 @@ const battlesTable = {
 			optional: false,
 			customType: null as unknown as 'TIME_TRIAL' | 'TIMED_MATCH'
 		},
+		win_condition: {
+			type: 'string',
+			optional: true,
+			customType: null as unknown as 'VOTING' | 'FIRST_TO_PERFECT'
+		},
 		total_time_seconds: {
 			type: 'number',
 			optional: false,
@@ -302,10 +307,20 @@ const battlesTable = {
 			optional: true,
 			customType: null as unknown as number
 		},
+		allow_time_extension: {
+			type: 'boolean',
+			optional: true,
+			customType: null as unknown as boolean
+		},
 		revealed_at: {
 			type: 'number',
 			optional: true,
 			customType: null as unknown as number
+		},
+		winner_hax_id: {
+			type: 'string',
+			optional: true,
+			customType: null as unknown as string
 		},
 		created_at: {
 			type: 'number',
@@ -378,12 +393,63 @@ const haxTable = {
 			optional: true,
 			customType: null as unknown as string
 		},
+		diff_score: {
+			type: 'number',
+			optional: true,
+			customType: null as unknown as number
+		},
+		diff_score_updated_at: {
+			type: 'number',
+			optional: true,
+			customType: null as unknown as number
+		},
 		created_at: {
 			type: 'number',
 			optional: true,
 			customType: null as unknown as number
 		},
 		updated_at: {
+			type: 'number',
+			optional: true,
+			customType: null as unknown as number
+		}
+	},
+	primaryKey: ['id']
+} as const;
+const haxHistoryTable = {
+	name: 'hax_history',
+	columns: {
+		id: {
+			type: 'string',
+			optional: false,
+			customType: null as unknown as string
+		},
+		hax_id: {
+			type: 'string',
+			optional: false,
+			customType: null as unknown as string
+		},
+		html: {
+			type: 'string',
+			optional: false,
+			customType: null as unknown as string
+		},
+		css: {
+			type: 'string',
+			optional: false,
+			customType: null as unknown as string
+		},
+		elapsed_ms: {
+			type: 'number',
+			optional: false,
+			customType: null as unknown as number
+		},
+		sequence: {
+			type: 'number',
+			optional: false,
+			customType: null as unknown as number
+		},
+		created_at: {
 			type: 'number',
 			optional: true,
 			customType: null as unknown as number
@@ -624,6 +690,11 @@ const userTable = {
 			optional: false,
 			customType: null as unknown as string
 		},
+		username: {
+			type: 'string',
+			optional: true,
+			customType: null as unknown as string
+		},
 		email: {
 			type: 'string',
 			optional: false,
@@ -848,6 +919,16 @@ const battleVotesRelationships = {
 		}
 	]
 } as const;
+const haxHistoryRelationships = {
+	hax: [
+		{
+			sourceField: ['hax_id'],
+			destField: ['id'],
+			destSchema: 'hax',
+			cardinality: 'one'
+		}
+	]
+} as const;
 const haxRelationships = {
 	user: [
 		{
@@ -878,6 +959,14 @@ const haxRelationships = {
 			sourceField: ['id'],
 			destField: ['nominee_hax_id'],
 			destSchema: 'battle_votes',
+			cardinality: 'many'
+		}
+	],
+	history: [
+		{
+			sourceField: ['id'],
+			destField: ['hax_id'],
+			destSchema: 'hax_history',
 			cardinality: 'many'
 		}
 	]
@@ -1000,6 +1089,7 @@ export const schema = {
 		battle_votes: battleVotesTable,
 		battles: battlesTable,
 		hax: haxTable,
+		hax_history: haxHistoryTable,
 		images: imagesTable,
 		jwks: jwksTable,
 		ratings: ratingsTable,
@@ -1013,6 +1103,7 @@ export const schema = {
 		battle_participants: battleParticipantsRelationships,
 		battles: battlesRelationships,
 		battle_votes: battleVotesRelationships,
+		hax_history: haxHistoryRelationships,
 		hax: haxRelationships,
 		images: imagesRelationships,
 		ratings: ratingsRelationships,
@@ -1071,6 +1162,13 @@ export type Battle = Row['battles'];
  * @deprecated Use Row["hax"] instead from "@rocicorp/zero".
  */
 export type Hax = Row['hax'];
+/**
+ * Represents a row from the "hax_history" table.
+ * This type is auto-generated from your Drizzle schema definition.
+ *
+ * @deprecated Use Row["hax_history"] instead from "@rocicorp/zero".
+ */
+export type HaxHistory = Row['hax_history'];
 /**
  * Represents a row from the "images" table.
  * This type is auto-generated from your Drizzle schema definition.

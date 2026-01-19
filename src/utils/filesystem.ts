@@ -33,7 +33,8 @@ export async function validate_and_load_project_files(
 
 		return { success: true, htmlHandle, cssHandle };
 	} catch (error) {
-		const errorMessage = `Error validating project "${projectName}": ${error.message}`;
+		const message = error instanceof Error ? error.message : String(error);
+		const errorMessage = `Error validating project "${projectName}": ${message}`;
 		return { success: false, error: errorMessage };
 	}
 }

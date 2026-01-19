@@ -85,7 +85,7 @@
 <style>
 	section {
 		display: grid;
-		color: var(--white);
+		color: var(--fg);
 		padding: 100px;
 		gap: 60px;
 		justify-content: center;

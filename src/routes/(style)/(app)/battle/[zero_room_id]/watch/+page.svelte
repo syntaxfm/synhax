@@ -17,29 +17,28 @@
 </script>
 
 {#if battle.data}
-	{#if battle.data.visibility === 'PUBLIC'}
-		<Header battle={battle.data}>
+	{@const battleData = battle.data}
+	{#if battleData.visibility === 'PUBLIC'}
+		<Header battle={battleData} target>
 			{#snippet detail()}
-				<p>Today's Referee: {battle?.data?.referee?.name}</p>
-				<h3>{remove_screaming(battle?.data?.type || '')}</h3>
-				<ShareLinks code={false} battle={battle.data} />
+				<p>Today's Referee: {battleData.referee?.name}</p>
+				<h3>{remove_screaming(battleData.type ?? '')}</h3>
+				<ShareLinks code={false} battle={battleData} />
 			{/snippet}
 			{#snippet countdown()}
-				{#if battle.data?.type === 'TIMED_MATCH'}
-					<Countdown battle={battle.data} view="WATCH" />
+				{#if battleData.type === 'TIMED_MATCH'}
+					<Countdown battle={battleData} view="WATCH" />
 				{/if}
 			{/snippet}
 		</Header>
 
-		<Battlers battle={battle.data} results={true} />
+		<Battlers battle={battleData} results={true} />
 	{:else}
 		<div class="private">
 			<p>This battle is private. Sorry.</p>
 		</div>
 	{/if}
 {/if}
-
-<!-- TODO code output -->
 
 <style>
 	.private {

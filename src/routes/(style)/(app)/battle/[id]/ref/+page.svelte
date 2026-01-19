@@ -16,10 +16,8 @@
 
 	let over_status: 'ACTIVE' | 'OVER' = $state('ACTIVE');
 	let controls_visible = $derived(
-		['PENDING', 'ACTIVE'].includes(battle.data?.status)
+		['PENDING', 'ACTIVE'].includes(battle.data?.status ?? '')
 	);
-
-
 
 	async function toggle_privacy() {
 		if (!battle.data) return;
@@ -43,7 +41,7 @@
 				ends_at: Date.now() + ot * 60 * 1000
 			})
 		);
-
+	}
 
 	function finish_battle() {
 		if (!battle.data) return;
@@ -63,10 +61,11 @@
 </script>
 
 {#if battle.data}
-	<Header battle={battle.data}>
+	{@const battleData = battle.data}
+	<Header battle={battleData} target>
 		{#snippet detail()}
 			<ShareLinks
-				battle={battle.data}
+				battle={battleData}
 				code={false}
 				watch={controls_visible}
 				vote={!controls_visible}
@@ -74,17 +73,24 @@
 		{/snippet}
 		{#snippet countdown()}
 			<!-- {#if battle.data.status === 'ACTIVE'} -->
-			<Countdown battle={battle.data} bind:status={over_status} view="REF" />
+			<Countdown
+				battle={battleData}
+				bind:status={over_status}
+				view="REF"
+				onautoend={battleData.allow_time_extension === false
+					? finish_battle
+					: undefined}
+			/>
 			<!-- {/if} -->
 		{/snippet}
 	</Header>
 
-	{#if battle.data.status === 'PENDING'}
+	{#if battleData.status === 'PENDING'}
 		<section class="settings" transition:fade>
 			<h2>Battle Settings</h2>
 
 			<ToggleButton
-				toggle={battle.data.visibility === 'PUBLIC'}
+				toggle={battleData.visibility === 'PUBLIC'}
 				ontoggle={toggle_privacy}
 				on_text="Public"
 				off_text="Private"
@@ -93,21 +99,21 @@
 			{#if controls_visible}
 				<Participants
 					locked_in_participants={locked_in_participants || []}
-					participants={battle.data?.participants || []}
+					participants={battleData.participants}
 				/>
 			{/if}
 		</section>
 	{/if}
-	<Battlers battle={battle.data} results={true} />
+	<Battlers battle={battleData} results={true} />
 
-	{#if battle.data?.type === 'TIMED_MATCH'}
+	{#if battleData.type === 'TIMED_MATCH' && battleData.allow_time_extension !== false}
 		<Modal
 			title="Time's Up!"
-			open={battle.data.status === 'ACTIVE' && over_status === 'OVER'}
+			open={battleData.status === 'ACTIVE' && over_status === 'OVER'}
 		>
 			<button
 				class="go_button big_button"
-				disabled={battle.data?.status !== 'ACTIVE' && over_status !== 'OVER'}
+				disabled={battleData.status !== 'ACTIVE' && over_status !== 'OVER'}
 				onclick={finish_battle}>Finish Battle</button
 			>
 
@@ -125,12 +131,6 @@
 		</Modal>
 	{/if}
 {/if}
-
-<!-- TODO SMall private toggle -->
-
-<!-- TODO time trial not showing ready unless time limit changed -->
-
-<!-- TODO add after completed, change interface to see votes, ability to reveal -->
 
 <style>
 	h2 {
@@ -182,7 +182,7 @@
 			&:hover,
 			&:focus-visible {
 				background: var(--yellow);
-				color: var(--black);
+				color: var(--bg);
 				border-color: var(--yellow);
 			}
 		}

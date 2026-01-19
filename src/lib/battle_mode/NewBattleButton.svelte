@@ -18,7 +18,7 @@
 				target_id,
 				zero_room_id,
 				type: 'TIME_TRIAL',
-				total_time_seconds: 0,
+				total_time_seconds: 600, // Default 10 minutes
 				overtime_seconds: 0,
 				referee_id: z.userID
 			})
@@ -28,7 +28,7 @@
 </script>
 
 {#if files.status === 'ACCESS'}
-	<button class="go_button" onclick={new_battle}>New Battle</button>
+	<button onclick={new_battle}>Start Battle</button>
 {:else}
 	<RequestAccess />
 {/if}

@@ -25,21 +25,9 @@
 	</div>
 </dialog>
 
-<!-- TODO modal don't close with escapte -->
-
 <style>
-	h3 {
-		background: var(--pink);
-		position: absolute;
-		padding: 6px 20px;
-		top: -30px;
-		left: 10px;
-		font-weight: 900;
-	}
 	dialog {
 		margin: auto;
-		background: var(--purp);
-		color: var(--white);
 		border: none;
 		z-index: 1;
 		overflow: visible;
@@ -51,18 +39,6 @@
 			z-index: 1;
 			text-align: center;
 			padding: 20px 20px 30px;
-			&:after {
-				content: '';
-				display: block;
-				position: absolute;
-				background: var(--purp);
-				inset: 0;
-				scale: 1.05;
-				rotate: 1deg;
-				z-index: -1;
-				box-shadow: 0 0 40px var(--black);
-				transition: all 0.2s ease;
-			}
 		}
 		:global(p) {
 			font-size: 24px;

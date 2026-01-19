@@ -2,7 +2,8 @@
 	import Highlight from 'svelte-highlight';
 	import css from 'svelte-highlight/languages/css';
 	import xml from 'svelte-highlight/languages/xml';
-	const { html_text, css_text }: { html_text: string; css_text: string } = $props();
+	const { html_text, css_text }: { html_text: string; css_text: string } =
+		$props();
 </script>
 
 <article class="stack">
@@ -28,7 +29,7 @@
 		border-bottom: 1px solid hsl(from var(--black) h s 2%);
 		background: hsl(from var(--black) h s 2%);
 		padding: 4px 10px 2px;
-		color: var(--white);
+		color: var(--fg);
 	}
 	.stack {
 		--stack-gap: 0;

@@ -5,5 +5,7 @@
 	const user = z.createQuery(queries.user.current());
 </script>
 
-<h1>Settings</h1>
-<Logout />
+<div class="battle-surface">
+	<h1>Settings</h1>
+	<Logout />
+</div>

@@ -3,6 +3,5 @@
 </script>
 
 <section>
-	<h3>Latest Targets</h3>
 	<TargetListing limit={10} />
 </section>

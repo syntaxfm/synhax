@@ -1,147 +1,393 @@
 <script lang="ts">
 	import AppFrame from '$lib/battle_mode/AppFrame.svelte';
-	import Debug from '$lib/Debug.svelte';
+	import CodeFrame from '$lib/battle_mode/CodeFrame.svelte';
+	import DiffEngine from '$lib/battle_mode/DiffEngine.svelte';
 	import type { Battle, Hax, Target } from '$sync/schema';
-	import Highlight from 'svelte-highlight';
-	import css from 'svelte-highlight/languages/css';
-	import xml from 'svelte-highlight/languages/xml';
-	import { Pane, Splitpanes } from 'svelte-splitpanes';
+	import { z, mutators } from '$lib/zero.svelte';
+	import { parseTargetCode } from '$utils/code';
+	type BattleWithParticipants = Battle & {
+		target?: Target | null;
+		participants?: readonly { hax?: Hax | null }[];
+	};
 
-	let { battle, hax }: { battle: Battle & { target: Target }; hax: Hax } =
-		$props();
+	let { battle, hax }: { battle: BattleWithParticipants; hax: Hax } = $props();
+
+	const opponentHax = $derived(
+		battle.participants?.find((participant) => participant.hax?.id !== hax.id)
+			?.hax
+	);
+
+	const targetImage = $derived(battle.target?.image ?? '');
+	const isCodeTarget = $derived(battle.target?.type === 'CODE');
+	const targetCode = $derived(parseTargetCode(battle.target?.inspo ?? ''));
+	const targetFrameData = $derived({
+		html: targetCode.html,
+		css: targetCode.css
+	});
+
+	// Iframe reference for DiffEngine
+	let iframeElement: HTMLIFrameElement | null = $state(null);
+	let targetIframeElement: HTMLIFrameElement | null = $state(null);
+
+	// DiffEngine reference to trigger comparisons
+	let diffEngine: DiffEngine | null = $state(null);
+
+	// Fixed dimensions for both panes (TODO: make configurable per target)
+	const FRAME_WIDTH = 600;
+	const FRAME_HEIGHT = 400;
+
+	// Overlay state: 'off', 'app', or 'diff'
+	type OverlayMode = 'off' | 'app' | 'diff';
+	let overlayMode: OverlayMode = $state('off');
+	let overlayOpacity = $state(50);
+
+	const showOverlayControls = $derived(true);
+
+	// Diff canvas for overlay (captured from DiffEngine)
+	let diffCanvasSrc: string | null = $state(null);
+
+	// Run diff for active and completed battles (so users can see their score)
+	const diffEnabled = $derived(
+		battle.status === 'ACTIVE' || battle.status === 'COMPLETED'
+	);
+
+	/**
+	 * Handle perfect score (100% accuracy)
+	 * For FIRST_TO_PERFECT: ends battle immediately with this hax as winner
+	 * For VOTING: no action (battle continues, voting determines winner)
+	 */
+	function handlePerfectScore() {
+		if (battle.status !== 'ACTIVE') return;
+
+		// Only auto-end for FIRST_TO_PERFECT mode
+		if (battle.win_condition !== 'FIRST_TO_PERFECT') {
+			console.log(
+				'🎯 Perfect score achieved! (Voting mode - battle continues)'
+			);
+			return;
+		}
+
+		console.log('🎯 Perfect score achieved! Ending battle - YOU WIN!');
+		z.mutate(
+			mutators.battles.update({
+				id: battle.id,
+				status: 'COMPLETED',
+				ends_at: Date.now(),
+				winner_hax_id: hax.id
+			})
+		);
+	}
+
+	/**
+	 * Called when iframe finishes loading - triggers diff comparison
+	 */
+	function handleIframeLoad() {
+		console.log('[BattleMode] Iframe loaded, triggering comparison');
+		diffEngine?.triggerCompare();
+	}
+
+	function handleTargetLoad() {
+		diffEngine?.triggerCompare();
+	}
+
+	/**
+	 * Handle diff canvas update from DiffEngine
+	 */
+	function handleDiffCanvasUpdate(canvas: HTMLCanvasElement | null) {
+		if (canvas) {
+			diffCanvasSrc = canvas.toDataURL();
+		}
+	}
+
+	/**
+	 * Toggle overlay mode - cycles through modes or sets specific
+	 */
+	function setOverlay(mode: OverlayMode) {
+		overlayMode = mode;
+	}
 </script>
 
 <section class="battle-mode">
-	<Splitpanes>
-		<Pane>
-			<!-- <Splitpanes horizontal={true}>
-				<Pane minSize={15}>
-					<article class="stack code">
-						<h2>HTML</h2>
-						<div class="wrap">
-							<Highlight language={xml} code={hax.html || ''} />
-						</div>
-					</article>
-				</Pane>
-				<Pane>
-					<article class="stack code">
-						<h2>CSS</h2>
-						<div class="wrap">
-							<Highlight language={css} code={hax.css || ''} />
-						</div>
-					</article>
-				</Pane>
-			</Splitpanes> -->
-			<div class="output stack">
-				<h2>Target</h2>
-				<img src={battle?.target?.image} alt="Battle Image" width="100%" />
+	<div class="output code-output">
+		<h2 class="battle-header">
+			<div class="battle-header__title">
+				<span class="battle-header__label">App</span>
+				<span class="battle-header__meta">{FRAME_WIDTH} × {FRAME_HEIGHT}</span>
 			</div>
-		</Pane>
-		<Pane minSize={20}>
-			<!-- <Splitpanes horizontal={true}>
-				<Pane minSize={15}>
-					<div class="output stack">
-						<h2>Target</h2>
-						<img src={battle?.target?.image} alt="Battle Image" width="100%" />
-					</div>
-				</Pane> -->
-			<!-- <Pane> -->
-			<div class="output stack code-output">
-				<h2>
-					App
-					<a target="_blank" href="/battle/{battle.id}/code/breakout"
-						><svg
-							xmlns="http://www.w3.org/2000/svg"
-							width="16"
-							height="16"
-							viewBox="0 0 24 24"
-							><title>launch</title><g
-								fill="#fff"
-								stroke-linejoin="miter"
-								stroke-linecap="butt"
-								><line
-									x1="11"
-									y1="13"
-									x2="22"
-									y2="2"
-									fill="none"
-									stroke="#fff"
-									stroke-miterlimit="10"
-									stroke-width="2"
-								></line><polyline
-									points="14 2 22 2 22 10"
-									fill="none"
-									stroke="#fff"
-									stroke-linecap="square"
-									stroke-miterlimit="10"
-									stroke-width="2"
-								></polyline><path
-									d="M9,4H4A2,2,0,0,0,2,6V20a2,2,0,0,0,2,2H18a2,2,0,0,0,2-2V15"
-									fill="none"
-									stroke="#fff"
-									stroke-linecap="square"
-									stroke-miterlimit="10"
-									stroke-width="2"
-								></path></g
-							></svg
-						></a
+			<div class="battle-header__actions">
+				<a
+					class="battle-icon-button"
+					target="_blank"
+					href="/battle/{battle.id}/code/breakout"
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="16"
+						height="16"
+						viewBox="0 0 24 24"
 					>
-				</h2>
-				<AppFrame {hax} />
+						<title>launch</title>
+						<g fill="none" stroke-linejoin="miter" stroke-linecap="butt">
+							<line
+								x1="11"
+								y1="13"
+								x2="22"
+								y2="2"
+								stroke="currentColor"
+								stroke-miterlimit="10"
+								stroke-width="2"
+							/>
+							<polyline
+								points="14 2 22 2 22 10"
+								stroke="currentColor"
+								stroke-linecap="square"
+								stroke-miterlimit="10"
+								stroke-width="2"
+							/>
+							<path
+								d="M9,4H4A2,2,0,0,0,2,6V20a2,2,0,0,0,2,2H18a2,2,0,0,0,2-2V15"
+								stroke="currentColor"
+								stroke-linecap="square"
+								stroke-miterlimit="10"
+								stroke-width="2"
+							/>
+						</g>
+					</svg>
+				</a>
 			</div>
-			<!-- </Pane>
-			</Splitpanes> -->
-		</Pane>
-	</Splitpanes>
+		</h2>
+		<div class="battle-frame-shell">
+			<div
+				class="cluster battle-frame-layout"
+				style="--gap: var(--pad-m); justify-content: center;"
+			>
+				<div
+					class="battle-frame"
+					style:width="{FRAME_WIDTH}px"
+					style:height="{FRAME_HEIGHT}px"
+				>
+					<AppFrame {hax} bind:iframeElement onload={handleIframeLoad} />
+				</div>
+				{#if opponentHax}
+					<div class="stack opponent-column" style="--gap: var(--pad-xs);">
+						<span class="opponent-label">Opponent Code</span>
+						<div
+							class="opponent-code-frame"
+							style:width="{FRAME_WIDTH}px"
+							style:height="{FRAME_HEIGHT}px"
+						>
+							<CodeFrame
+								html_text={opponentHax.html}
+								css_text={opponentHax.css}
+							/>
+						</div>
+					</div>
+				{/if}
+			</div>
+		</div>
+	</div>
+	<div class="output">
+		<h2 class="battle-header">
+			<div class="battle-header__title">
+				<span class="battle-header__label">Target</span>
+			</div>
+			<div class="battle-controls">
+				{#if showOverlayControls}
+					<div class="battle-control">
+						<span class="battle-control__label">Overlay</span>
+						<div class="cluster" style="--gap: 8px;">
+							<button
+								class="battle-chip"
+								class:selected={overlayMode === 'app'}
+								onclick={() =>
+									setOverlay(overlayMode === 'app' ? 'off' : 'app')}
+							>
+								App
+							</button>
+							<button
+								class="battle-chip"
+								class:selected={overlayMode === 'diff'}
+								onclick={() =>
+									setOverlay(overlayMode === 'diff' ? 'off' : 'diff')}
+							>
+								Diff
+							</button>
+						</div>
+					</div>
+					<div class="battle-control">
+						<span class="battle-control__label">Opacity</span>
+						<div class="battle-opacity">
+							<input
+								type="range"
+								class="battle-slider"
+								min="0"
+								max="100"
+								bind:value={overlayOpacity}
+								title="Overlay opacity: {overlayOpacity}%"
+							/>
+						</div>
+					</div>
+				{/if}
+			</div>
+		</h2>
+		<div class="battle-frame-shell">
+			<div
+				class="battle-frame"
+				style:width="{FRAME_WIDTH}px"
+				style:height="{FRAME_HEIGHT}px"
+			>
+				{#if isCodeTarget}
+					<div class="target-preview-layer">
+						<AppFrame
+							hax={targetFrameData}
+							bind:iframeElement={targetIframeElement}
+							onload={handleTargetLoad}
+						/>
+					</div>
+				{:else}
+					<img
+						src={targetImage}
+						alt="Battle Image"
+						width={FRAME_WIDTH}
+						height={FRAME_HEIGHT}
+					/>
+				{/if}
 
-	<Debug />
+				<!-- Overlay layer -->
+				{#if showOverlayControls}
+					{#if overlayMode === 'app'}
+						<div
+							class="overlay app-overlay"
+							style:opacity={overlayOpacity / 100}
+						>
+							<AppFrame {hax} />
+						</div>
+					{:else if overlayMode === 'diff' && diffCanvasSrc}
+						<div
+							class="overlay diff-overlay"
+							style:opacity={overlayOpacity / 100}
+						>
+							<img src={diffCanvasSrc} alt="Diff overlay" />
+						</div>
+					{/if}
+				{/if}
+			</div>
+		</div>
+	</div>
+
+	<!-- DiffEngine: computes diff and saves to DB via Zero mutators -->
+	<DiffEngine
+		bind:this={diffEngine}
+		contestantIframe={iframeElement}
+		targetImageSrc={isCodeTarget ? null : targetImage}
+		targetIframe={isCodeTarget ? targetIframeElement : null}
+		haxId={hax.id}
+		currentScore={hax.diff_score}
+		compareWidth={FRAME_WIDTH}
+		compareHeight={FRAME_HEIGHT}
+		enabled={diffEnabled}
+		onPerfectScore={handlePerfectScore}
+		onDiffCanvasUpdate={handleDiffCanvasUpdate}
+		debug={false}
+	/>
 </section>
 
 <style>
 	.battle-mode {
 		display: grid;
-		height: 100vh;
-		grid-template-rows: minmax(0, 1fr) auto;
-	}
-
-	h2 {
-		margin: 0;
-		font-size: 12px;
-		text-transform: uppercase;
-		border-top: 1px solid hsl(from var(--black) h s 2%);
-		border-bottom: 1px solid hsl(from var(--black) h s 2%);
-		background: hsl(from var(--black) h s 2%);
-		padding: 4px 10px 2px;
-		color: var(--white);
-		display: flex;
-		justify-content: space-between;
-		width: 100%;
-	}
-
-	article {
-		background: #1c1e26;
+		grid-template-rows: repeat(2, minmax(0, 1fr));
 		height: 100%;
+		min-height: 0;
 	}
+
 	:global(.splitpanes__splitter) {
 		border-inline: var(--border);
 	}
+
 	.output {
 		height: 100%;
-		img {
-			max-height: 100%;
-			width: auto;
-		}
+		display: flex;
+		flex-direction: column;
+		min-height: 0;
 	}
+
 	.code-output {
 		height: 100%;
 	}
-	.stack {
-		align-items: center;
-		&.code {
-			align-items: start;
-		}
+
+	.opponent-label {
+		font-size: 10px;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--fg);
+		opacity: 0.6;
 	}
-	.wrap {
-		padding: 10px;
+
+	.opponent-code-frame {
+		overflow: hidden;
+		border-radius: var(--br-s);
+		border: 1px solid rgb(255 255 255 / 0.1);
+		background: hsl(from var(--black) h s 2%);
+	}
+
+	.opponent-code-frame :global(pre) {
+		margin: 0;
+	}
+
+	.opponent-code-frame :global(code) {
+		font-size: 12px;
+	}
+
+	.battle-frame {
+		flex-shrink: 0;
+		overflow: hidden;
+		position: relative;
+	}
+
+	.target-preview-layer,
+	.target-code-layer {
+		position: absolute;
+		inset: 0;
+	}
+
+	.target-preview-layer {
+		z-index: 0;
+	}
+
+	.target-code-layer {
+		z-index: 1;
+		overflow: auto;
+		background: var(--black);
+	}
+
+	.target-code-layer :global(pre) {
+		margin: 0;
+	}
+
+	a {
+		margin-bottom: 0;
+	}
+
+	/* Overlay layers */
+	.battle-frame {
+		position: relative;
+	}
+
+	.overlay {
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
+	}
+
+	.app-overlay :global(iframe) {
+		width: 100%;
+		height: 100%;
+		border: none;
+	}
+
+	.diff-overlay img {
+		width: 100%;
+		height: 100%;
+		object-fit: contain;
 	}
 </style>

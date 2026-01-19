@@ -1,67 +1,84 @@
 <script lang="ts">
 	import { CSS_TEMPLATE, HTML_TEMPLATE } from '$lib/constants';
 	import { files } from '$lib/state/FileState.svelte';
-	import { to_snake_case } from '$lib/user/utils';
 	import { mutators, z } from '$lib/zero.svelte';
-	import type {
-		Battle,
-		Hax,
-		Participants,
-		Target,
-		User,
-		Votes
-	} from '$sync/schema';
+	import PlayerCard from './PlayerCard.svelte';
+
+	type ParticipantStatus =
+		| 'PENDING'
+		| 'ACTIVE'
+		| 'READY'
+		| 'DROPPED'
+		| 'FINISHED'
+		| null;
+
+	type Battler = {
+		id: string;
+		user_id: string;
+		status: ParticipantStatus;
+		user?: {
+			name: string;
+			username?: string | null;
+			image?: string | null;
+		};
+		hax?: {
+			id: string;
+		} | null;
+	};
+
+	type BattleWithParticipants = {
+		id: string;
+		target_id: string | null;
+		target?: {
+			name?: string | null;
+		} | null;
+		participants: readonly Battler[];
+	};
 
 	const {
 		battle
 	}: {
-		battle: Battle & {
-			target: Target;
-			participants: readonly (Participants & {
-				user: User;
-				hax: Hax & { votes: readonly Votes[] };
-			})[];
-		};
+		battle: BattleWithParticipants;
 	} = $props();
 
 	let me_participant = $derived(
-		battle?.participants.find((p: Participants) => p.user_id === z.userID)
+		battle.participants.find((participant) => participant.user_id === z.userID)
 	);
 
 	function join_battle() {
 		// Make sure target actually exists
-		if (battle?.target?.name) {
+		if (battle.target?.name) {
 			// Create hax with files
 			z.mutate(
 				mutators.hax.insert({
 					id: crypto.randomUUID(),
 					user_id: z.userID,
-					target_id: battle?.target_id || '',
-					battle_id: battle?.id || '',
+					target_id: battle.target_id || '',
+					battle_id: battle.id,
 					html: HTML_TEMPLATE,
 					css: CSS_TEMPLATE,
 					type: 'BATTLE'
 				})
 			);
 
-			// First create file structure for battle
-			files.create_hax_directory(to_snake_case(battle.target.name));
+			// First create file structure for battle (use battle ID for unique folders)
+			files.create_hax_directory(battle.id);
 
 			// Add self as a participant
 			z.mutate(
 				mutators.battle_participants.insert({
 					id: crypto.randomUUID(),
-					battle_id: battle?.id || '',
+					battle_id: battle.id,
 					user_id: z.userID,
 					status: 'PENDING' as const,
-					display_order: battle?.participants.length || 0
+					display_order: battle.participants.length
 				})
 			);
 		}
 	}
 
 	function leave_battle() {
-		if (me_participant && battle?.id) {
+		if (me_participant) {
 			z.mutate(
 				mutators.battle_participants.delete({
 					id: me_participant.id
@@ -75,19 +92,25 @@
 			z.mutate(
 				mutators.battle_participants.upsert({
 					id: me_participant.id,
-					battle_id: battle?.id || '',
+					battle_id: battle.id,
 					user_id: z.userID,
 					status: 'READY' as const
 				})
 			);
 		}
 	}
-
-	$inspect(me_participant);
 </script>
 
-<button onclick={join_battle}>Join</button>
+<section class="stack">
+	<h2>Battlers</h2>
 
-{#each battle.participants as battler}
-	<img src={battler.user.image} alt="" />
-{/each}
+	{#if !me_participant}
+		<button class="battle-button" onclick={join_battle}>Join Battle</button>
+	{/if}
+
+	<div class="layout-card" style="--min-card-width: 180px;">
+		{#each battle.participants as battler}
+			<PlayerCard {battler} onlockin={lock_in} onleave={leave_battle} />
+		{/each}
+	</div>
+</section>

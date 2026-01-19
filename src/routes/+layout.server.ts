@@ -1,9 +1,9 @@
-import type { PageServerLoad } from './(style)/$types';
+import type { LayoutServerLoad, LayoutServerLoadEvent } from './$types';
 
 export const ssr = false;
 
-export const load: PageServerLoad = async ({ locals }) => {
+export const load: LayoutServerLoad = async (event: LayoutServerLoadEvent) => {
 	return {
-		user: locals.user
+		user: event.locals.user
 	};
 };

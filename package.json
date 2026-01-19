@@ -56,6 +56,7 @@
 		"@tanstack/match-sorter-utils": "^8.19.4",
 		"@tanstack/svelte-table": "npm:tanstack-table-8-svelte-5@^0.1",
 		"@tanstack/table-core": "^8.21.3",
+		"@zumer/snapdom": "^2.0.1",
 		"arktype": "^2.1.29",
 		"better-auth": "^1.4.10",
 		"dotenv": "^17.2.3",

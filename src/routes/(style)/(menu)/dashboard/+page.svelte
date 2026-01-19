@@ -4,4 +4,10 @@
 	import { z, queries } from '$lib/zero.svelte';
 </script>
 
-<LatestTargets />
+<section class="stack battle-surface" style="--gap: 1.5rem;">
+	<header class="stack" style="--gap: 0.5rem; text-align: center;">
+		<h1>Latest Targets</h1>
+		<p class="muted">Jump into a new battle or practice.</p>
+	</header>
+	<LatestTargets />
+</section>

@@ -35,6 +35,9 @@ importers:
       '@tanstack/table-core':
         specifier: ^8.21.3
         version: 8.21.3
+      '@zumer/snapdom':
+        specifier: ^2.0.1
+        version: 2.0.1
       arktype:
         specifier: ^2.1.29
         version: 2.1.29
@@ -2772,6 +2775,9 @@ packages:
 
   '@types/trusted-types@2.0.7':
     resolution: {integrity: sha512-ScaPdn1dQczgbl0QFTeTOmVHFULt394XJgOQNoyVhZ6r2vLnMLJfBPd53SB52T/3G36VI1/g2MZaX0cwDuXsfw==}
+
+  '@zumer/snapdom@2.0.1':
+    resolution: {integrity: sha512-78/qbYl2FTv4H6qaXcNfAujfIOSzdvs83NW63VbyC9QA3sqNPfPvhn4xYMO6Gy11hXwJUEhd0z65yKiNzDwy9w==}
 
   abstract-logging@2.0.1:
     resolution: {integrity: sha512-2BjRTZxTPvheOvGbBslFSYOUkr+SjPtOnrLP33f+VIWLzezQpZcqVg7ja3L4dBXmzzgwT+a029jRx5PCi3JuiA==}
@@ -7725,6 +7731,8 @@ snapshots:
       '@types/node': 25.0.3
 
   '@types/trusted-types@2.0.7': {}
+
+  '@zumer/snapdom@2.0.1': {}
 
   abstract-logging@2.0.1: {}
 

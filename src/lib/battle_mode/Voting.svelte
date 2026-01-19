@@ -1,17 +1,25 @@
 <script lang="ts">
 	import { BATTLE_AWARDS } from '$lib/constants';
 	import { z, queries, mutators } from '$lib/zero.svelte';
-	import type { Battle, Hax, Participants, User } from '$sync/schema';
 	import { remove_screaming } from '$utils/formatting';
+
+	type BattleRef = {
+		id: string;
+	};
+
+	type Nominee = {
+		hax: {
+			id: string;
+		};
+	};
 
 	const {
 		battle,
 		participant
 	}: {
-		battle: Battle;
-		participant: Participants & { user: User; hax: Hax };
+		battle: BattleRef;
+		participant: Nominee;
 	} = $props();
-	// TODO voting updating broken
 
 	let votes = $derived.by(() =>
 		z.createQuery(

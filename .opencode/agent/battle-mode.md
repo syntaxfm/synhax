@@ -71,6 +71,61 @@ Use for:
 - Combining Zero patterns with Svelte 5 runes
 - Any component in `src/lib/` that reads/writes Zero data
 
+## Zero Data Flow
+
+**Zero is the state of the app.** All synced data flows through Zero - never use
+local Svelte state (`$state`) for data that should be persisted or synced.
+
+### The Pattern
+
+```
+User Action
+    → Call mutator: z.mutate(mutators.table.update({ ... }))
+    → Zero syncs to server and other clients
+    → Zero query data updates reactively
+    → UI reads from query, updates automatically
+```
+
+### Rules
+
+1. **Read from Zero queries** - Use `z.createQuery()` to get data, pass it to
+   components as props
+2. **Write via Zero mutators** - All data changes go through
+   `z.mutate(mutators.*)`, never direct state updates
+3. **No local state for synced data** - Don't duplicate Zero data in `$state`.
+   If you need derived values, use `$derived` from the query data
+4. **Components are "dumb"** - They receive data as props from queries, emit
+   changes via mutators. Zero handles reactivity.
+
+### Example: Diff Score
+
+```svelte
+<!-- WRONG: Local state duplicates Zero data -->
+<script>
+  let score = $state(null); // Don't do this!
+  // ... compute score ...
+  score = result; // Local state gets out of sync
+</script>
+
+<!-- RIGHT: Read from Zero, write via mutator -->
+<script>
+  let { hax } = $props(); // hax comes from Zero query
+
+  // Write: save to DB via mutator
+  z.mutate(mutators.hax.update({ id: hax.id, diff_score: newScore }));
+
+  // Read: use query data directly
+  // hax.diff_score updates automatically when Zero syncs
+</script>
+<DiffPreview score={hax.diff_score} />
+```
+
+### When Local State IS Appropriate
+
+- UI-only state (modal open/closed, form input before submit)
+- Ephemeral state (hover states, animation progress)
+- Derived computations from Zero data (use `$derived`)
+
 ## Core Concepts
 
 ### Battles
@@ -99,6 +154,29 @@ This project uses [Graffiti UI](https://graffiti-ui.com) for CSS utilities and
 components. **Before writing any HTML or CSS**, check
 https://graffiti-ui.com/llms.txt for the proper Graffiti patterns and utility
 classes.
+
+### ALWAYS use Graffiti for:
+
+- **Layouts**: Use `class="cluster"`, `class="stack"`, `class="sidebar"`,
+  `class="switcher"`, `class="grid"`, `class="layout-card"` etc.
+- **Spacing**: Use `--gap` custom properties instead of custom margin/padding
+- **Typography**: Use Graffiti type utilities
+- **Buttons/Forms**: Use existing Graffiti button classes like `button`,
+  `go_button`, `big_button`
+
+### AVOID writing custom CSS for:
+
+- Flexbox layouts (use `cluster`, `stack`, `sidebar` instead)
+- Grid layouts (use `grid`, `layout-card` instead)
+- Basic spacing (use `--gap` props or Graffiti spacing)
+- Common UI patterns that Graffiti already handles
+
+### Only write custom CSS when:
+
+- Graffiti doesn't have an equivalent utility
+- Component-specific styling that can't be achieved with utilities
+- Animation/transition effects
+- Very specific visual design requirements
 
 ## Svelte 5 Rules
 

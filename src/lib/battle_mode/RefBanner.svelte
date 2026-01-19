@@ -22,7 +22,7 @@
 		padding: 1em;
 		text-align: center;
 		a {
-			color: var(--white);
+			color: var(--fg);
 		}
 	}
 </style>

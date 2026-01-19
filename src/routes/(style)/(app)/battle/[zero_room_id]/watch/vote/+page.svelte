@@ -19,14 +19,15 @@
 </script>
 
 {#if battle.data && battle.data.visibility === 'PUBLIC'}
-	<Header battle={battle.data}>
+	{@const battleData = battle.data}
+	<Header battle={battleData} target>
 		{#snippet detail()}
 			<div class="res">
-				<p>Battle Type:{remove_screaming(battle?.data?.type || '')}</p>
-				<p>Today's Referee: {battle?.data?.referee?.name}</p>
+				<p>Battle Type:{remove_screaming(battleData.type ?? '')}</p>
+				<p>Today's Referee: {battleData.referee?.name}</p>
 				<ShareLinks
 					code={false}
-					battle={battle.data}
+					battle={battleData}
 					watch={false}
 					vote={true}
 				/>
@@ -34,7 +35,7 @@
 		{/snippet}
 		{#snippet countdown()}{/snippet}
 	</Header>
-	<Battlers battle={battle.data} votes={true} {scores} />
+	<Battlers battle={battleData} votes={true} {scores} />
 {/if}
 
 <style>

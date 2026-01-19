@@ -2,6 +2,12 @@ import { CSS_TEMPLATE, HTML_TEMPLATE } from '$lib/constants';
 import { validate_and_load_project_files } from '$utils/filesystem';
 import { z, mutators } from '$lib/zero.svelte';
 
+type HaxHistoryContext = {
+	battle_starts_at: number | null;
+	current_html: string;
+	current_css: string;
+};
+
 export class FileState {
 	status: 'INITIAL' | 'NO_ACCESS' | 'ACCESS' | 'ERROR' = $state('INITIAL');
 	error = $state('');
@@ -282,7 +288,11 @@ export class FileState {
 		}
 	}
 
-	async read_and_apply_project_files(id: string, force: boolean) {
+	async read_and_apply_project_files(
+		id: string | undefined,
+		force: boolean,
+		history_context?: HaxHistoryContext
+	) {
 		if (
 			!this.project_directory_handle ||
 			!this.synhax_directory_handle ||
@@ -302,10 +312,10 @@ export class FileState {
 		const css_mtime = css_file?.lastModified;
 		const css_text = await css_file?.text();
 
-		// Check if HTML file has changed
+		// Check if HTML file has changed (by mtime)
 		const html_changed = force || html_mtime !== this.html_mtime;
 
-		// Check if CSS file has changed
+		// Check if CSS file has changed (by mtime)
 		const css_changed = force || css_mtime !== this.css_mtime;
 
 		if (html_changed) {
@@ -316,12 +326,29 @@ export class FileState {
 			this.css_mtime = css_mtime;
 			this.save_css(id, css_text);
 		}
+
+		// Save history if content actually changed (dedup by comparing to current hax content)
+		if (history_context && (html_changed || css_changed)) {
+			const content_changed =
+				html_text !== history_context.current_html ||
+				css_text !== history_context.current_css;
+
+			if (content_changed) {
+				this.save_history(
+					id,
+					html_text,
+					css_text,
+					history_context.battle_starts_at
+				);
+			}
+		}
 	}
 
 	async save_html(id: string, text: string) {
 		z.mutate(
 			mutators.hax.update({
 				id,
+				user_id: z.userID,
 				html: text,
 				updated_at: Date.now()
 			})
@@ -332,13 +359,40 @@ export class FileState {
 		z.mutate(
 			mutators.hax.update({
 				id,
+				user_id: z.userID,
 				css: text,
 				updated_at: Date.now()
 			})
 		);
 	}
 
+	async save_history(
+		hax_id: string,
+		html: string,
+		css: string,
+		battle_starts_at: number | null
+	) {
+		// Calculate elapsed time since battle started
+		const elapsed_ms = battle_starts_at ? Date.now() - battle_starts_at : 0;
+
+		// Use elapsed_ms as sequence - it's monotonically increasing and
+		// provides natural ordering for playback
+		z.mutate(
+			mutators.hax_history.insert({
+				id: crypto.randomUUID(),
+				hax_id,
+				html,
+				css,
+				elapsed_ms,
+				sequence: elapsed_ms
+			})
+		);
+	}
+
 	async check() {
+		if (typeof window === 'undefined') {
+			return;
+		}
 		// Check to see if handle exists and is valid.
 		// Only checks existing permission, does NOT request (no user gesture needed)
 		const hasAccess = await this.check_existing_permission();

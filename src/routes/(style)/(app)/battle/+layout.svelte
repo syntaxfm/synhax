@@ -8,18 +8,9 @@
 </script>
 
 <svelte:head>
-	{@html "<style>" + sentinel + "</style>"}
+	{@html `<style>${sentinel}</style>`}
 </svelte:head>
 
-<div class="grid">
+<div>
 	{@render children()}
 </div>
-
-
-<style>
-	.grid {
-		display: grid;
-		grid-template-rows: auto 1fr;
-		height: 100%;
-	}
-</style>

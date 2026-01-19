@@ -2,8 +2,42 @@
 	import '@awesome.me/webawesome/dist/components/tab-group/tab-group.js';
 	import Avatar from '$lib/ui/Avatar.svelte';
 	import { s } from '$lib/user/utils';
-	import type { Battle, Participants, User, Hax, Votes } from '$sync/schema';
 	import AppFrame from './AppFrame.svelte';
+
+	type BattleStatus = 'PENDING' | 'ACTIVE' | 'COMPLETED' | null;
+	type ParticipantStatus =
+		| 'PENDING'
+		| 'ACTIVE'
+		| 'READY'
+		| 'DROPPED'
+		| 'FINISHED'
+		| null;
+
+	type ParticipantUser = {
+		name: string;
+		avatar: string | null;
+	};
+
+	type ParticipantHax = {
+		id: string;
+		html: string;
+		css: string;
+	};
+
+	type BattleParticipant = {
+		id: string;
+		user_id: string;
+		status: ParticipantStatus;
+		user?: ParticipantUser;
+		hax?: ParticipantHax | null;
+	};
+
+	type BattleWithParticipants = {
+		id: string;
+		status: BattleStatus;
+		target_id: string | null;
+		participants: readonly BattleParticipant[];
+	};
 	import CodeFrame from './CodeFrame.svelte';
 	import Voting from './Voting.svelte';
 	import VotingResults from './VotingResults.svelte';
@@ -22,23 +56,22 @@
 		scores,
 		join = false
 	}: {
-		battle: Battle & {
-			participants: readonly (Participants & {
-				user: User;
-				hax: Hax & { votes: readonly Votes[] };
-			})[];
-		};
+		battle: BattleWithParticipants;
 		votes?: boolean;
-		scores?: ParticipantScores[];
+		scores?: ParticipantScores;
 		results?: boolean;
 		join?: boolean;
 	} = $props();
 
 	let me_participant = $derived(
-		battle?.participants.find((p: Participants) => p.user_id === z.userID)
+		battle.participants.find((participant) => participant.user_id === z.userID)
 	);
 
-	const EXPRESSIONS = ['NORMAL', 'HAPPY', 'SAD', 'ANGRY'];
+	const EXPRESSIONS = ['NORMAL', 'HAPPY', 'SAD', 'ANGRY'] as const;
+	type Expression = (typeof EXPRESSIONS)[number];
+	const defaultExpression: Expression = 'NORMAL';
+	const getExpression = (place?: number) =>
+		EXPRESSIONS[place ?? 0] ?? defaultExpression;
 	let copied = $state(false);
 
 	/**
@@ -68,42 +101,42 @@
 		{#if me_participant?.status !== 'READY' && join}
 			<JoinBattler {battle} {me_participant} />
 		{/if}
-		{#each battle?.participants.filter((p) => p.status === 'READY') as participant}
-			{@const expression = scores
-				? EXPRESSIONS[scores[participant.id].place]
-				: 'NORMAL'}
+		{#each battle.participants.filter((participant) => participant.status === 'READY') as participant}
+			{@const participantScore = scores?.[participant.id]}
+			{@const expression = getExpression(participantScore?.place)}
 			<div class="battler">
 				<div class="top">
-					{#if votes}
+					{#if votes && participant.hax}
 						<div class="voting-container" in:fly={{ y: 20, opacity: 300 }}>
-							<Voting {battle} {participant} />
+							<Voting {battle} participant={{ hax: participant.hax }} />
 						</div>
 					{/if}
 					{#if results}
 						<div class="voting-container" in:fly={{ y: 20, opacity: 300 }}>
-							{#if scores}
-								<VotingResults
-									votes={participant.hax.votes}
-									score={scores[participant.id]}
-								/>
+							{#if participantScore}
+								<VotingResults score={participantScore} />
 							{/if}
 						</div>
 					{/if}
 					<div class="image-frame">
-						<Avatar avatar={s(participant.user?.avatar)} {expression} />
-						<h4>{participant.user.name}</h4>
+						{#if participant.user}
+							<Avatar avatar={s(participant.user.avatar)} {expression} />
+							<h4>{participant.user.name}</h4>
+						{/if}
 					</div>
 				</div>
 				<wa-tab-group>
 					<wa-tab panel="custom">App</wa-tab>
 					<wa-tab panel="general">Code</wa-tab>
-					<wa-tab-panel name="custom"
-						><AppFrame hax={participant.hax} /></wa-tab-panel
-					>
+					<wa-tab-panel name="custom">
+						{#if participant.hax}
+							<AppFrame hax={participant.hax} />
+						{/if}
+					</wa-tab-panel>
 					<wa-tab-panel name="general"
 						><CodeFrame
-							html_text={participant?.hax?.html}
-							css_text={participant.hax.css}
+							html_text={participant.hax?.html ?? ''}
+							css_text={participant.hax?.css ?? ''}
 						/></wa-tab-panel
 					>
 				</wa-tab-group>
@@ -111,7 +144,6 @@
 		{/each}
 		<div
 			class="battler empty-seat"
-			type="button"
 			onclick={() => handleCopy(`${PUBLIC_APP_URL}/battle/${battle.id}/lobby`)}
 		>
 			{#if battle.status === 'PENDING'}
@@ -141,7 +173,7 @@
 			0 -1px 1px rgb(255 255 255 / 0.1) inset;
 	}
 	h3 {
-		color: var(--white);
+		color: var(--fg);
 		background: var(--pink);
 		display: inline-block;
 		padding: 4px 10px;
