@@ -21,7 +21,6 @@ function decodeJWT(token: string): { sub?: string; role?: string } | null {
 
 async function get_z_options() {
 	const jwt = await get_jwt();
-	console.log(JSON.parse(atob(jwt.split('.')[0])));
 
 	let userID = 'anon';
 	let userRole: string | undefined = undefined;
