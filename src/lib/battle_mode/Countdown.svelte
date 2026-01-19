@@ -54,8 +54,11 @@
 		status = 'OVER';
 		onover();
 		// If auto-end is enabled (allow_time_extension is false), trigger the callback
-		// @ts-expect-error - allow_time_extension is newly added, types may need refresh
-		if (battle.allow_time_extension === false && onautoend) {
+		if (
+			(battle as Battle & { allow_time_extension?: boolean })
+				.allow_time_extension === false &&
+			onautoend
+		) {
 			onautoend();
 		}
 	}
@@ -83,7 +86,8 @@
 {#if view !== 'REF' && (battle as any).allow_time_extension !== false}
 	<Modal
 		title={view === 'CODE' ? 'Pencils Down!' : 'Battle Over'}
-		open={status === 'OVER' && ['ACTIVE', 'COMPLETED'].includes(battle.status)}
+		open={status === 'OVER' &&
+			['ACTIVE', 'COMPLETED'].includes(battle.status ?? 'PENDING')}
 	>
 		<p>Battle recap pending....</p>
 		{#if view === 'CODE'}
@@ -91,14 +95,6 @@
 				class="go_button button big_button"
 				class:disabled={battle.status !== 'COMPLETED'}
 				href={`/recap/${battle.id}`}>Battle Recap</a
-			>
-		{/if}
-		{#if view === 'WATCH'}
-			<a
-				class="go_button button big_button"
-				class:disabled={battle.status !== 'COMPLETED'}
-				href={`/battle/${battle.zero_room_id}/watch/vote`}
-				>Vote for the winner</a
 			>
 		{/if}
 	</Modal>

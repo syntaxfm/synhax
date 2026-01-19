@@ -37,15 +37,6 @@
 		/>
 	{/if}
 
-	{#if vote}
-		<Copybutton
-			label="Vote"
-			disabled={!alwaysEnabled &&
-				(battle.visibility !== 'PUBLIC' || battle.status !== 'COMPLETED')}
-			link={`${PUBLIC_APP_URL}/battle/${battle.zero_room_id}/watch/vote`}
-		/>
-	{/if}
-
 	{#if ref}
 		<Copybutton
 			label="Ref"

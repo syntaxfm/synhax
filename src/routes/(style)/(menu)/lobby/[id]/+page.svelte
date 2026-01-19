@@ -15,8 +15,8 @@
 	// Track countdown status for modal
 	let over_status: 'ACTIVE' | 'OVER' = $state('ACTIVE');
 
-	// Minimum participants required to start a battle (set to 1 for testing, 2 for production)
-	const MIN_PARTICIPANTS = 1;
+	// Minimum participants required to start a battle (2 players per battle)
+	const MIN_PARTICIPANTS = 2;
 
 	// Count participants who are locked in (status === 'READY')
 	let ready_count = $derived(

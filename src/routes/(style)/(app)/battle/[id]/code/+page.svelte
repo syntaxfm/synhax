@@ -35,14 +35,37 @@
 	);
 
 	// Get all participants with their user and hax data for the progress bars
-	let battlers = $derived(
-		(battle?.data?.participants ?? []).map((p) => ({
-			id: p.id,
-			user_id: p.user_id,
-			user: p.user,
-			hax: p.hax
-		}))
-	);
+	let battlers = $derived.by(() => {
+		const participants = battle.data?.participants ?? [];
+		const sorted = [...participants]
+			.sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0))
+			.slice(0, 2);
+
+		return sorted.map((participant) => ({
+			id: participant.id,
+			user_id: participant.user_id,
+			display_order: participant.display_order ?? null,
+			user: participant.user,
+			hax: participant.hax
+		}));
+	});
+
+	let headerBattlers = $derived.by(() => {
+		if (!battlers.length) {
+			return [];
+		}
+
+		const meIndex = battlers.findIndex(
+			(participant) => participant.user_id === z.userID
+		);
+		if (meIndex === -1) {
+			return battlers;
+		}
+
+		const me = battlers[meIndex];
+		const opponent = battlers.find((_, index) => index !== meIndex);
+		return opponent ? [me, opponent] : [me];
+	});
 
 	// Modern Svelte 5 approach with runes
 	let poll_timer: NodeJS.Timeout | null = $state(null);
@@ -102,7 +125,7 @@
 			battle={battle.data}
 			target={false}
 			diffScore={hax.data?.diff_score ?? null}
-			{battlers}
+			battlers={headerBattlers}
 		>
 			{#snippet detail()}{/snippet}
 			{#snippet countdown()}

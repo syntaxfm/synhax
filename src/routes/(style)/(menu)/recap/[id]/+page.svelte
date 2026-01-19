@@ -96,6 +96,21 @@
 			return participants;
 		}
 
+		if (viewerParticipant) {
+			const ordered = participants
+				.sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0))
+				.slice(0, 2);
+			const meIndex = ordered.findIndex(
+				(participant) => participant.user_id === viewerParticipant.user_id
+			);
+			if (meIndex === -1) {
+				return ordered;
+			}
+			const me = ordered[meIndex];
+			const opponent = ordered.find((_, index) => index !== meIndex);
+			return opponent ? [me, opponent] : [me];
+		}
+
 		if (winner) {
 			const remaining = participants.filter(
 				(participant) => participant.id !== winner.id
@@ -222,6 +237,20 @@
 									>
 										{participant.hax.diff_score}% Match
 									</span>
+									<span
+										class="tag battle-score"
+										class:win={isWinner}
+										class:loss={Boolean(winner) && !isWinner}
+										class:neutral={!winner}
+										style:--tag-color={participant.user_id ===
+										viewerParticipant?.user_id
+											? 'var(--blue)'
+											: 'var(--red)'}
+									>
+										{participant.user_id === viewerParticipant?.user_id
+											? 'You'
+											: 'Opponent'}
+									</span>
 								{/if}
 							</div>
 						</div>
@@ -280,22 +309,14 @@
 	}
 
 	.recap-layout {
-		height: 100%;
-		min-height: 0;
+		min-height: 100%;
 		display: flex;
 		flex-direction: column;
 		box-sizing: border-box;
 	}
 
 	.recap-layout > section {
-		flex: 1;
-		min-height: 0;
 		display: flex;
-	}
-
-	.recap-layout .recap-grid {
-		flex: 1;
-		min-height: 0;
 	}
 
 	.battler-hero {

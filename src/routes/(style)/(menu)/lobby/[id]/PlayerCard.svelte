@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { get_github_avatar_url } from '$lib/user/utils';
 	import { z } from '$lib/zero.svelte';
 
 	type ParticipantStatus =
@@ -16,6 +17,7 @@
 			username?: string | null;
 			name: string;
 			image?: string | null;
+			avatar?: string | null;
 		};
 	};
 
@@ -33,12 +35,16 @@
 		battler.user ?? {
 			name: 'Anonymous',
 			username: null,
-			image: null
+			image: null,
+			avatar: null
 		}
 	);
 
 	// GitHub username stored from OAuth
 	let username = $derived(user.username || user.name || 'Anonymous');
+	let avatar_src = $derived(
+		get_github_avatar_url(user) ?? user.avatar ?? user.image
+	);
 
 	function get_initials(name: string | null | undefined): string {
 		if (!name) return '??';
@@ -55,8 +61,8 @@
 	<div class="card-frame">
 		<div class="card-inner">
 			<div class="card-photo">
-				{#if user.image}
-					<img src={user.image} alt={username} />
+				{#if avatar_src}
+					<img src={avatar_src} alt={username} />
 				{:else}
 					<span class="initials">{get_initials(user.name)}</span>
 				{/if}

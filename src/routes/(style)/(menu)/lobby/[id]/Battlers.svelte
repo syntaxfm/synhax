@@ -20,6 +20,7 @@
 			name: string;
 			username?: string | null;
 			image?: string | null;
+			avatar?: string | null;
 		};
 		hax?: {
 			id: string;
@@ -48,6 +49,13 @@
 	function join_battle() {
 		// Make sure target actually exists
 		if (battle.target?.name) {
+			const activeParticipants = battle.participants.filter(
+				(participant) => participant.status !== 'DROPPED'
+			);
+			if (activeParticipants.length >= 2) {
+				alert('This battle already has two battlers.');
+				return;
+			}
 			// Create hax with files
 			z.mutate(
 				mutators.hax.insert({
@@ -71,7 +79,7 @@
 					battle_id: battle.id,
 					user_id: z.userID,
 					status: 'PENDING' as const,
-					display_order: battle.participants.length
+					display_order: activeParticipants.length
 				})
 			);
 		}
@@ -109,7 +117,9 @@
 	{/if}
 
 	<div class="layout-card" style="--min-card-width: 180px;">
-		{#each battle.participants as battler}
+		{#each battle.participants
+			.filter((participant) => participant.status !== 'DROPPED')
+			.slice(0, 2) as battler}
 			<PlayerCard {battler} onlockin={lock_in} onleave={leave_battle} />
 		{/each}
 	</div>

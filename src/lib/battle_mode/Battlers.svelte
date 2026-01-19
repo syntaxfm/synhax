@@ -1,7 +1,7 @@
 <script lang="ts">
 	import '@awesome.me/webawesome/dist/components/tab-group/tab-group.js';
 	import Avatar from '$lib/ui/Avatar.svelte';
-	import { s } from '$lib/user/utils';
+	import { get_user_avatar_url } from '$lib/user/utils';
 	import AppFrame from './AppFrame.svelte';
 
 	type BattleStatus = 'PENDING' | 'ACTIVE' | 'COMPLETED' | null;
@@ -16,6 +16,8 @@
 	type ParticipantUser = {
 		name: string;
 		avatar: string | null;
+		image?: string | null;
+		username?: string | null;
 	};
 
 	type ParticipantHax = {
@@ -120,7 +122,10 @@
 					{/if}
 					<div class="image-frame">
 						{#if participant.user}
-							<Avatar avatar={s(participant.user.avatar)} {expression} />
+							<Avatar
+								avatar={get_user_avatar_url(participant.user, '/unknown.png')}
+								{expression}
+							/>
 							<h4>{participant.user.name}</h4>
 						{/if}
 					</div>

@@ -18,3 +18,23 @@ export function to_snake_case(str: string): string {
 export function s(str: string | null): string {
 	return str || '';
 }
+
+export type AvatarInput = {
+	avatar?: string | null;
+	image?: string | null;
+	username?: string | null;
+};
+
+export function get_github_avatar_url(
+	user: AvatarInput | null | undefined
+): string | null {
+	if (!user?.username) return null;
+	return `https://github.com/${encodeURIComponent(user.username)}.png?size=256`;
+}
+
+export function get_user_avatar_url(
+	user: AvatarInput | null | undefined,
+	fallback = '/unknown.png'
+): string {
+	return get_github_avatar_url(user) ?? user?.avatar ?? user?.image ?? fallback;
+}

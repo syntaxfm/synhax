@@ -4,6 +4,7 @@
 	 *
 	 * The avatar sits at the current progress point on a colored bar.
 	 */
+	import { get_user_avatar_url } from '$lib/user/utils';
 	import type { User, Hax } from '$sync/schema';
 
 	interface Props {
@@ -22,13 +23,11 @@
 
 	// Default colors based on position (using Graffiti colors)
 	const barColor = $derived(
-		color ?? (position === 'left' ? 'var(--teal)' : 'var(--orange)')
+		color ?? (position === 'left' ? 'var(--blue)' : 'var(--red)')
 	);
 
-	// Avatar image - prefer avatar, fall back to image (from BetterAuth)
-	const avatarSrc = $derived(
-		user.avatar ?? user.image ?? '/default-avatar.png'
-	);
+	// Avatar image - prefer GitHub avatar, then stored fields
+	const avatarSrc = $derived(get_user_avatar_url(user, '/unknown.png'));
 </script>
 
 <div class="battler-progress" class:right={position === 'right'}>

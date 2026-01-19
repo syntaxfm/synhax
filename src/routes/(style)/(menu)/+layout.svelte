@@ -2,6 +2,7 @@
 	import { browser } from '$app/environment';
 	import { page } from '$app/state';
 	import { queries } from '$lib/queries';
+	import { get_user_avatar_url } from '$lib/user/utils';
 	import { z } from '$lib/zero.svelte';
 	import { files } from '$lib/state/FileState.svelte';
 
@@ -65,7 +66,7 @@
 		</a>
 
 		<button class="avatar bordered" popovertarget="user-menu-1">
-			<img src={user.data?.image} alt={user?.data?.name} />
+			<img src={get_user_avatar_url(user.data)} alt={user?.data?.name} />
 		</button>
 	</header>
 
@@ -114,7 +115,6 @@
 	.fill-wrapper {
 		display: grid;
 		min-height: 100vh;
-		height: 100vh;
 		grid-template-rows: auto 1fr;
 	}
 

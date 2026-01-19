@@ -30,6 +30,9 @@
 	// Get the two battlers (for now, assuming 2 participants)
 	const leftBattler = $derived(battlers[0]);
 	const rightBattler = $derived(battlers[1]);
+
+	const leftColor = 'var(--blue)';
+	const rightColor = 'var(--red)';
 </script>
 
 <header class:has-battlers={battlers.length > 0}>
@@ -41,6 +44,7 @@
 					user={leftBattler.user}
 					hax={leftBattler.hax ?? null}
 					position="left"
+					color={leftColor}
 				/>
 			{/if}
 		</div>
@@ -56,6 +60,7 @@
 					user={rightBattler.user}
 					hax={rightBattler.hax ?? null}
 					position="right"
+					color={rightColor}
 				/>
 			{/if}
 		</div>

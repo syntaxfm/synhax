@@ -79,6 +79,7 @@
 										user={left_battler.user}
 										hax={left_battler.hax ?? null}
 										position="left"
+										color="var(--blue)"
 									/>
 								</div>
 							</div>
@@ -129,6 +130,7 @@
 										user={right_battler.user}
 										hax={right_battler.hax ?? null}
 										position="right"
+										color="var(--red)"
 									/>
 								</div>
 							</div>
@@ -145,17 +147,6 @@
 				{/if}
 			</div>
 		</section>
-
-		{#if battle.data.status === 'COMPLETED'}
-			<div class="cluster row" style="justify-content: center;">
-				<a
-					href="/battle/{battle.data.zero_room_id}/watch/vote"
-					class="battle-button"
-				>
-					View Results & Vote
-				</a>
-			</div>
-		{/if}
 	</div>
 {:else}
 	<p>Loading battle...</p>
@@ -182,22 +173,14 @@
 	}
 
 	.ref-layout {
-		height: 100%;
-		min-height: 0;
+		min-height: 100%;
 		display: flex;
 		flex-direction: column;
 		box-sizing: border-box;
 	}
 
 	.ref-layout > section {
-		flex: 1;
-		min-height: 0;
 		display: flex;
-	}
-
-	.ref-layout .recap-grid {
-		flex: 1;
-		min-height: 0;
 	}
 
 	.battler-card {

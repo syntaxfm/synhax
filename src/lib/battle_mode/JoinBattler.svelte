@@ -17,7 +17,7 @@
 	type BattleJoin = {
 		id: string;
 		target_id: string | null;
-		participants: readonly { id: string }[];
+		participants: readonly { id: string; status?: ParticipantStatus }[];
 	};
 
 	type Participant = {
@@ -38,6 +38,13 @@
 	function join_battle() {
 		// Make sure target actually exists
 		if (battle.target_id) {
+			const activeParticipants = battle.participants.filter(
+				(participant) => participant.status !== 'DROPPED'
+			);
+			if (activeParticipants.length >= 2) {
+				alert('This battle already has two battlers.');
+				return;
+			}
 			// Create hax with files
 			z.mutate(
 				mutators.hax.insert({
@@ -61,7 +68,7 @@
 					battle_id: battle?.id || '',
 					user_id: z.userID,
 					status: 'PENDING' as const,
-					display_order: battle?.participants.length || 0
+					display_order: activeParticipants.length
 				})
 			);
 		}
@@ -106,7 +113,10 @@
 			</div>
 		{:else if me_participant?.status === 'PENDING'}
 			<div class="image-frame me" in:fade>
-				<Avatar avatar={s(me.data?.avatar)} expression="NORMAL" />
+				<Avatar
+					avatar={s(me.data?.avatar) || '/unknown.png'}
+					expression="NORMAL"
+				/>
 				<h4>{me.data.name}</h4>
 				<div class="joining">
 					<button class="go_button big_button" onclick={lock_in}>Lock In</button

@@ -2,6 +2,7 @@
 	import { page } from '$app/state';
 	import Bread from '$lib/ui/Bread.svelte';
 	import { queries } from '$lib/queries';
+	import { get_user_avatar_url } from '$lib/user/utils';
 	import { z } from '$lib/zero.svelte';
 
 	const { children } = $props();
@@ -62,7 +63,7 @@
 		</div>
 
 		<button class="avatar bordered" popovertarget="user-menu-admin">
-			<img src={user.data?.image} alt={user?.data?.name} />
+			<img src={get_user_avatar_url(user.data)} alt={user?.data?.name} />
 		</button>
 	</header>
 

@@ -75,7 +75,9 @@
 				ends_at: Date.now(),
 				winner_hax_id: hax.id
 			})
-		);
+		).server.catch((error: unknown) => {
+			console.error('Failed to end battle on perfect score:', error);
+		});
 	}
 
 	/**
