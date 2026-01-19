@@ -152,7 +152,7 @@
 		{/each}
 		<div
 			class="battler empty-seat"
-			onclick={() => handleCopy(`${PUBLIC_APP_URL}/battle/${battle.id}/lobby`)}
+			onclick={() => handleCopy(`${PUBLIC_APP_URL}/lobby/${battle.id}`)}
 		>
 			{#if battle.status === 'PENDING'}
 				<div class="image-frame">

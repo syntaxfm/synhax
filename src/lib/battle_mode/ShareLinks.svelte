@@ -22,7 +22,7 @@
 		<Copybutton
 			label="Code"
 			disabled={!alwaysEnabled && battle.status !== 'PENDING'}
-			link={`${PUBLIC_APP_URL}/battle/${battle.id}/lobby`}
+			link={`${PUBLIC_APP_URL}/lobby/${battle.id}`}
 		/>
 	{/if}
 

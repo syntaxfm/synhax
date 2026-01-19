@@ -38,7 +38,6 @@ async function get_z_options() {
 
 	return {
 		userID,
-		kvStore: 'mem' as const,
 		server: PUBLIC_SERVER,
 		schema,
 		mutators,
