@@ -84,13 +84,32 @@ export const handle: Handle = async ({ event, resolve }) => {
 			const session = await auth.api.getSession({
 				headers: event.request.headers
 			});
-			console.log(session);
 			if (session) {
 				event.locals.session = session.session;
 				event.locals.user = {
 					id: session.user.id,
 					role: session.user.role || undefined
 				};
+			} else {
+				const authHeader = event.request.headers.get('authorization');
+				const token = authHeader?.startsWith('Bearer ')
+					? authHeader.slice('Bearer '.length)
+					: undefined;
+				if (token) {
+					const result = await auth.api.verifyJWT({
+						body: { token }
+					});
+					const payload = result?.payload as
+						| { sub?: string; role?: string; id?: string }
+						| null
+						| undefined;
+					if (payload?.sub || payload?.id) {
+						event.locals.user = {
+							id: payload.sub ?? payload.id ?? 'anon',
+							role: payload.role || undefined
+						};
+					}
+				}
 			}
 		} catch (e) {
 			console.error('Session error:', e);
