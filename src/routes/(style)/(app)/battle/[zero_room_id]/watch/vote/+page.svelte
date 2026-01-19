@@ -25,12 +25,7 @@
 			<div class="res">
 				<p>Battle Type:{remove_screaming(battleData.type ?? '')}</p>
 				<p>Today's Referee: {battleData.referee?.name}</p>
-				<ShareLinks
-					code={false}
-					battle={battleData}
-					watch={false}
-					vote={true}
-				/>
+				<ShareLinks code={false} battle={battleData} watch={false} />
 			</div>
 		{/snippet}
 		{#snippet countdown()}{/snippet}

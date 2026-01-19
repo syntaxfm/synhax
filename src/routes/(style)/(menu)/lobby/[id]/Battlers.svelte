@@ -46,6 +46,18 @@
 		battle.participants.find((participant) => participant.user_id === z.userID)
 	);
 
+	let active_participants = $derived(
+		battle.participants.filter(
+			(participant) => participant.status !== 'DROPPED'
+		)
+	);
+
+	let display_participants = $derived.by(() => {
+		return [...active_participants]
+			.sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0))
+			.slice(0, 2);
+	});
+
 	function join_battle() {
 		// Make sure target actually exists
 		if (battle.target?.name) {
@@ -113,13 +125,17 @@
 	<h2>Battlers</h2>
 
 	{#if !me_participant}
-		<button class="battle-button" onclick={join_battle}>Join Battle</button>
+		<button
+			class="battle-button"
+			onclick={join_battle}
+			disabled={active_participants.length >= 2}
+		>
+			Join Battle
+		</button>
 	{/if}
 
 	<div class="layout-card" style="--min-card-width: 180px;">
-		{#each battle.participants
-			.filter((participant) => participant.status !== 'DROPPED')
-			.slice(0, 2) as battler}
+		{#each display_participants as battler}
 			<PlayerCard {battler} onlockin={lock_in} onleave={leave_battle} />
 		{/each}
 	</div>

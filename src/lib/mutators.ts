@@ -223,6 +223,27 @@ export const mutators = defineMutators({
 					status: args.status,
 					winner_hax_id: args.winner_hax_id
 				});
+				const winnerProvided = Object.prototype.hasOwnProperty.call(
+					args,
+					'winner_hax_id'
+				);
+				if (winnerProvided || args.status === 'COMPLETED') {
+					const battle = (await getBattle(tx, args.id)) as {
+						winner_hax_id?: string | null;
+						status?: string | null;
+					} | null;
+					if (!battle) {
+						throw new Error('Battle not found');
+					}
+					if (battle.winner_hax_id) {
+						if (!winnerProvided) {
+							throw new Error('Battle winner is already set');
+						}
+						if (args.winner_hax_id !== battle.winner_hax_id) {
+							throw new Error('Battle winner is already set');
+						}
+					}
+				}
 				await tx.mutate.battles.update({
 					id: args.id,
 					status: args.status,
@@ -257,6 +278,18 @@ export const mutators = defineMutators({
 				assertAuthenticated(ctx);
 				if (!isAdmin(ctx) && args.user_id !== ctx.userID) {
 					throw new Error('Participants can only be created for yourself');
+				}
+				const participants = (await tx.run(
+					zql.battle_participants.where('battle_id', args.battle_id)
+				)) as { id?: string; status?: string | null }[];
+				const activeCount = Array.isArray(participants)
+					? participants.filter(
+							(participant) =>
+								participant.status !== 'DROPPED' && participant.id !== args.id
+						).length
+					: 0;
+				if (activeCount >= 2) {
+					throw new Error('Battle already has two participants');
 				}
 				const userId = isAdmin(ctx) ? args.user_id : ctx.userID;
 				await tx.mutate.battle_participants.insert({

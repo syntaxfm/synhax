@@ -41,13 +41,18 @@
 			.sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0))
 			.slice(0, 2);
 
-		return sorted.map((participant) => ({
-			id: participant.id,
-			user_id: participant.user_id,
-			display_order: participant.display_order ?? null,
-			user: participant.user,
-			hax: participant.hax
-		}));
+		return sorted.map((participant, index) => {
+			const displayOrder = participant.display_order ?? index;
+			const color = displayOrder === 0 ? 'var(--blue)' : 'var(--red)';
+			return {
+				id: participant.id,
+				user_id: participant.user_id,
+				display_order: participant.display_order ?? null,
+				color,
+				user: participant.user,
+				hax: participant.hax
+			};
+		});
 	});
 
 	let headerBattlers = $derived.by(() => {
@@ -130,7 +135,13 @@
 			{#snippet detail()}{/snippet}
 			{#snippet countdown()}
 				{#if battle.data?.type === 'TIMED_MATCH'}
-					<Countdown battle={battle.data} view="CODE" />
+					<Countdown
+						battle={battle.data}
+						view="CODE"
+						onautoend={battle.data.allow_time_extension === false
+							? () => goto(`/recap/${battle.data?.id}`)
+							: undefined}
+					/>
 				{/if}
 			{/snippet}
 		</Header>

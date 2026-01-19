@@ -64,12 +64,7 @@
 	{@const battleData = battle.data}
 	<Header battle={battleData} target>
 		{#snippet detail()}
-			<ShareLinks
-				battle={battleData}
-				code={false}
-				watch={controls_visible}
-				vote={!controls_visible}
-			/>
+			<ShareLinks battle={battleData} code={false} watch={controls_visible} />
 		{/snippet}
 		{#snippet countdown()}
 			<!-- {#if battle.data.status === 'ACTIVE'} -->

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { get_github_avatar_url } from '$lib/user/utils';
+	import { get_user_avatar_url } from '$lib/user/utils';
 	import { z } from '$lib/zero.svelte';
 
 	type ParticipantStatus =
@@ -42,9 +42,7 @@
 
 	// GitHub username stored from OAuth
 	let username = $derived(user.username || user.name || 'Anonymous');
-	let avatar_src = $derived(
-		get_github_avatar_url(user) ?? user.avatar ?? user.image
-	);
+	let avatar_src = $derived(get_user_avatar_url(user, ''));
 
 	function get_initials(name: string | null | undefined): string {
 		if (!name) return '??';

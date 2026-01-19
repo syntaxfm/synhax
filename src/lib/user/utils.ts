@@ -23,6 +23,7 @@ export type AvatarInput = {
 	avatar?: string | null;
 	image?: string | null;
 	username?: string | null;
+	name?: string | null;
 };
 
 export function get_github_avatar_url(

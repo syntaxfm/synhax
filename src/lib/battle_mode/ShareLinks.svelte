@@ -6,14 +6,12 @@
 		battle,
 		code = true,
 		watch = true,
-		vote = false,
 		ref = false,
 		alwaysEnabled = false
 	}: {
 		battle: Battle;
 		code?: boolean;
 		watch?: boolean;
-		vote?: boolean;
 		ref?: boolean;
 		alwaysEnabled?: boolean;
 	} = $props();

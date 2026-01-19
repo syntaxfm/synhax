@@ -63,7 +63,10 @@
 		</div>
 
 		<button class="avatar bordered" popovertarget="user-menu-admin">
-			<img src={get_user_avatar_url(user.data)} alt={user?.data?.name} />
+			<img
+				src={get_user_avatar_url(user.data, '/unknown.png')}
+				alt={user?.data?.name}
+			/>
 		</button>
 	</header>
 

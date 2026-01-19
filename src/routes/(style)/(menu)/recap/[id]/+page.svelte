@@ -237,20 +237,6 @@
 									>
 										{participant.hax.diff_score}% Match
 									</span>
-									<span
-										class="tag battle-score"
-										class:win={isWinner}
-										class:loss={Boolean(winner) && !isWinner}
-										class:neutral={!winner}
-										style:--tag-color={participant.user_id ===
-										viewerParticipant?.user_id
-											? 'var(--blue)'
-											: 'var(--red)'}
-									>
-										{participant.user_id === viewerParticipant?.user_id
-											? 'You'
-											: 'Opponent'}
-									</span>
 								{/if}
 							</div>
 						</div>

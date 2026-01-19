@@ -9,6 +9,7 @@
 		user_id: string;
 		user: User | undefined;
 		hax: Hax | undefined;
+		color?: string;
 	};
 
 	const {
@@ -31,8 +32,8 @@
 	const leftBattler = $derived(battlers[0]);
 	const rightBattler = $derived(battlers[1]);
 
-	const leftColor = 'var(--blue)';
-	const rightColor = 'var(--red)';
+	const leftColor = leftBattler?.color ?? 'var(--blue)';
+	const rightColor = rightBattler?.color ?? 'var(--red)';
 </script>
 
 <header class:has-battlers={battlers.length > 0}>
