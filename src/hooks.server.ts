@@ -11,7 +11,7 @@ import {
 import * as schema from './db/schema';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
-import { admin, jwt } from 'better-auth/plugins';
+import { admin, jwt, bearer } from 'better-auth/plugins';
 import { betterAuth } from 'better-auth';
 
 // Sentry disabled on Cloudflare Workers due to edge runtime compatibility issues
@@ -72,7 +72,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 				}
 			}
 		},
-		plugins: [admin(), jwt()]
+		plugins: [admin(), jwt(), bearer()]
 	});
 
 	const authHandle: Handle = async ({ event, resolve }) => {

@@ -30,7 +30,7 @@
 		{/snippet}
 		{#snippet countdown()}{/snippet}
 	</Header>
-	<Battlers battle={battleData} votes={true} {scores} />
+	<Battlers battle={battleData} {scores} />
 {/if}
 
 <style>

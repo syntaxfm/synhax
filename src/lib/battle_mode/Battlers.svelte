@@ -30,6 +30,7 @@
 		id: string;
 		user_id: string;
 		status: ParticipantStatus;
+		display_order?: number | null;
 		user?: ParticipantUser;
 		hax?: ParticipantHax | null;
 	};
@@ -103,7 +104,9 @@
 		{#if me_participant?.status !== 'READY' && join}
 			<JoinBattler {battle} {me_participant} />
 		{/if}
-		{#each battle.participants.filter((participant) => participant.status === 'READY') as participant}
+		{#each battle.participants
+			.filter((participant) => participant.status === 'READY')
+			.sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0)) as participant}
 			{@const participantScore = scores?.[participant.id]}
 			{@const expression = getExpression(participantScore?.place)}
 			<div class="battler">

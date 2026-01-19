@@ -4,7 +4,7 @@
 	import Avatar from '$lib/ui/Avatar.svelte';
 	import { s } from '$lib/user/utils';
 	import { z, queries, mutators } from '$lib/zero.svelte';
-	import { fade, fly } from 'svelte/transition';
+	import { fade } from 'svelte/transition';
 
 	type ParticipantStatus =
 		| 'PENDING'
@@ -17,7 +17,11 @@
 	type BattleJoin = {
 		id: string;
 		target_id: string | null;
-		participants: readonly { id: string; status?: ParticipantStatus }[];
+		participants: readonly {
+			id: string;
+			status?: ParticipantStatus;
+			display_order?: number | null;
+		}[];
 	};
 
 	type Participant = {
@@ -35,16 +39,26 @@
 
 	let me = z.createQuery(queries.user.current());
 
+	let active_participants = $derived(
+		battle.participants.filter(
+			(participant) => participant.status !== 'DROPPED'
+		)
+	);
+
+	let is_full = $derived(active_participants.length >= 2);
+
 	function join_battle() {
 		// Make sure target actually exists
 		if (battle.target_id) {
-			const activeParticipants = battle.participants.filter(
-				(participant) => participant.status !== 'DROPPED'
-			);
-			if (activeParticipants.length >= 2) {
+			if (is_full) {
 				alert('This battle already has two battlers.');
 				return;
 			}
+			const usedOrders = new Set(
+				active_participants.map((participant) => participant.display_order ?? 0)
+			);
+			const displayOrder = usedOrders.has(0) ? 1 : 0;
+
 			// Create hax with files
 			z.mutate(
 				mutators.hax.insert({
@@ -68,7 +82,7 @@
 					battle_id: battle?.id || '',
 					user_id: z.userID,
 					status: 'PENDING' as const,
-					display_order: activeParticipants.length
+					display_order: displayOrder
 				})
 			);
 		}
@@ -106,9 +120,13 @@
 				<h4>You?</h4>
 				<div class="joining">
 					<p>The battle starts now<br />claim your destiny!</p>
-					<button class="go_button big_button" onclick={join_battle}
-						>Join</button
+					<button
+						class="go_button big_button"
+						onclick={join_battle}
+						disabled={is_full}
 					>
+						Join
+					</button>
 				</div>
 			</div>
 		{:else if me_participant?.status === 'PENDING'}

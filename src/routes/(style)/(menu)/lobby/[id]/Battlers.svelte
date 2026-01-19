@@ -16,6 +16,7 @@
 		id: string;
 		user_id: string;
 		status: ParticipantStatus;
+		display_order?: number | null;
 		user?: {
 			name: string;
 			username?: string | null;
@@ -68,6 +69,10 @@
 				alert('This battle already has two battlers.');
 				return;
 			}
+			const usedOrders = new Set(
+				activeParticipants.map((participant) => participant.display_order ?? 0)
+			);
+			const displayOrder = usedOrders.has(0) ? 1 : 0;
 			// Create hax with files
 			z.mutate(
 				mutators.hax.insert({
@@ -91,7 +96,7 @@
 					battle_id: battle.id,
 					user_id: z.userID,
 					status: 'PENDING' as const,
-					display_order: activeParticipants.length
+					display_order: displayOrder
 				})
 			);
 		}

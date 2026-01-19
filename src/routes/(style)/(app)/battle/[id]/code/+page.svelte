@@ -135,13 +135,7 @@
 			{#snippet detail()}{/snippet}
 			{#snippet countdown()}
 				{#if battle.data?.type === 'TIMED_MATCH'}
-					<Countdown
-						battle={battle.data}
-						view="CODE"
-						onautoend={battle.data.allow_time_extension === false
-							? () => goto(`/recap/${battle.data?.id}`)
-							: undefined}
-					/>
+					<Countdown battle={battle.data} view="CODE" />
 				{/if}
 			{/snippet}
 		</Header>

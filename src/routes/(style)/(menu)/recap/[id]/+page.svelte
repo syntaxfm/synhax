@@ -3,7 +3,6 @@
 	import { page } from '$app/state';
 	import AppFrame from '$lib/battle_mode/AppFrame.svelte';
 	import CodeFrame from '$lib/battle_mode/CodeFrame.svelte';
-	import ShareLinks from '$lib/battle_mode/ShareLinks.svelte';
 	import { z, queries, mutators } from '$lib/zero.svelte';
 	import { parseTargetCode } from '$utils/code';
 	import { remove_screaming } from '$utils/formatting';
@@ -13,6 +12,7 @@
 	type WinnerParticipant = {
 		id: string;
 		user_id: string;
+		display_order?: number | null;
 		user?: { name?: string | null } | null;
 		hax?: {
 			id?: string | null;
@@ -62,7 +62,6 @@
 		)
 	);
 
-	const showVotingResults = $derived(battle.data?.win_condition === 'VOTING');
 	const isParticipant = $derived(
 		battle.data?.participants?.some(
 			(participant) => participant.user_id === z.userID
@@ -96,10 +95,11 @@
 			return participants;
 		}
 
+		const ordered = [...participants]
+			.sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0))
+			.slice(0, 2);
+
 		if (viewerParticipant) {
-			const ordered = participants
-				.sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0))
-				.slice(0, 2);
 			const meIndex = ordered.findIndex(
 				(participant) => participant.user_id === viewerParticipant.user_id
 			);
@@ -111,14 +111,7 @@
 			return opponent ? [me, opponent] : [me];
 		}
 
-		if (winner) {
-			const remaining = participants.filter(
-				(participant) => participant.id !== winner.id
-			);
-			return [winner, ...remaining].slice(0, 2);
-		}
-
-		return participants.slice(0, 2);
+		return ordered;
 	});
 	const targetImage = $derived(battle.data?.target?.image ?? '');
 	const isCodeTarget = $derived(battle.data?.target?.type === 'CODE');
@@ -197,12 +190,6 @@
 					</span>
 				</div>
 			</div>
-			<!-- <ShareLinks
-					code={false}
-					watch={false}
-					vote={showVotingResults}
-					battle={battleData}
-				/> -->
 		</header>
 
 		<section class="stack" style="--gap: 1rem;">
