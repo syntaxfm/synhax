@@ -43,6 +43,8 @@
 		html: targetCode.html,
 		css: targetCode.css
 	});
+	const leftParticipant = $derived(participants[0] ?? null);
+	const rightParticipant = $derived(participants[1] ?? null);
 </script>
 
 <svelte:head>
@@ -50,9 +52,9 @@
 </svelte:head>
 
 <div class="recap-grid battle-panel">
-	{#each participants as participant}
-		{@const tone = participant.tone ?? 'neutral'}
-		{@const outcomeLabel = participant.outcomeLabel ?? 'Battler'}
+	{#if leftParticipant}
+		{@const tone = leftParticipant.tone ?? 'neutral'}
+		{@const outcomeLabel = leftParticipant.outcomeLabel ?? 'Battler'}
 		<article
 			class="stack battler-card"
 			class:win={tone === 'win'}
@@ -70,15 +72,15 @@
 					{outcomeLabel}
 				</span>
 				<div class="battler-meta">
-					<h3>{participant.user?.name ?? 'Battler'}</h3>
-					{#if participant.hax?.diff_score !== null && participant.hax?.diff_score !== undefined}
+					<h3>{leftParticipant.user?.name ?? 'Battler'}</h3>
+					{#if leftParticipant.hax?.diff_score !== null && leftParticipant.hax?.diff_score !== undefined}
 						<span
 							class="tag battle-score"
 							class:win={tone === 'win'}
 							class:loss={tone === 'loss'}
 							class:neutral={tone === 'neutral'}
 						>
-							{formatScore(participant.hax.diff_score)} Match
+							{formatScore(leftParticipant.hax.diff_score)} Match
 						</span>
 					{/if}
 				</div>
@@ -89,21 +91,21 @@
 					<div class="result-frame battle-frame battle-frame--bordered">
 						<AppFrame
 							hax={{
-								html: participant.hax?.html ?? '',
-								css: participant.hax?.css ?? ''
+								html: leftParticipant.hax?.html ?? '',
+								css: leftParticipant.hax?.css ?? ''
 							}}
 						/>
 					</div>
 				</div>
 				<div class="code-panel">
 					<CodeFrame
-						html_text={participant.hax?.html ?? ''}
-						css_text={participant.hax?.css ?? ''}
+						html_text={leftParticipant.hax?.html ?? ''}
+						css_text={leftParticipant.hax?.css ?? ''}
 					/>
 				</div>
 			</div>
 		</article>
-	{/each}
+	{/if}
 
 	{#if target}
 		<div class="stack target-card" style="--gap: 0.5rem;">
@@ -116,6 +118,61 @@
 				{/if}
 			</div>
 		</div>
+	{/if}
+
+	{#if rightParticipant}
+		{@const tone = rightParticipant.tone ?? 'neutral'}
+		{@const outcomeLabel = rightParticipant.outcomeLabel ?? 'Battler'}
+		<article
+			class="stack battler-card"
+			class:win={tone === 'win'}
+			class:loss={tone === 'loss'}
+			class:neutral={tone === 'neutral'}
+			style="--gap: 1.5rem;"
+		>
+			<div class="stack battler-hero" style="--gap: 0.5rem;">
+				<span
+					class="tag battle-outcome"
+					class:win={tone === 'win'}
+					class:loss={tone === 'loss'}
+					class:neutral={tone === 'neutral'}
+				>
+					{outcomeLabel}
+				</span>
+				<div class="battler-meta">
+					<h3>{rightParticipant.user?.name ?? 'Battler'}</h3>
+					{#if rightParticipant.hax?.diff_score !== null && rightParticipant.hax?.diff_score !== undefined}
+						<span
+							class="tag battle-score"
+							class:win={tone === 'win'}
+							class:loss={tone === 'loss'}
+							class:neutral={tone === 'neutral'}
+						>
+							{formatScore(rightParticipant.hax.diff_score)} Match
+						</span>
+					{/if}
+				</div>
+			</div>
+			<div class="battler-panels">
+				<div class="stack" style="--gap: 0.5rem;">
+					<span class="status-badge">Result</span>
+					<div class="result-frame battle-frame battle-frame--bordered">
+						<AppFrame
+							hax={{
+								html: rightParticipant.hax?.html ?? '',
+								css: rightParticipant.hax?.css ?? ''
+							}}
+						/>
+					</div>
+				</div>
+				<div class="code-panel">
+					<CodeFrame
+						html_text={rightParticipant.hax?.html ?? ''}
+						css_text={rightParticipant.hax?.css ?? ''}
+					/>
+				</div>
+			</div>
+		</article>
 	{/if}
 </div>
 
