@@ -3,6 +3,7 @@
 	import Avatar from '$lib/ui/Avatar.svelte';
 	import { get_user_avatar_url } from '$lib/user/utils';
 	import AppFrame from './AppFrame.svelte';
+	import { FRAME_HEIGHT, FRAME_WIDTH } from '$lib/constants';
 
 	type BattleStatus = 'PENDING' | 'ACTIVE' | 'COMPLETED' | null;
 	type ParticipantStatus =
@@ -138,7 +139,12 @@
 					<wa-tab panel="general">Code</wa-tab>
 					<wa-tab-panel name="custom">
 						{#if participant.hax}
-							<AppFrame hax={participant.hax} />
+							<div
+								class="battle-frame"
+								style="--frame-width: {FRAME_WIDTH}; --frame-height: {FRAME_HEIGHT};"
+							>
+								<AppFrame hax={participant.hax} />
+							</div>
 						{/if}
 					</wa-tab-panel>
 					<wa-tab-panel name="general"
@@ -256,6 +262,16 @@
 	.battler {
 		border-inline: 2px solid var(--black);
 		position: relative;
+	}
+
+	.battle-frame {
+		width: calc(var(--frame-width) * 1px);
+		height: calc(var(--frame-height) * 1px);
+		overflow: hidden;
+		border-radius: var(--br-s);
+		box-shadow:
+			0 0 0 1px rgb(255 255 255 / 0.1),
+			0 18px 30px rgb(0 0 0 / 0.35);
 	}
 
 	wa-tab-group {

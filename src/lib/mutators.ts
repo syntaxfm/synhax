@@ -185,19 +185,24 @@ export const mutators = defineMutators({
 					throw new Error('Referee must match the authenticated user');
 				}
 				const refereeId = isAdmin(ctx) ? args.referee_id : ctx.userID;
+				const now = Date.now();
 				await tx.mutate.battles.insert({
 					id: args.id,
 					target_id: args.target_id,
 					zero_room_id: args.zero_room_id,
 					referee_id: refereeId,
 					type: args.type,
-					win_condition: args.win_condition,
+					win_condition: args.win_condition ?? 'FIRST_TO_PERFECT',
 					total_time_seconds: args.total_time_seconds,
 					overtime_seconds: args.overtime_seconds,
-					status: args.status,
-					visibility: args.visibility,
+					status: args.status ?? 'PENDING',
+					visibility: args.visibility ?? 'PRIVATE',
 					starts_at: args.starts_at,
-					ends_at: args.ends_at
+					ends_at: args.ends_at,
+					date: now,
+					allow_time_extension: true,
+					created_at: now,
+					updated_at: now
 				});
 			}
 		),
@@ -256,7 +261,8 @@ export const mutators = defineMutators({
 					ends_at: args.ends_at,
 					allow_time_extension: args.allow_time_extension,
 					revealed_at: args.revealed_at,
-					winner_hax_id: args.winner_hax_id
+					winner_hax_id: args.winner_hax_id,
+					updated_at: Date.now()
 				});
 			}
 		)
@@ -292,12 +298,16 @@ export const mutators = defineMutators({
 					throw new Error('Battle already has two participants');
 				}
 				const userId = isAdmin(ctx) ? args.user_id : ctx.userID;
+				const now = Date.now();
 				await tx.mutate.battle_participants.insert({
 					id: args.id,
 					battle_id: args.battle_id,
 					user_id: userId,
-					status: args.status,
-					display_order: args.display_order
+					status: args.status ?? 'PENDING',
+					display_order: args.display_order,
+					joined_at: now,
+					created_at: now,
+					updated_at: now
 				});
 			}
 		),
@@ -315,7 +325,8 @@ export const mutators = defineMutators({
 					id: args.id,
 					status: args.status,
 					display_order: args.display_order,
-					finished_at: args.finished_at
+					finished_at: args.finished_at,
+					updated_at: Date.now()
 				});
 			}
 		),
@@ -337,12 +348,16 @@ export const mutators = defineMutators({
 					throw new Error('Participants can only be updated for yourself');
 				}
 				const userId = isAdmin(ctx) ? args.user_id : ctx.userID;
+				const now = Date.now();
 				await tx.mutate.battle_participants.upsert({
 					id: args.id,
 					battle_id: args.battle_id,
 					user_id: userId,
-					status: args.status,
-					display_order: args.display_order
+					status: args.status ?? 'PENDING',
+					display_order: args.display_order,
+					joined_at: existing ? undefined : now,
+					created_at: existing ? undefined : now,
+					updated_at: now
 				});
 			}
 		),
@@ -410,6 +425,7 @@ export const mutators = defineMutators({
 					throw new Error('Hax can only be created for yourself');
 				}
 				const userId = isAdmin(ctx) ? args.user_id : ctx.userID;
+				const now = Date.now();
 				await tx.mutate.hax.insert({
 					id: args.id,
 					user_id: userId,
@@ -417,7 +433,10 @@ export const mutators = defineMutators({
 					battle_id: args.battle_id,
 					html: args.html,
 					css: args.css,
-					type: args.type
+					type: args.type,
+					is_final: false,
+					created_at: now,
+					updated_at: now
 				});
 			}
 		),
@@ -441,7 +460,7 @@ export const mutators = defineMutators({
 					css: args.css,
 					is_final: args.is_final,
 					submitted_at: args.submitted_at,
-					updated_at: args.updated_at,
+					updated_at: args.updated_at ?? Date.now(),
 					// Clamp diff_score to 0-100 and update timestamp when provided
 					diff_score:
 						args.diff_score !== undefined
@@ -479,37 +498,8 @@ export const mutators = defineMutators({
 					html: args.html,
 					css: args.css,
 					elapsed_ms: args.elapsed_ms,
-					sequence: args.sequence
-				});
-			}
-		)
-	},
-
-	// ==================
-	// TARGETS (admin only - enforced server-side via ctx)
-	// ==================
-	targets: {
-		insert: defineMutator(
-			type({
-				id: 'string',
-				name: 'string',
-				image: 'string',
-				type: targetTypeEnum,
-				inspo: 'string',
-				created_by: 'string'
-			}),
-			async ({ tx, args, ctx }) => {
-				// Admin check - ctx is typed via DefaultTypes in schema.ts
-				if (!isAdmin(ctx)) {
-					throw new Error('Only admins can create targets');
-				}
-				await tx.mutate.targets.insert({
-					id: args.id,
-					name: args.name,
-					image: args.image,
-					type: args.type,
-					inspo: args.inspo,
-					created_by: args.created_by
+					sequence: args.sequence,
+					created_at: Date.now()
 				});
 			}
 		),

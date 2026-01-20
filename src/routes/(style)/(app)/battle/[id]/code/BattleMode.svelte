@@ -31,6 +31,7 @@
 	const FRAME_WIDTH = 600;
 	const FRAME_HEIGHT = 400;
 
+
 	// Overlay state: 'off', 'app', or 'diff'
 	type OverlayMode = 'off' | 'app' | 'diff';
 	let overlayMode: OverlayMode = $state('off');
@@ -38,6 +39,7 @@
 
 	const showOverlayControls = $derived(true);
 
+	// Test
 	// Diff canvas for overlay (captured from DiffEngine)
 	let diffCanvasSrc: string | null = $state(null);
 

@@ -286,6 +286,7 @@
 		<ShareLinks
 			battle={battleData}
 			code={true}
+			watch={false}
 			ref={true}
 			alwaysEnabled={true}
 		/>
