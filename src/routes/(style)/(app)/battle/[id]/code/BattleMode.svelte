@@ -1,6 +1,7 @@
 <script lang="ts">
 	import AppFrame from '$lib/battle_mode/AppFrame.svelte';
 	import DiffEngine from '$lib/battle_mode/DiffEngine.svelte';
+	import SeverityScale from '$lib/battle_mode/SeverityScale.svelte';
 	import type { Battle, Hax, Target } from '$sync/schema';
 	import { z, mutators } from '$lib/zero.svelte';
 	import { parseTargetCode } from '$utils/code';
@@ -175,38 +176,48 @@
 			<div class="battle-controls">
 				{#if showOverlayControls}
 					<div class="battle-control">
-						<span class="battle-control__label">Overlay</span>
-						<div class="cluster" style="--gap: 8px;">
+						<div class="button-group">
+							<button
+								class="battle-chip"
+								class:selected={overlayMode === 'off'}
+								onclick={() => setOverlay('off')}
+							>
+								Target
+							</button>
 							<button
 								class="battle-chip"
 								class:selected={overlayMode === 'app'}
-								onclick={() =>
-									setOverlay(overlayMode === 'app' ? 'off' : 'app')}
+								onclick={() => setOverlay('app')}
 							>
-								App
+								Overlay
 							</button>
 							<button
 								class="battle-chip"
 								class:selected={overlayMode === 'diff'}
-								onclick={() =>
-									setOverlay(overlayMode === 'diff' ? 'off' : 'diff')}
+								onclick={() => setOverlay('diff')}
 							>
 								Diff
 							</button>
 						</div>
 					</div>
-					<div class="battle-control">
-						<span class="battle-control__label">Opacity</span>
-						<div class="battle-opacity">
-							<input
-								type="range"
-								class="battle-slider"
-								min="0"
-								max="100"
-								bind:value={overlayOpacity}
-								title="Overlay opacity: {overlayOpacity}%"
-							/>
-						</div>
+					<div class="battle-control-slot">
+						{#if overlayMode === 'app'}
+							<div class="battle-control">
+								<span class="battle-control__label">Opacity</span>
+								<div class="battle-opacity">
+									<input
+										type="range"
+										class="battle-slider"
+										min="0"
+										max="100"
+										bind:value={overlayOpacity}
+										title="Overlay opacity: {overlayOpacity}%"
+									/>
+								</div>
+							</div>
+						{:else if overlayMode === 'diff'}
+							<SeverityScale />
+						{/if}
 					</div>
 				{/if}
 			</div>
@@ -244,10 +255,7 @@
 							<AppFrame {hax} />
 						</div>
 					{:else if overlayMode === 'diff' && diffCanvasSrc}
-						<div
-							class="overlay diff-overlay"
-							style:opacity={overlayOpacity / 100}
-						>
+						<div class="overlay diff-overlay">
 							<img src={diffCanvasSrc} alt="Diff overlay" />
 						</div>
 					{/if}
@@ -276,7 +284,8 @@
 <style>
 	.battle-mode {
 		display: grid;
-		grid-template-rows: repeat(2, minmax(0, 1fr));
+		/* grid-template-rows: repeat(2, minmax(0, 1fr)); */
+		grid-template-columns: 1fr 1fr;
 		height: 100%;
 		min-height: 0;
 	}
@@ -300,6 +309,10 @@
 		flex-shrink: 0;
 		overflow: hidden;
 		position: relative;
+	}
+
+	.battle-frame-shell {
+		padding: 0;
 	}
 
 	.target-preview-layer,

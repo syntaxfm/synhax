@@ -75,7 +75,7 @@
 	}
 </script>
 
-<div class="clock">
+<div class="clock" data-view={view}>
 	<div class="time-display">
 		{#each getTimeChars(countdown) as char, index}
 			<span class="char" class:colon={char === ':'}>{char}</span>
@@ -102,16 +102,19 @@
 
 <style>
 	.clock {
-		font-size: 100px;
+		font-size: 45px;
+		border: solid 1px rgb(255 255 255 / 0.15);
+		border-block-width: 0;
+		&[data-view='REF'] {
+			border-block-width: 1px;
+			font-size: 100px; /* larger for ref view */
+		}
 		text-align: center;
 		display: flex;
-		border-radius: 4px;
 		justify-content: center;
 		align-items: center;
-		background: #000;
-		padding: 0 40px;
-		margin: 10px;
-		border: solid 1px rgb(255 255 255 / 0.2);
+		background: var(--black);
+		padding: 0 10px;
 
 		.time-display {
 			display: flex;
