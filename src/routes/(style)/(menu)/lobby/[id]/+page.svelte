@@ -26,6 +26,37 @@
 	// Battles require at least MIN_PARTICIPANTS locked in to start
 	let can_start = $derived(ready_count >= MIN_PARTICIPANTS);
 
+	let is_participant = $derived(
+		battle.data?.participants?.some(
+			(participant) => participant.user_id === z.userID
+		) ?? false
+	);
+
+	let is_referee = $derived(
+		battle.data?.referee_id === z.userID ||
+			battle.data?.referee?.id === z.userID
+	);
+
+	$effect(() => {
+		if (!battle.data) return;
+		if (battle.data.status === 'ACTIVE') {
+			if (is_referee) {
+				goto(`/ref/${battle.data.id}`);
+				return;
+			}
+			if (is_participant) {
+				goto(`/battle/${battle.data.id}/code`);
+				return;
+			}
+		}
+		if (
+			battle.data.status === 'COMPLETED' &&
+			battle.data.win_condition === 'FIRST_TO_PERFECT'
+		) {
+			goto(`/recap/${battle.data.id}`);
+		}
+	});
+
 	async function toggle_privacy() {
 		if (!battle.data) return;
 		const new_visibility =
@@ -110,7 +141,7 @@
 
 		z.mutate(mutators.battles.update(updates));
 
-		// Redirect referee to the ref view
+		// Redirect battlers to the battle code view
 		goto(`/battle/${page.params.id}/code`);
 	}
 

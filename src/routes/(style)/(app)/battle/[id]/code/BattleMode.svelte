@@ -1,6 +1,5 @@
 <script lang="ts">
 	import AppFrame from '$lib/battle_mode/AppFrame.svelte';
-	import CodeFrame from '$lib/battle_mode/CodeFrame.svelte';
 	import DiffEngine from '$lib/battle_mode/DiffEngine.svelte';
 	import type { Battle, Hax, Target } from '$sync/schema';
 	import { z, mutators } from '$lib/zero.svelte';
@@ -11,11 +10,6 @@
 	};
 
 	let { battle, hax }: { battle: BattleWithParticipants; hax: Hax } = $props();
-
-	const opponentHax = $derived(
-		battle.participants?.find((participant) => participant.hax?.id !== hax.id)
-			?.hax
-	);
 
 	const targetImage = $derived(battle.target?.image ?? '');
 	const isCodeTarget = $derived(battle.target?.type === 'CODE');
@@ -170,21 +164,6 @@
 				>
 					<AppFrame {hax} bind:iframeElement onload={handleIframeLoad} />
 				</div>
-				{#if opponentHax}
-					<div class="stack opponent-column" style="--gap: var(--pad-xs);">
-						<span class="opponent-label">Opponent Code</span>
-						<div
-							class="opponent-code-frame"
-							style:width="{FRAME_WIDTH}px"
-							style:height="{FRAME_HEIGHT}px"
-						>
-							<CodeFrame
-								html_text={opponentHax.html}
-								css_text={opponentHax.css}
-							/>
-						</div>
-					</div>
-				{/if}
 			</div>
 		</div>
 	</div>
@@ -315,29 +294,6 @@
 
 	.code-output {
 		height: 100%;
-	}
-
-	.opponent-label {
-		font-size: 10px;
-		letter-spacing: 0.08em;
-		text-transform: uppercase;
-		color: var(--fg);
-		opacity: 0.6;
-	}
-
-	.opponent-code-frame {
-		overflow: hidden;
-		border-radius: var(--br-s);
-		border: 1px solid rgb(255 255 255 / 0.1);
-		background: hsl(from var(--black) h s 2%);
-	}
-
-	.opponent-code-frame :global(pre) {
-		margin: 0;
-	}
-
-	.opponent-code-frame :global(code) {
-		font-size: 12px;
 	}
 
 	.battle-frame {

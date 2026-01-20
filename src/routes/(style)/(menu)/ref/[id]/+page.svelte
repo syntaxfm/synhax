@@ -246,6 +246,20 @@
 		align-items: center;
 	}
 
+	.target-frame {
+		width: 600px;
+		height: 400px;
+		background: var(--black);
+	}
+
+	.target-frame img,
+	.target-frame :global(iframe) {
+		display: block;
+		width: 100%;
+		height: 100%;
+		object-fit: contain;
+	}
+
 	.battler-panels {
 		display: grid;
 		gap: var(--pad-m);
