@@ -26,3 +26,8 @@ vite.config.ts.timestamp-*
 
 # Sentry Config File
 .env.sentry-build-plugin
+
+zero.db
+zero.db-shm
+zero.db-wal
+zero.db-wal2
