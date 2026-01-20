@@ -29,6 +29,7 @@
 <iframe
 	bind:this={iframeElement}
 	srcdoc={code}
+	sandbox=""
 	title="App Frame"
 	onload={handleLoad}
 ></iframe>
