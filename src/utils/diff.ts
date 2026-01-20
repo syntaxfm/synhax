@@ -194,7 +194,9 @@ export function getImageData(canvas: HTMLCanvasElement): DiffImageData {
  * - Uses weighted color differences based on human eye sensitivity
  *   (green > red > blue): R*0.299 + G*0.587 + B*0.114 + A*0.1
  * - Ignores very small differences (anti-aliasing tolerance)
- * - Generates a heatmap showing where differences occur
+ * - Generates a heatmap showing where differences occur:
+ *   - Black: pixels that are 100% correct (< 0.01 difference)
+ *   - Green to Red: pixels with differences (green = minor, red = major)
  * - Returns a similarity score from 0-100%
  */
 export function compareImages(
@@ -287,11 +289,11 @@ export function compareImages(
 		const rgbaIdx = i * 4;
 
 		if (pixelDiff < 0.01) {
-			// Nearly identical - leave transparent
+			// Nearly identical - show as black
 			diffImageData.data[rgbaIdx] = 0;
 			diffImageData.data[rgbaIdx + 1] = 0;
 			diffImageData.data[rgbaIdx + 2] = 0;
-			diffImageData.data[rgbaIdx + 3] = 0;
+			diffImageData.data[rgbaIdx + 3] = 255;
 			continue;
 		}
 
