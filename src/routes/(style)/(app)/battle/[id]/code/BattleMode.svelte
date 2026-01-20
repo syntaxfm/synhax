@@ -38,6 +38,7 @@
 
 	const showOverlayControls = $derived(true);
 
+	// Test
 	// Diff canvas for overlay (captured from DiffEngine)
 	let diffCanvasSrc: string | null = $state(null);
 
