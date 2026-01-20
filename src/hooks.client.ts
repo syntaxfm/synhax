@@ -1,8 +1,12 @@
 import * as Sentry from '@sentry/sveltekit';
 import type { HandleClientError } from '@sveltejs/kit';
 
+const SENTRY_DSN =
+	'https://a825005a7ee52dd8ea15b555f4eaa374@o4507217476845568.ingest.us.sentry.io/4510003969458176';
+
 Sentry.init({
-	dsn: 'https://a825005a7ee52dd8ea15b555f4eaa374@o4507217476845568.ingest.us.sentry.io/4510003969458176',
+	dsn: SENTRY_DSN,
+	tunnel: '/api/telemetry',
 	// Adds request headers and IP for users, for more info visit:
 	// https://docs.sentry.io/platforms/javascript/guides/sveltekit/configuration/options/#sendDefaultPii
 	sendDefaultPii: true,
