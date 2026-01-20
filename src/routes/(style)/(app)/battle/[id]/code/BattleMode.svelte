@@ -29,7 +29,7 @@
 	// Fixed dimensions for both panes (TODO: make configurable per target)
 	const FRAME_WIDTH = 600;
 	const FRAME_HEIGHT = 400;
-	// TODO
+
 
 	// Overlay state: 'off', 'app', or 'diff'
 	type OverlayMode = 'off' | 'app' | 'diff';

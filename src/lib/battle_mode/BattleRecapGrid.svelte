@@ -3,6 +3,7 @@
 	import CodeFrame from '$lib/battle_mode/CodeFrame.svelte';
 	import { parseTargetCode } from '$utils/code';
 	import sentinel from '../../routes/(style)/(app)/battle/sentinel-dark.css?raw';
+	import { FRAME_HEIGHT, FRAME_WIDTH } from '$lib/constants';
 
 	type RecapTone = 'win' | 'loss' | 'neutral';
 
@@ -51,12 +52,15 @@
 	{@html `<style>${sentinel}</style>`}
 </svelte:head>
 
-<div class="recap-grid battle-panel">
+<div
+	class="recap-grid battle-panel"
+	style="--frame-width: {FRAME_WIDTH}; --frame-height: {FRAME_HEIGHT};"
+>
 	{#if leftParticipant}
 		{@const tone = leftParticipant.tone ?? 'neutral'}
 		{@const outcomeLabel = leftParticipant.outcomeLabel ?? 'Battler'}
 		<article
-			class="stack battler-card"
+			class="stack battler-card left"
 			class:win={tone === 'win'}
 			class:loss={tone === 'loss'}
 			class:neutral={tone === 'neutral'}
@@ -124,7 +128,7 @@
 		{@const tone = rightParticipant.tone ?? 'neutral'}
 		{@const outcomeLabel = rightParticipant.outcomeLabel ?? 'Battler'}
 		<article
-			class="stack battler-card"
+			class="stack battler-card right"
 			class:win={tone === 'win'}
 			class:loss={tone === 'loss'}
 			class:neutral={tone === 'neutral'}
@@ -179,6 +183,34 @@
 <style>
 	.battler-hero {
 		align-items: flex-start;
+	}
+
+	.battler-card.left {
+		text-align: right;
+	}
+
+	.battler-card.left .battler-hero,
+	.battler-card.left .battler-meta,
+	.battler-card.left .battler-panels > .stack,
+	.battler-card.left .status-badge {
+		text-align: right;
+		align-items: flex-end;
+	}
+
+	.battler-card.left .battler-meta {
+		justify-content: flex-end;
+	}
+
+	.battler-card.left .code-panel {
+		margin-left: auto;
+	}
+
+	.battler-card.left .result-frame {
+		margin-left: auto;
+	}
+
+	.battler-card.right .code-panel {
+		margin-right: auto;
 	}
 
 	.battler-meta {
@@ -288,8 +320,8 @@
 
 	.result-frame,
 	.target-frame {
-		width: 400px;
-		height: 300px;
+		width: calc(var(--frame-width) * 1px);
+		height: calc(var(--frame-height) * 1px);
 		background: var(--black);
 	}
 
