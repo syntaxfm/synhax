@@ -31,6 +31,7 @@
 	srcdoc={code}
 	title="App Frame"
 	onload={handleLoad}
+	sandbox="allow-same-origin"
 ></iframe>
 
 <style>

@@ -157,10 +157,13 @@
 <style>
 	.battle-code-page {
 		min-height: 100vh;
+		width: 1200px;
+		margin: 0 auto;
 		height: 100vh;
 		display: flex;
 		flex-direction: column;
 		overflow: hidden;
+		background: var(--black);
 	}
 
 	.battle-code-page :global(.battle-mode) {

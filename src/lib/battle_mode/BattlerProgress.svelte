@@ -37,7 +37,9 @@
 			class="progress-fill"
 			style:width="{score}%"
 			style:background-color={barColor}
-		></div>
+		>
+			<span class="score">{score}%</span>
+		</div>
 		<!-- Avatar positioned at progress point -->
 		<div class="avatar-wrapper" style:--progress="{score}%">
 			<img src={avatarSrc} alt="{user.name}'s avatar" class="avatar" />
@@ -55,25 +57,37 @@
 		padding: 0 20px;
 	}
 
+	.score {
+		font-size: 14px;
+		padding-inline: 8px;
+		font-weight: bold;
+	}
+
 	.progress-track {
 		position: relative;
 		flex: 1;
-		height: 8px;
+		height: 20px;
 		background: var(--fg-1);
-		border-radius: var(--br-s);
+		--radius: 500px;
+		border-radius: var(--radius);
+		box-shadow: var(--shadow-2);
 	}
 
 	.progress-fill {
 		position: absolute;
 		top: 0;
 		bottom: 0;
-		border-radius: var(--br-s);
+		border-radius: var(--radius);
+		display: flex;
+		align-items: center;
+		justify-content: end;
 		transition: width 0.3s ease-out;
 	}
 
 	/* Left position: fill from left */
 	.battler-progress:not(.right) .progress-fill {
 		left: 0;
+		justify-content: start;
 	}
 
 	/* Right position: fill from right */

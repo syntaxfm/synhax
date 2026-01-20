@@ -52,7 +52,7 @@
 		<div class="center">
 			{@render countdown()}
 			{#if diffScore !== null}
-				<DiffPreview score={diffScore} compact />
+				<!-- <DiffPreview score={diffScore} compact /> -->
 			{/if}
 		</div>
 		<div class="battler-side right">
@@ -97,7 +97,6 @@
 	}
 
 	header.has-battlers {
-		padding: var(--pad-m);
 		align-items: center;
 	}
 
