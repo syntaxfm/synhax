@@ -1,16 +1,10 @@
 <script lang="ts">
 	import '@awesome.me/webawesome/dist/components/rating/rating.js';
 	import { page } from '$app/state';
-	import AppFrame from '$lib/battle_mode/AppFrame.svelte';
-	import CodeFrame from '$lib/battle_mode/CodeFrame.svelte';
+	import BattleRecapGrid from '$lib/battle_mode/BattleRecapGrid.svelte';
 	import { z, queries, mutators } from '$lib/zero.svelte';
-	import { parseTargetCode } from '$utils/code';
-
-	const formatScore = (score: number) =>
-		`${(Math.floor(Math.max(0, Math.min(100, score)) * 100) / 100).toFixed(2)}%`;
 	import { remove_screaming } from '$utils/formatting';
 	import { BATTLE_RATINGS } from '$lib/constants';
-	import sentinel from '../../../(app)/battle/sentinel-dark.css?raw';
 
 	type WinnerParticipant = {
 		id: string;
@@ -116,16 +110,6 @@
 
 		return ordered;
 	});
-	const targetImage = $derived(battle.data?.target?.image ?? '');
-	const isCodeTarget = $derived(battle.data?.target?.type === 'CODE');
-	const targetCode = $derived(
-		parseTargetCode(battle.data?.target?.inspo ?? '')
-	);
-	const targetFrameData = $derived({
-		html: targetCode.html,
-		css: targetCode.css
-	});
-
 	function isWinnerParticipant(participant: WinnerParticipant) {
 		return Boolean(winner && participant.id === winner.id);
 	}
@@ -174,10 +158,6 @@
 	}
 </script>
 
-<svelte:head>
-	{@html `<style>${sentinel}</style>`}
-</svelte:head>
-
 {#if battle.data && canView}
 	{@const battleData = battle.data}
 	<div class="stack battle-surface recap-layout" style="--gap: 2rem;">
@@ -196,78 +176,19 @@
 		</header>
 
 		<section class="stack" style="--gap: 1rem;">
-			<div class="recap-grid battle-panel">
-				{#each recapBattlers as participant}
-					{@const isWinner = isWinnerParticipant(participant)}
-					{@const isLoser = Boolean(winner) && !isWinner}
-					<article
-						class="stack battler-card"
-						class:win={isWinner}
-						class:loss={isLoser}
-						class:neutral={!winner}
-						style="--gap: 1.5rem;"
-					>
-						<div class="stack battler-hero" style="--gap: 0.5rem;">
-							<span
-								class="tag battle-outcome"
-								class:win={isWinner}
-								class:loss={Boolean(winner) && !isWinner}
-								class:neutral={!winner}
-							>
-								{getOutcomeLabel(participant)}
-							</span>
-							<div class="battler-meta">
-								<h3>{participant.user?.name ?? 'Battler'}</h3>
-								{#if participant.hax?.diff_score !== null && participant.hax?.diff_score !== undefined}
-									<span
-										class="tag battle-score"
-										class:win={isWinner}
-										class:loss={Boolean(winner) && !isWinner}
-										class:neutral={!winner}
-									>
-										{formatScore(participant.hax.diff_score)} Match
-									</span>
-								{/if}
-							</div>
-						</div>
-						<div class="battler-panels">
-							<div class="stack" style="--gap: 0.5rem;">
-								<span class="status-badge">Result</span>
-								<div class="result-frame battle-frame battle-frame--bordered">
-									<AppFrame
-										hax={{
-											html: participant.hax?.html ?? '',
-											css: participant.hax?.css ?? ''
-										}}
-									/>
-								</div>
-							</div>
-							<div class="code-panel">
-								<CodeFrame
-									html_text={participant.hax?.html ?? ''}
-									css_text={participant.hax?.css ?? ''}
-								/>
-							</div>
-						</div>
-					</article>
-				{/each}
-
-				{#if battleData.target}
-					<div class="stack target-card" style="--gap: 0.5rem;">
-						<span class="status-badge">Target</span>
-						<div class="target-frame battle-frame battle-frame--bordered">
-							{#if isCodeTarget}
-								<AppFrame hax={targetFrameData} />
-							{:else}
-								<img
-									src={targetImage}
-									alt={battleData.target?.name ?? 'Target'}
-								/>
-							{/if}
-						</div>
-					</div>
-				{/if}
-			</div>
+			<BattleRecapGrid
+				participants={recapBattlers.map((participant) => {
+					const isWinner = isWinnerParticipant(participant);
+					return {
+						id: participant.id,
+						user: participant.user,
+						hax: participant.hax,
+						outcomeLabel: getOutcomeLabel(participant),
+						tone: isWinner ? 'win' : winner ? 'loss' : 'neutral'
+					};
+				})}
+				target={battleData.target}
+			/>
 		</section>
 	</div>
 {:else if battle.data}
@@ -295,147 +216,6 @@
 		display: flex;
 	}
 
-	.battler-hero {
-		align-items: flex-start;
-	}
-
-	.battler-meta {
-		display: flex;
-		align-items: baseline;
-		gap: 0.75rem;
-		flex-wrap: wrap;
-	}
-
-	.battler-card {
-		padding: 1.5rem;
-		border-radius: var(--br-l);
-		background: hsl(from var(--black) h s 4%);
-		border: 1px solid rgb(255 255 255 / 0.06);
-		box-shadow:
-			0 18px 30px rgb(0 0 0 / 0.35),
-			0 1px 0 rgb(255 255 255 / 0.05) inset;
-	}
-
-	.battler-card.win {
-		background: linear-gradient(
-			135deg,
-			hsl(from var(--yellow) h 50% 10%),
-			hsl(from var(--black) h s 3%)
-		);
-		border-color: rgb(250 191 71 / 0.35);
-		box-shadow:
-			0 18px 40px rgb(0 0 0 / 0.45),
-			0 1px 0 rgb(255 255 255 / 0.08) inset;
-	}
-
-	.battler-card.loss {
-		background: linear-gradient(
-			135deg,
-			hsl(from var(--slate) h s 6%),
-			hsl(from var(--black) h s 3%)
-		);
-		border-color: rgb(148 163 184 / 0.2);
-	}
-
-	.battler-card.neutral {
-		background: hsl(from var(--black) h s 4%);
-	}
-
-	.battler-card h3 {
-		margin: 0;
-		font-size: 1.35rem;
-		letter-spacing: 0.01em;
-	}
-
-	.battle-outcome,
-	.battle-score {
-		--tag-color: var(--gray);
-		font-size: 0.85rem;
-		letter-spacing: 0.08em;
-		text-transform: uppercase;
-	}
-
-	.battle-outcome.win,
-	.battle-score.win {
-		--tag-color: var(--yellow);
-	}
-
-	.battle-outcome.loss,
-	.battle-score.loss {
-		--tag-color: var(--slate);
-	}
-
-	.battle-outcome.neutral,
-	.battle-score.neutral {
-		--tag-color: var(--gray);
-	}
-
-	.battle-score {
-		font-weight: 600;
-		letter-spacing: 0.05em;
-	}
-
-	.outcome-label {
-		display: none;
-	}
-
-	@media (max-width: 1200px) {
-		.recap-grid {
-			grid-template-columns: 1fr;
-		}
-	}
-
-	.recap-grid {
-		display: grid;
-		gap: var(--pad-l);
-		grid-template-columns: repeat(3, minmax(0, 1fr));
-		align-items: start;
-	}
-
-	.target-card {
-		align-items: center;
-	}
-
-	.battler-panels {
-		display: grid;
-		gap: var(--pad-m);
-		grid-template-columns: minmax(240px, 1fr);
-		align-items: start;
-	}
-
-	.battler-card .status-badge {
-		letter-spacing: 0.12em;
-		font-weight: 700;
-	}
-
-	.result-frame,
-	.target-frame {
-		width: 400px;
-		height: 300px;
-		background: var(--black);
-	}
-
-	.result-frame img,
-	.result-frame :global(iframe),
-	.target-frame img,
-	.target-frame :global(iframe) {
-		display: block;
-		width: 100%;
-		height: 100%;
-		object-fit: contain;
-	}
-
-	.code-panel {
-		border-radius: var(--br-s);
-		overflow: hidden;
-		border: 1px solid rgb(255 255 255 / 0.08);
-		background: hsl(from var(--black) h s 4%);
-		box-shadow: 0 12px 24px rgb(0 0 0 / 0.25);
-	}
-
-	.code-panel :global(pre) {
-		margin: 0;
-	}
 	/*
 	.ratings {
 		display: grid;
