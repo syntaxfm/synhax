@@ -10,7 +10,8 @@
 	const user = z.createQuery(queries.user.current());
 
 	const links = [
-		{ label: 'Dashboard', href: '/admin' },
+		{ label: 'Admin', href: '/admin' },
+		{ label: 'Dashboard', href: '/dashboard' },
 		{ label: 'Users', href: '/admin/users' },
 		{ label: 'Targets', href: '/admin/targets' },
 		{ label: 'Battles', href: '/admin/battles' },
