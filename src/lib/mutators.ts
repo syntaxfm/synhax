@@ -445,7 +445,7 @@ export const mutators = defineMutators({
 					// Clamp diff_score to 0-100 and update timestamp when provided
 					diff_score:
 						args.diff_score !== undefined
-							? Math.round(Math.max(0, Math.min(100, args.diff_score)))
+							? Math.max(0, Math.min(100, args.diff_score))
 							: undefined,
 					diff_score_updated_at:
 						args.diff_score !== undefined ? Date.now() : undefined

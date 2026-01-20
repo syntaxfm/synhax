@@ -59,47 +59,60 @@
 			.slice(0, 2);
 	});
 
-	function join_battle() {
-		// Make sure target actually exists
-		if (battle.target?.name) {
-			const activeParticipants = battle.participants.filter(
-				(participant) => participant.status !== 'DROPPED'
-			);
-			if (activeParticipants.length >= 2) {
-				alert('This battle already has two battlers.');
-				return;
-			}
-			const usedOrders = new Set(
-				activeParticipants.map((participant) => participant.display_order ?? 0)
-			);
-			const displayOrder = usedOrders.has(0) ? 1 : 0;
-			// Create hax with files
-			z.mutate(
-				mutators.hax.insert({
-					id: crypto.randomUUID(),
-					user_id: z.userID,
-					target_id: battle.target_id || '',
-					battle_id: battle.id,
-					html: HTML_TEMPLATE,
-					css: CSS_TEMPLATE,
-					type: 'BATTLE'
-				})
-			);
-
-			// First create file structure for battle (use battle ID for unique folders)
-			files.create_hax_directory(battle.id);
-
-			// Add self as a participant
-			z.mutate(
-				mutators.battle_participants.insert({
-					id: crypto.randomUUID(),
-					battle_id: battle.id,
-					user_id: z.userID,
-					status: 'PENDING' as const,
-					display_order: displayOrder
-				})
-			);
+	async function join_battle() {
+		if (!battle.target?.name) {
+			return;
 		}
+
+		const activeParticipants = battle.participants.filter(
+			(participant) => participant.status !== 'DROPPED'
+		);
+		if (activeParticipants.length >= 2) {
+			alert('This battle already has two battlers.');
+			return;
+		}
+
+		const has_access =
+			files.status === 'ACCESS' || (await files.restore_directory_handle());
+		if (!has_access) {
+			alert('File access is required to join this battle.');
+			return;
+		}
+
+		try {
+			await files.create_hax_directory(battle.id);
+		} catch (error) {
+			console.error('Failed to create battle folder:', error);
+			alert('Unable to create your battle folder.');
+			return;
+		}
+
+		const usedOrders = new Set(
+			activeParticipants.map((participant) => participant.display_order ?? 0)
+		);
+		const displayOrder = usedOrders.has(0) ? 1 : 0;
+
+		z.mutate(
+			mutators.hax.insert({
+				id: crypto.randomUUID(),
+				user_id: z.userID,
+				target_id: battle.target_id || '',
+				battle_id: battle.id,
+				html: HTML_TEMPLATE,
+				css: CSS_TEMPLATE,
+				type: 'BATTLE'
+			})
+		);
+
+		z.mutate(
+			mutators.battle_participants.insert({
+				id: crypto.randomUUID(),
+				battle_id: battle.id,
+				user_id: z.userID,
+				status: 'PENDING' as const,
+				display_order: displayOrder
+			})
+		);
 	}
 
 	function leave_battle() {

@@ -184,7 +184,7 @@
 			// Check for perfect score
 			if (
 				!perfectScoreTriggered &&
-				result.score >= perfectScoreThreshold &&
+				newScore >= perfectScoreThreshold &&
 				onPerfectScore
 			) {
 				console.log('[DiffEngine] Perfect score achieved!');

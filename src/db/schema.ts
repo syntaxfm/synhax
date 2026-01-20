@@ -6,6 +6,7 @@ import {
 	text,
 	boolean,
 	integer,
+	doublePrecision,
 	timestamp,
 	index,
 	uniqueIndex,
@@ -274,7 +275,7 @@ export const hax = pgTable(
 		is_final: boolean().notNull().default(false),
 		rendered_preview_url: text(),
 		// Live diff score (0-100) comparing user output to target
-		diff_score: integer(),
+		diff_score: doublePrecision(),
 		diff_score_updated_at: timestamp({ withTimezone: true }),
 		created_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
 		updated_at: timestamp({ withTimezone: true }).notNull().defaultNow()
