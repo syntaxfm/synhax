@@ -4,4 +4,4 @@
 	const { text = 'Request Access' }: { text?: string } = $props();
 </script>
 
-<button onclick={() => files.setup_synhax_directory()}>{text}</button>
+<button onclick={() => files.restore_directory_handle()}>{text}</button>
