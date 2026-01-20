@@ -29,9 +29,9 @@
 <iframe
 	bind:this={iframeElement}
 	srcdoc={code}
-	sandbox=""
 	title="App Frame"
 	onload={handleLoad}
+	sandbox="allow-same-origin"
 ></iframe>
 
 <style>
