@@ -8,6 +8,9 @@
 	import { parseTargetCode } from '$utils/code';
 	import { remove_screaming } from '$utils/formatting';
 
+	const formatScore = (score: number) =>
+		`${(Math.floor(Math.max(0, Math.min(100, score)) * 100) / 100).toFixed(2)}%`;
+
 	let battle = $derived(
 		z.createQuery(queries.battles.byId({ id: page?.params?.id || '' }))
 	);
@@ -66,7 +69,7 @@
 								<h3>{left_battler.user?.name ?? 'Battler'}</h3>
 								{#if left_battler.hax?.diff_score !== null && left_battler.hax?.diff_score !== undefined}
 									<span class="tag battle-score neutral">
-										{left_battler.hax.diff_score}% Match
+										{formatScore(left_battler.hax.diff_score)} Match
 									</span>
 								{/if}
 							</div>
@@ -117,7 +120,7 @@
 								<h3>{right_battler.user?.name ?? 'Battler'}</h3>
 								{#if right_battler.hax?.diff_score !== null && right_battler.hax?.diff_score !== undefined}
 									<span class="tag battle-score neutral">
-										{right_battler.hax.diff_score}% Match
+										{formatScore(right_battler.hax.diff_score)} Match
 									</span>
 								{/if}
 							</div>

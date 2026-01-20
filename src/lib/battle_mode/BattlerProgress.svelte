@@ -19,7 +19,7 @@
 	let { user, hax, position, color }: Props = $props();
 
 	// Get the score (0-100) or default to 0
-	const score = $derived(hax?.diff_score ?? 0);
+	const score = $derived(Math.max(0, Math.min(100, hax?.diff_score ?? 0)));
 
 	// Default colors based on position (using Graffiti colors)
 	const barColor = $derived(

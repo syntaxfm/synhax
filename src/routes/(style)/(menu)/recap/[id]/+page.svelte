@@ -5,6 +5,9 @@
 	import CodeFrame from '$lib/battle_mode/CodeFrame.svelte';
 	import { z, queries, mutators } from '$lib/zero.svelte';
 	import { parseTargetCode } from '$utils/code';
+
+	const formatScore = (score: number) =>
+		`${(Math.floor(Math.max(0, Math.min(100, score)) * 100) / 100).toFixed(2)}%`;
 	import { remove_screaming } from '$utils/formatting';
 	import { BATTLE_RATINGS } from '$lib/constants';
 	import sentinel from '../../../(app)/battle/sentinel-dark.css?raw';
@@ -222,7 +225,7 @@
 										class:loss={Boolean(winner) && !isWinner}
 										class:neutral={!winner}
 									>
-										{participant.hax.diff_score}% Match
+										{formatScore(participant.hax.diff_score)} Match
 									</span>
 								{/if}
 							</div>

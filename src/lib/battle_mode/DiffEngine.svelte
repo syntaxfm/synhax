@@ -133,8 +133,10 @@
 						threshold: 0.005
 					});
 
-			const newScore = Math.round(result.score);
-			debugLastScore = newScore;
+			const normalizedScore =
+				Math.floor(Math.max(0, Math.min(100, result.score)) * 100) / 100;
+
+			debugLastScore = normalizedScore;
 
 			// Notify parent of diff canvas update (for overlay display)
 			onDiffCanvasUpdate?.(result.diffCanvas);
@@ -169,14 +171,21 @@
 				}
 			}
 
-			// Only save if score changed by >= 1%
-			if (currentScore === null || Math.abs(newScore - currentScore) >= 1) {
-				console.log('[DiffEngine] Saving score:', newScore);
+			// Only save if score changed by >= 0.01%
+			const roundedCurrent =
+				currentScore === null
+					? null
+					: Math.floor(Math.max(0, Math.min(100, currentScore)) * 100) / 100;
+			if (
+				roundedCurrent === null ||
+				Math.abs(normalizedScore - roundedCurrent) >= 0.01
+			) {
+				console.log('[DiffEngine] Saving score:', normalizedScore);
 				z.mutate(
 					mutators.hax.update({
 						id: haxId,
 						user_id: z.userID,
-						diff_score: newScore
+						diff_score: normalizedScore
 					})
 				);
 			}
@@ -184,7 +193,7 @@
 			// Check for perfect score
 			if (
 				!perfectScoreTriggered &&
-				newScore >= perfectScoreThreshold &&
+				normalizedScore >= perfectScoreThreshold &&
 				onPerfectScore
 			) {
 				console.log('[DiffEngine] Perfect score achieved!');

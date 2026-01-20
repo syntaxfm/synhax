@@ -35,7 +35,11 @@
 	});
 
 	// Format score for display
-	const scoreDisplay = $derived(score !== null ? `${Math.round(score)}%` : '—');
+	const scoreDisplay = $derived(
+		score !== null
+			? `${(Math.floor(Math.max(0, Math.min(100, score)) * 100) / 100).toFixed(2)}%`
+			: '—'
+	);
 
 	// Canvas container ref for appending the diff canvas
 	let canvasContainer: HTMLDivElement | null = $state(null);
