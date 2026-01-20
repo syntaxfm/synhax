@@ -39,7 +39,7 @@
 body {
 	min-height: 100vh;
 	scrollbar-width: none;
-	background-image: url('/bg.png');
+	background-image: url('/bg-pattern.png');
 	margin: 0;
 	> div {
 		min-height: 100vh;
