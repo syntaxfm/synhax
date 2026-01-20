@@ -1,9 +1,9 @@
 <script lang="ts">
 	import AppFrame from '$lib/battle_mode/AppFrame.svelte';
 	import CodeFrame from '$lib/battle_mode/CodeFrame.svelte';
+	import { FRAME_HEIGHT, FRAME_WIDTH } from '$lib/constants';
 	import { parseTargetCode } from '$utils/code';
 	import sentinel from '../../routes/(style)/(app)/battle/sentinel-dark.css?raw';
-	import { FRAME_HEIGHT, FRAME_WIDTH } from '$lib/constants';
 
 	type RecapTone = 'win' | 'loss' | 'neutral';
 
@@ -28,10 +28,12 @@
 
 	const {
 		participants = [],
-		target = null
+		target = null,
+		showOutcomeLabel = true
 	}: {
 		participants?: RecapParticipant[];
 		target?: BattleTarget | null;
+		showOutcomeLabel?: boolean;
 	} = $props();
 
 	const formatScore = (score: number) =>
@@ -53,12 +55,11 @@
 </svelte:head>
 
 <div
-	class="recap-grid battle-panel"
-	style="--frame-width: {FRAME_WIDTH}; --frame-height: {FRAME_HEIGHT};"
+	class="recap-grid"
+	style="--frame-width: {FRAME_WIDTH}; --frame-height: {FRAME_HEIGHT}; --target-col-width: calc({FRAME_WIDTH} * 1px);"
 >
 	{#if leftParticipant}
 		{@const tone = leftParticipant.tone ?? 'neutral'}
-		{@const outcomeLabel = leftParticipant.outcomeLabel ?? 'Battler'}
 		<article
 			class="stack battler-card left"
 			class:win={tone === 'win'}
@@ -67,16 +68,17 @@
 			style="--gap: 1.5rem;"
 		>
 			<div class="stack battler-hero" style="--gap: 0.5rem;">
-				<span
-					class="tag battle-outcome"
-					class:win={tone === 'win'}
-					class:loss={tone === 'loss'}
-					class:neutral={tone === 'neutral'}
-				>
-					{outcomeLabel}
-				</span>
+				{#if showOutcomeLabel}
+					<span
+						class="tag battle-outcome"
+						class:win={tone === 'win'}
+						class:loss={tone === 'loss'}
+						class:neutral={tone === 'neutral'}
+					>
+						{leftParticipant.outcomeLabel ?? 'Battler'}
+					</span>
+				{/if}
 				<div class="battler-meta">
-					<h3>{leftParticipant.user?.name ?? 'Battler'}</h3>
 					{#if leftParticipant.hax?.diff_score !== null && leftParticipant.hax?.diff_score !== undefined}
 						<span
 							class="tag battle-score"
@@ -87,6 +89,7 @@
 							{formatScore(leftParticipant.hax.diff_score)} Match
 						</span>
 					{/if}
+					<h3>{leftParticipant.user?.name ?? 'Battler'}</h3>
 				</div>
 			</div>
 			<div class="battler-panels">
@@ -126,7 +129,6 @@
 
 	{#if rightParticipant}
 		{@const tone = rightParticipant.tone ?? 'neutral'}
-		{@const outcomeLabel = rightParticipant.outcomeLabel ?? 'Battler'}
 		<article
 			class="stack battler-card right"
 			class:win={tone === 'win'}
@@ -135,14 +137,16 @@
 			style="--gap: 1.5rem;"
 		>
 			<div class="stack battler-hero" style="--gap: 0.5rem;">
-				<span
-					class="tag battle-outcome"
-					class:win={tone === 'win'}
-					class:loss={tone === 'loss'}
-					class:neutral={tone === 'neutral'}
-				>
-					{outcomeLabel}
-				</span>
+				{#if showOutcomeLabel}
+					<span
+						class="tag battle-outcome"
+						class:win={tone === 'win'}
+						class:loss={tone === 'loss'}
+						class:neutral={tone === 'neutral'}
+					>
+						{rightParticipant.outcomeLabel ?? 'Battler'}
+					</span>
+				{/if}
 				<div class="battler-meta">
 					<h3>{rightParticipant.user?.name ?? 'Battler'}</h3>
 					{#if rightParticipant.hax?.diff_score !== null && rightParticipant.hax?.diff_score !== undefined}
@@ -189,11 +193,7 @@
 		text-align: right;
 	}
 
-	.battler-card.left .battler-hero,
-	.battler-card.left .battler-meta,
-	.battler-card.left .battler-panels > .stack,
-	.battler-card.left .status-badge {
-		text-align: right;
+	.battler-card.left .battler-hero {
 		align-items: flex-end;
 	}
 
@@ -201,16 +201,17 @@
 		justify-content: flex-end;
 	}
 
-	.battler-card.left .code-panel {
-		margin-left: auto;
+	.battler-card.left .battler-panels {
+		justify-items: end;
 	}
 
 	.battler-card.left .result-frame {
 		margin-left: auto;
 	}
 
-	.battler-card.right .code-panel {
-		margin-right: auto;
+	.battler-card.left .code-panel {
+		justify-self: start;
+		text-align: left;
 	}
 
 	.battler-meta {
@@ -218,6 +219,10 @@
 		align-items: baseline;
 		gap: 0.75rem;
 		flex-wrap: wrap;
+	}
+
+	.battler-card .code-panel {
+		width: 100%;
 	}
 
 	.battler-card {
@@ -298,11 +303,12 @@
 	.recap-grid {
 		display: grid;
 		gap: var(--pad-l);
-		grid-template-columns: repeat(3, minmax(0, 1fr));
+		grid-template-columns: minmax(0, 1fr) var(--target-col-width) minmax(0, 1fr);
 		align-items: start;
 	}
 
 	.target-card {
+		width: var(--target-col-width);
 		align-items: center;
 	}
 

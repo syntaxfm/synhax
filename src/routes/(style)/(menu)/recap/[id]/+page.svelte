@@ -116,18 +116,10 @@
 
 	function getOutcomeLabel(participant: WinnerParticipant) {
 		if (!winner) {
-			return participant.user?.name ?? 'Battler';
+			return 'No Winner';
 		}
 
-		if (
-			viewerParticipant &&
-			participant.user_id === viewerParticipant.user_id
-		) {
-			return isWinnerParticipant(participant) ? 'You Win' : 'You Lose';
-		}
-
-		const name = participant.user?.name ?? 'Battler';
-		return isWinnerParticipant(participant) ? `${name} Wins` : `${name} Loses`;
+		return isWinnerParticipant(participant) ? 'You Win' : 'You Lose';
 	}
 
 	function rate_battle(
@@ -188,6 +180,7 @@
 					};
 				})}
 				target={battleData.target}
+				showOutcomeLabel={true}
 			/>
 		</section>
 	</div>

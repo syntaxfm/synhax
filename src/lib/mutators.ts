@@ -176,6 +176,7 @@ export const mutators = defineMutators({
 				'overtime_seconds?': 'number',
 				'status?': battleStatusEnum,
 				'visibility?': visibilityEnum,
+				'allow_time_extension?': 'boolean',
 				'starts_at?': 'number',
 				'ends_at?': 'number'
 			}),
@@ -200,7 +201,7 @@ export const mutators = defineMutators({
 					starts_at: args.starts_at,
 					ends_at: args.ends_at,
 					date: now,
-					allow_time_extension: true,
+					allow_time_extension: args.allow_time_extension ?? true,
 					created_at: now,
 					updated_at: now
 				});
@@ -340,7 +341,10 @@ export const mutators = defineMutators({
 			}),
 			async ({ tx, args, ctx }) => {
 				assertAuthenticated(ctx);
-				const existing = await getParticipant(tx, args.id);
+				const existing = (await getParticipant(tx, args.id)) as {
+					joined_at?: number | null;
+					created_at?: number | null;
+				} | null;
 				if (existing) {
 					await assertParticipantOwner(tx, ctx, args.id);
 				}
@@ -349,14 +353,16 @@ export const mutators = defineMutators({
 				}
 				const userId = isAdmin(ctx) ? args.user_id : ctx.userID;
 				const now = Date.now();
+				const joinedAt = existing?.joined_at ?? now;
+				const createdAt = existing?.created_at ?? now;
 				await tx.mutate.battle_participants.upsert({
 					id: args.id,
 					battle_id: args.battle_id,
 					user_id: userId,
 					status: args.status ?? 'PENDING',
 					display_order: args.display_order,
-					joined_at: existing ? undefined : now,
-					created_at: existing ? undefined : now,
+					joined_at: joinedAt,
+					created_at: createdAt,
 					updated_at: now
 				});
 			}
@@ -388,18 +394,22 @@ export const mutators = defineMutators({
 			}),
 			async ({ tx, args, ctx }) => {
 				assertAuthenticated(ctx);
-				const existing = await assertVoteOwner(tx, ctx, args.id);
+				const existing = (await assertVoteOwner(tx, ctx, args.id)) as {
+					created_at?: number | null;
+				} | null;
 				if (!existing && !isAdmin(ctx) && args.voter_id !== ctx.userID) {
 					throw new Error('Votes can only be submitted for yourself');
 				}
 				const voterId = isAdmin(ctx) ? args.voter_id : ctx.userID;
+				const createdAt = existing?.created_at ?? Date.now();
 				await tx.mutate.battle_votes.upsert({
 					id: args.id,
 					battle_id: args.battle_id,
 					voter_id: voterId,
 					nominee_hax_id: args.nominee_hax_id,
 					award_type: args.award_type,
-					value: args.value
+					value: args.value,
+					created_at: createdAt
 				});
 			}
 		)
@@ -502,6 +512,41 @@ export const mutators = defineMutators({
 					created_at: Date.now()
 				});
 			}
+		)
+	},
+
+	// ==================
+	// TARGETS (admin only - enforced server-side via ctx)
+	// ==================
+	targets: {
+		insert: defineMutator(
+			type({
+				id: 'string',
+				name: 'string',
+				image: 'string',
+				type: targetTypeEnum,
+				inspo: 'string',
+				created_by: 'string'
+			}),
+			async ({ tx, args, ctx }) => {
+				// Admin check - ctx is typed via DefaultTypes in schema.ts
+				if (!isAdmin(ctx)) {
+					throw new Error('Only admins can create targets');
+				}
+				const now = Date.now();
+				await tx.mutate.targets.insert({
+					id: args.id,
+					name: args.name,
+					image: args.image,
+					type: args.type,
+					inspo: args.inspo,
+					created_by: args.created_by,
+					is_active: true,
+					last_updated_at: now,
+					created_at: now,
+					updated_at: now
+				});
+			}
 		),
 		update: defineMutator(
 			type({
@@ -517,13 +562,16 @@ export const mutators = defineMutators({
 				if (!isAdmin(ctx)) {
 					throw new Error('Only admins can update targets');
 				}
+				const now = Date.now();
 				await tx.mutate.targets.update({
 					id: args.id,
 					name: args.name,
 					image: args.image,
 					type: args.type,
 					inspo: args.inspo,
-					is_active: args.is_active
+					is_active: args.is_active,
+					last_updated_at: now,
+					updated_at: now
 				});
 			}
 		)
@@ -531,6 +579,7 @@ export const mutators = defineMutators({
 
 	// ==================
 	// RATINGS
+
 	// ==================
 	ratings: {
 		upsert: defineMutator(
@@ -545,11 +594,14 @@ export const mutators = defineMutators({
 			}),
 			async ({ tx, args, ctx }) => {
 				assertAuthenticated(ctx);
-				const existing = await assertRatingOwner(tx, ctx, args.id);
+				const existing = (await assertRatingOwner(tx, ctx, args.id)) as {
+					created_at?: number | null;
+				} | null;
 				if (!existing && !isAdmin(ctx) && args.user_id !== ctx.userID) {
 					throw new Error('Ratings can only be submitted for yourself');
 				}
 				const userId = isAdmin(ctx) ? args.user_id : ctx.userID;
+				const createdAt = existing?.created_at ?? Date.now();
 				await tx.mutate.ratings.upsert({
 					id: args.id,
 					user_id: userId,
@@ -557,7 +609,8 @@ export const mutators = defineMutators({
 					difficulty: args.difficulty,
 					creativity: args.creativity,
 					fun: args.fun,
-					coolness: args.coolness
+					coolness: args.coolness,
+					created_at: createdAt
 				});
 			}
 		)
@@ -586,7 +639,8 @@ export const mutators = defineMutators({
 					name: args.name,
 					avatar: args.avatar,
 					bio: args.bio,
-					theme: args.theme
+					theme: args.theme,
+					updatedAt: Date.now()
 				});
 			}
 		)
