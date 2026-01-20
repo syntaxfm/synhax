@@ -6,5 +6,8 @@ export default defineConfig({
 	plugins: [sentrySvelteKit(), sveltekit()],
 	server: {
 		port: 7777
+	},
+	css: {
+		devSourcemap: true
 	}
 });
