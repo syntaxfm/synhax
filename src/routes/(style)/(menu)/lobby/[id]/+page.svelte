@@ -16,7 +16,7 @@
 	let over_status: 'ACTIVE' | 'OVER' = $state('ACTIVE');
 
 	// Minimum participants required to start a battle (2 players per battle)
-	const MIN_PARTICIPANTS = 2;
+	const MIN_PARTICIPANTS: number = 2;
 
 	// Count participants who are locked in (status === 'READY')
 	let ready_count = $derived(
@@ -58,7 +58,7 @@
 	});
 
 	async function toggle_privacy() {
-		if (!battle.data) return;
+		if (!battle.data || !is_referee) return;
 		const new_visibility =
 			battle.data.visibility === 'PUBLIC' ? 'PRIVATE' : 'PUBLIC';
 		z.mutate(
@@ -70,7 +70,7 @@
 	}
 
 	async function toggle_type() {
-		if (!battle.data) return;
+		if (!battle.data || !is_referee) return;
 		const new_type =
 			battle.data.type === 'TIME_TRIAL' ? 'TIMED_MATCH' : 'TIME_TRIAL';
 		z.mutate(
@@ -82,7 +82,7 @@
 	}
 
 	function update_time_limit(event: Event) {
-		if (!battle.data) return;
+		if (!battle.data || !is_referee) return;
 		const input = event.target as HTMLInputElement;
 		const new_time = parseFloat(input.value);
 		if (!isNaN(new_time)) {
@@ -96,7 +96,7 @@
 	}
 
 	function toggle_time_extension() {
-		if (!battle.data) return;
+		if (!battle.data || !is_referee) return;
 		z.mutate(
 			mutators.battles.update({
 				id: battle.data.id,
@@ -106,7 +106,7 @@
 	}
 
 	function toggle_win_condition() {
-		if (!battle.data) return;
+		if (!battle.data || !is_referee) return;
 		const new_condition =
 			battle.data.win_condition === 'FIRST_TO_PERFECT'
 				? 'VOTING'
@@ -120,7 +120,7 @@
 	}
 
 	async function start() {
-		if (!battle.data) return;
+		if (!battle.data || !is_referee) return;
 
 		const now = Date.now();
 		const updates: any = {
@@ -146,7 +146,7 @@
 	}
 
 	async function add_overtime(minutes: number) {
-		if (!battle.data) return;
+		if (!battle.data || !is_referee) return;
 
 		z.mutate(
 			mutators.battles.update({
@@ -159,7 +159,7 @@
 	}
 
 	function finish_battle() {
-		if (!battle.data) return;
+		if (!battle.data || !is_referee) return;
 
 		// For FIRST_TO_PERFECT mode, determine winner by highest diff_score
 		let winner_hax_id: string | null = null;
@@ -216,7 +216,7 @@
 		{/if}
 
 		<!-- Settings only shown when PENDING -->
-		{#if battle.data.status === 'PENDING'}
+		{#if battle.data.status === 'PENDING' && is_referee}
 			<section class="stack">
 				<div class="cluster">
 					<ToggleButton
@@ -294,7 +294,7 @@
 		<Battlers battle={battleData} />
 
 		<!-- Start button when PENDING -->
-		{#if battle.data?.status === 'PENDING'}
+		{#if battle.data?.status === 'PENDING' && is_referee}
 			<div class="cluster" style="justify-content: center;">
 				<button
 					class="go_button big_button"
@@ -314,7 +314,7 @@
 		{/if}
 
 		<!-- Controls when ACTIVE -->
-		{#if battle.data?.status === 'ACTIVE'}
+		{#if battle.data?.status === 'ACTIVE' && is_referee}
 			<div class="cluster" style="justify-content: center; --gap: 1rem;">
 				<a href={`/battle/${battle.data.id}/ref`} class="button">
 					View Battle
