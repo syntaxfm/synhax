@@ -16,6 +16,7 @@ const BASE_STYLES = `
 export function combine_html_and_css(html = '', css = ''): string {
 	return `<!DOCTYPE html>
 <html>
+	<script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,container-queries"></script>
 	<style>
 		${BASE_STYLES}
 		${css}
