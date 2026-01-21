@@ -151,6 +151,21 @@ RENDER
 
 - Rendered preview of users hax code
 
+## Battle Features
+
+### Tailwind CSS Support
+
+Battles support **Tailwind CSS v4** with full client-side JIT compilation. You can use any Tailwind class in your HTML, including arbitrary values.
+
+**Examples:**
+- Standard classes: `bg-blue-500`, `text-white`, `p-4`, `rounded-lg`
+- Arbitrary colors: `bg-[#efefef]`, `text-[#333]`
+- Arbitrary spacing: `p-[23px]`, `m-[1.5rem]`
+- Arbitrary dimensions: `w-[347px]`, `h-[89px]`
+- Arbitrary borders: `border-[3px]`, `rounded-[12px]`
+
+The Tailwind CDN automatically compiles these classes in the browser, so no build step is required. All Tailwind v4 features work out of the box, including plugins for forms, typography, aspect-ratio, and container-queries.
+
 ## Tables
 
 all have basic created_at, updated_at, id
