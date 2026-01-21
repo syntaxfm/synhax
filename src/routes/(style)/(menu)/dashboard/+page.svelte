@@ -15,7 +15,3 @@
 	</header>
 	<LatestTargets />
 </section>
-
-<svelte:head>
-	<title>Dashboard - Synhax</title>
-</svelte:head>
