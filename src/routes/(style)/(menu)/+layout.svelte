@@ -5,6 +5,7 @@
 	import { get_user_avatar_url } from '$lib/user/utils';
 	import { z } from '$lib/zero.svelte';
 	import { files } from '$lib/state/FileState.svelte';
+	import Logo from '$lib/ui/Logo.svelte';
 
 	const { children } = $props();
 
@@ -30,138 +31,198 @@
 	}
 </script>
 
-<div class="fill-wrapper">
-	<header class="header">
+<div class="layout-sidebar fill" class:sidebar-hidden={hideSidebarByDefault}>
+	<aside>
 		<a class="logo" href="/dashboard">
-			<svg
-				width="200"
-				viewBox="0 0 948 177"
-				fill="none"
-				xmlns="http://www.w3.org/2000/svg"
-			>
-				<path
-					d="M840.27 103.499L898.07 74.8988L840.27 46.0988V19.8988L947.07 74.8988L840.27 129.899V103.499Z"
-					fill="var(--primary)"
-				/>
-				<path
-					d="M745.384 89.0988L709.984 38.2988H745.584L765.984 70.4988L786.384 38.2988H821.984L786.184 89.0988L821.984 140.699H786.384L765.984 107.699L745.584 140.699H709.984L745.384 89.0988Z"
-					fill="var(--primary)"
-				/>
-				<path
-					d="M653.981 36.2988C667.581 36.2988 678.581 39.1654 686.981 44.8988C695.381 50.6321 699.581 59.2988 699.581 70.8988V140.699H673.781V129.299C669.248 133.699 663.981 137.099 657.981 139.499C651.981 141.765 646.248 142.899 640.781 142.899C630.648 142.899 622.581 140.365 616.581 135.299C610.581 130.232 607.581 123.299 607.581 114.499C607.581 102.099 613.981 92.6988 626.781 86.2988C631.314 84.1654 636.248 82.2988 641.581 80.6988C646.914 79.0988 655.448 76.7654 667.181 73.6988C668.648 73.4321 670.848 72.8988 673.781 72.0988C673.648 67.0321 672.048 63.4321 668.981 61.2988C665.914 59.0321 660.981 57.8988 654.181 57.8988C648.181 57.8988 643.114 58.8988 638.981 60.8988C634.981 62.8988 631.181 66.1654 627.581 70.6988L609.581 56.8988C614.514 50.2321 620.514 45.1654 627.581 41.6988C634.781 38.0988 643.581 36.2988 653.981 36.2988ZM648.781 121.099C653.448 121.099 657.914 120.099 662.181 118.099C666.581 116.099 670.448 113.165 673.781 109.299V91.2988C668.714 92.7654 663.648 94.2988 658.581 95.8988C653.648 97.3654 649.848 98.7654 647.181 100.099C641.181 102.899 638.181 106.699 638.181 111.499C638.181 114.565 639.181 116.965 641.181 118.699C643.181 120.299 645.714 121.099 648.781 121.099Z"
-					fill="var(--primary)"
-				/>
-				<path
-					d="M471.255 2.8988H501.655V58.0988H556.454V2.8988H586.855V140.699H556.454V85.0988H501.655V140.699H471.255V2.8988Z"
-					fill="var(--primary)"
-				/>
-				<path
-					d="M348.165 38.2988H377.165V51.0988H378.165C381.365 46.6988 385.632 43.1654 390.965 40.4988C396.299 37.6988 402.499 36.2988 409.565 36.2988C420.232 36.2988 428.765 39.6988 435.165 46.4988C441.699 53.1654 444.965 61.9654 444.965 72.8988V140.699H415.765V78.0988C415.765 72.0988 414.232 67.6321 411.165 64.6988C408.099 61.6321 403.832 60.0988 398.365 60.0988C392.232 60.0988 387.232 61.9654 383.365 65.6988C379.499 69.2988 377.565 74.0988 377.565 80.0988V140.699H348.165V38.2988Z"
-					fill="var(--primary)"
-				/>
-				<path
-					d="M240.831 153.299C249.231 153.299 255.564 151.899 259.831 149.099C264.231 146.432 267.364 142.765 269.231 138.099L231.831 38.2988H263.031L283.631 109.499H285.031L305.831 38.2988H337.231L297.631 142.699C294.031 152.032 289.964 159.099 285.431 163.899C281.031 168.699 275.364 171.965 268.431 173.699C261.631 175.432 252.431 176.299 240.831 176.299V153.299Z"
-					fill="var(--primary)"
-				/>
-				<path
-					d="M182.089 142.299C170.222 142.299 159.422 139.432 149.689 133.699C139.956 127.965 131.956 119.565 125.689 108.499L147.289 91.8988C151.822 100.032 157.022 106.165 162.889 110.299C168.889 114.432 175.289 116.499 182.089 116.499C188.089 116.499 192.822 115.032 196.289 112.099C199.889 109.165 201.689 105.299 201.689 100.499C201.689 96.7655 200.556 93.6988 198.289 91.2988C196.022 88.8988 193.022 86.8988 189.289 85.2988C185.556 83.6988 180.356 81.8321 173.689 79.6988C165.289 77.0321 158.289 74.3655 152.689 71.6988C147.222 68.8988 142.556 64.8988 138.689 59.6988C134.822 54.4988 132.889 47.8321 132.889 39.6988C132.889 27.4321 137.222 17.8988 145.889 11.0988C154.689 4.16546 166.089 0.698792 180.089 0.698792C189.022 0.698792 197.289 2.36546 204.889 5.6988C212.622 8.8988 219.889 14.2321 226.689 21.6988L209.489 40.2988C201.089 29.8988 190.889 24.6988 178.889 24.6988C173.956 24.6988 170.022 25.6988 167.089 27.6988C164.156 29.5655 162.689 32.2988 162.689 35.8988C162.689 40.0321 164.556 43.2988 168.289 45.6988C172.022 47.9655 178.222 50.5655 186.889 53.4988C195.822 56.4321 203.289 59.4321 209.289 62.4988C215.422 65.4321 220.622 69.8321 224.889 75.6988C229.156 81.4321 231.289 88.8988 231.289 98.0988C231.289 106.899 229.222 114.699 225.089 121.499C220.956 128.165 215.156 133.299 207.689 136.899C200.222 140.499 191.689 142.299 182.089 142.299Z"
-					fill="var(--primary)"
-				/>
-				<path
-					d="M0.406036 74.8988L107.206 19.8988V46.0988L49.406 74.8988L107.206 103.499V129.899L0.406036 74.8988Z"
-					fill="var(--primary)"
-				/>
-			</svg>
+			<Logo />
 		</a>
 
-		<button class="avatar bordered" popovertarget="user-menu-1">
-			<img
-				src={get_user_avatar_url(user.data, '/unknown.png')}
-				alt={user?.data?.name}
-			/>
-		</button>
-	</header>
-
-	<div
-		class="layout-sidebar fill"
-		class:sidebar-hidden={hideSidebarByDefault}
-		style="height: 100%;"
-	>
-		<aside class="split vertical battle-surface">
-			<nav class="sidebar-nav">
+		<nav class="sidebar-nav">
+			<a
+				href="/dashboard"
+				aria-current={page.url.pathname === '/dashboard' ? 'page' : undefined}
+				>Battles</a
+			>
+			<a
+				href="/history"
+				aria-current={page.url.pathname === '/history' ? 'page' : undefined}
+				>History</a
+			>
+			<a
+				href="/settings"
+				aria-current={page.url.pathname === '/settings' ? 'page' : undefined}
+				>Settings</a
+			>
+			{#if isAdmin}
 				<a
-					href="/dashboard"
-					aria-current={page.url.pathname === '/dashboard' ? 'page' : undefined}
-					>Battles</a
+					href="/admin"
+					aria-current={page.url.pathname === '/admin' ? 'page' : undefined}
+					>Admin</a
 				>
-				<a
-					href="/history"
-					aria-current={page.url.pathname === '/history' ? 'page' : undefined}
-					>History</a
-				>
-				<a
-					href="/settings"
-					aria-current={page.url.pathname === '/settings' ? 'page' : undefined}
-					>Settings</a
-				>
-				{#if isAdmin}
+				{#each adminSubLinks as link}
 					<a
-						href="/admin"
-						aria-current={page.url.pathname === '/admin' ? 'page' : undefined}
-						>Admin</a
+						class="nav-nested"
+						href={link.href}
+						aria-current={page.url.pathname === link.href ? 'page' : undefined}
+						>{link.label}</a
 					>
-					{#each adminSubLinks as link}
-						<a
-							class="nav-nested"
-							href={link.href}
-							aria-current={page.url.pathname === link.href
-								? 'page'
-								: undefined}>{link.label}</a
-						>
-					{/each}
-				{/if}
-			</nav>
-			<div>
-				<small>v0.0.1</small>
-			</div>
-		</aside>
-		<section>
-			{@render children()}
-		</section>
-	</div>
+				{/each}
+			{/if}
+		</nav>
+
+		<div class="sidebar-footer">
+			<button class="user-button" popovertarget="user-menu-1">
+				<span class="avatar bordered">
+					<img
+						src={get_user_avatar_url(user.data, '/unknown.png')}
+						alt={user?.data?.name}
+					/>
+				</span>
+				<span class="user-name">{user.data?.name || 'User'}</span>
+			</button>
+		</div>
+	</aside>
+	<section>
+		{@render children()}
+	</section>
 </div>
 
 <style>
-	.fill-wrapper {
-		display: grid;
-		min-height: 100vh;
-		grid-template-rows: auto 1fr;
-	}
-
 	.layout-sidebar {
-		min-height: 0;
+		min-height: 100vh;
+		gap: 0;
 	}
 
 	.layout-sidebar > section {
 		min-height: 0;
 		display: flex;
 		flex-direction: column;
+		padding: var(--pad-l);
+		overflow-y: auto;
 	}
 
 	aside {
-		padding: var(--pad-s);
-		a {
-			border-radius: var(--br-xxl);
-		}
+		display: flex;
+		flex-direction: column;
+		padding: var(--pad-l);
+		margin: var(--pad-l);
+		border-radius: var(--br-l);
+		background: var(--surface-1);
+		border-right: 1px solid var(--border-subtle);
+		background: rgba(23, 2, 45, 0.87);
+	}
+
+	.logo {
+		display: block;
+		margin-bottom: var(--pad-xl);
+		padding-bottom: var(--pad-l);
+		border-bottom: 1px solid var(--border-subtle);
+	}
+
+	.logo :global(svg) {
+		width: 100%;
+		padding: 10px 30px;
+		height: auto;
 	}
 
 	.sidebar-nav {
-		gap: var(--vs-s);
+		display: flex;
+		flex-direction: column;
+		gap: 0;
+	}
+
+	.sidebar-nav a {
+		position: relative;
+		display: block;
+		padding: var(--pad-m) 0;
+		padding-left: var(--pad-l);
+		font-family: 'Jamboree', sans-serif;
+		font-size: 1.1rem;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: var(--fg-10);
+		text-decoration: none;
+		border-radius: 0;
+		border-left: 3px solid transparent;
+		transition:
+			color 0.15s ease,
+			border-color 0.15s ease,
+			text-shadow 0.15s ease;
+	}
+
+	.sidebar-nav a:hover {
+		color: var(--fg);
+		border-left-color: var(--fg-3);
+	}
+
+	.sidebar-nav a[aria-current='page'] {
+		color: var(--primary);
+		border-left-color: var(--primary);
+		text-shadow: 0 0 20px oklch(from var(--primary) l c h / 0.5);
+	}
+
+	/* Arrow indicator for active item */
+	.sidebar-nav a[aria-current='page']::before {
+		content: '›';
+		position: absolute;
+		left: -0.1rem;
+		color: var(--primary);
+	}
+
+	/* Nested nav links (admin sub-items) */
+	a.nav-nested {
+		padding-left: calc(var(--pad-l) + 1rem);
+		font-size: var(--);
+	}
+
+	.nav-nested[aria-current='page'] {
+		text-shadow: 0 0 15px oklch(from var(--primary) l c h / 0.4);
+	}
+
+	.sidebar-footer {
+		margin-top: var(--pad-xl);
+		padding-top: var(--pad-l);
+		border-top: 1px solid var(--border-subtle);
+	}
+
+	.user-button {
+		display: flex;
+		align-items: center;
+		justify-content: flex-start;
+		gap: var(--pad-m);
+		width: auto;
+		padding: var(--pad-s);
+		background: transparent;
+		border: 1px solid transparent;
+		border-radius: var(--br-s);
+		cursor: pointer;
+		transition:
+			background 0.1s ease,
+			border-color 0.1s ease;
+	}
+
+	.user-button:hover {
+		background: var(--surface-2);
+		border-color: var(--border-subtle);
 	}
 
 	.avatar {
 		border-color: var(--primary);
 		border-width: 2px;
+		--avatar-size: 1.75rem;
+		flex-shrink: 0;
+	}
+
+	.user-name {
+		font-family: 'Jamboree', sans-serif;
+		font-size: 0.9rem;
+		text-transform: uppercase;
+		letter-spacing: 0.03em;
+		color: var(--fg-6);
+		text-align: left;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 
 	.layout-sidebar.sidebar-hidden {
@@ -172,8 +233,75 @@
 		display: none;
 	}
 
-	/* Nested nav links (admin sub-items) */
-	.nav-nested {
-		padding-left: var(--pad-l, 24px);
+	/* Mobile layout */
+	@media (max-width: 768px) {
+		.layout-sidebar {
+			display: flex;
+			flex-direction: column;
+		}
+
+		aside {
+			flex-direction: row;
+			flex-wrap: wrap;
+			align-items: center;
+			justify-content: center;
+			gap: var(--pad-m);
+			padding: var(--pad-m);
+			margin: var(--pad-s);
+			border-radius: var(--br-m);
+			border-right: none;
+		}
+
+		.logo {
+			margin-bottom: 0;
+			padding-bottom: 0;
+			border-bottom: none;
+			max-width: 200px;
+		}
+
+		.logo :global(svg) {
+			padding: 5px 10px;
+		}
+
+		.sidebar-nav {
+			flex-direction: row;
+			flex-wrap: wrap;
+			align-items: center;
+			justify-content: center;
+			gap: var(--pad-s);
+		}
+
+		.sidebar-nav a {
+			padding: var(--pad-s) var(--pad-m);
+			padding-left: var(--pad-m);
+			font-size: 0.9rem;
+			border-left: none;
+			border-bottom: 2px solid transparent;
+		}
+
+		.sidebar-nav a:hover {
+			border-left-color: transparent;
+			border-bottom-color: var(--fg-3);
+		}
+
+		.sidebar-nav a[aria-current='page'] {
+			border-left-color: transparent;
+			border-bottom-color: var(--primary);
+		}
+
+		.sidebar-nav a[aria-current='page']::before {
+			display: none;
+		}
+
+		a.nav-nested {
+			padding-left: var(--pad-m);
+			font-size: 0.8rem;
+		}
+
+		.sidebar-footer {
+			margin-top: 0;
+			padding-top: 0;
+			border-top: none;
+		}
 	}
 </style>

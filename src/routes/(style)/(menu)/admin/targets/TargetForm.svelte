@@ -351,17 +351,17 @@
 	.status {
 		margin-top: 0.5rem;
 		font-size: 0.875rem;
-		color: var(--text-secondary, #666);
+		color: var(--fg-5);
 	}
 
 	.status.success {
-		color: var(--success, #22c55e);
+		color: var(--green);
 	}
 
 	.error {
 		margin-top: 0.5rem;
 		font-size: 0.875rem;
-		color: var(--error, #ef4444);
+		color: var(--red);
 	}
 
 	input[type='file'] {

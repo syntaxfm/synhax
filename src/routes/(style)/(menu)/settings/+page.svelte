@@ -16,10 +16,10 @@
 </svelte:head>
 
 <div class="battle-surface stack" style="--gap: var(--space-l);">
-	<h1>Settings</h1>
+	<h1 class="game-title">Settings</h1>
 
 	<section class="layout-card stack" style="--gap: var(--space-s);">
-		<h2>File System</h2>
+		<h2 class="game-title">File System</h2>
 		<div class="stack" style="--gap: 0.35rem;">
 			<span class="muted">Current folder</span>
 			<div class="cluster" style="align-items: center;">

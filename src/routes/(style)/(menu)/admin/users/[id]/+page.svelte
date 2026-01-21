@@ -17,9 +17,7 @@
 			string,
 			{
 				id: string;
-				battle: NonNullable<
-					(typeof user.data.participants)[number]['battle']
-				>;
+				battle: NonNullable<(typeof user.data.participants)[number]['battle']>;
 			}
 		>();
 
@@ -71,7 +69,7 @@
 			</div>
 
 			<div class="user-info">
-				<h1>{userData.name}</h1>
+				<h1 class="game-title">{userData.name}</h1>
 				{#if userData.username}
 					<p class="username">@{userData.username}</p>
 				{/if}
@@ -97,7 +95,7 @@
 
 		<!-- User Details -->
 		<section class="details-section">
-			<h2>Details</h2>
+			<h2 class="game-title">Details</h2>
 			<div class="details-grid">
 				<div class="detail-item">
 					<span class="detail-label">User ID</span>
@@ -129,7 +127,7 @@
 		<!-- Ban Info (if banned) -->
 		{#if userData.banned}
 			<section class="ban-section">
-				<h2>🚫 Ban Information</h2>
+				<h2 class="game-title">🚫 Ban Information</h2>
 				<div class="details-grid">
 					{#if userData.banReason}
 						<div class="detail-item full-width">
@@ -150,7 +148,7 @@
 
 		<!-- User's Battles -->
 		<section class="battles-section">
-			<h2>Battles ({userBattles.length})</h2>
+			<h2 class="game-title">Battles ({userBattles.length})</h2>
 			{#if userBattles.length > 0}
 				<div class="battles-grid">
 					{#each userBattles as battle (battle.id)}
@@ -158,19 +156,22 @@
 					{/each}
 				</div>
 			{:else}
-				<p class="empty-state">This user has not participated in any battles yet.</p>
+				<p class="empty-state">
+					This user has not participated in any battles yet.
+				</p>
 			{/if}
 		</section>
 
 		<!-- User's Hax -->
 		<section class="hax-section">
-			<h2>Hax Submissions ({userData.hax?.length ?? 0})</h2>
+			<h2 class="game-title">Hax Submissions ({userData.hax?.length ?? 0})</h2>
 			{#if userData.hax && userData.hax.length > 0}
 				<div class="hax-grid">
 					{#each userData.hax as hax (hax.id)}
 						<div class="hax-card">
 							<div class="hax-header">
-								<span class="hax-type {hax.type.toLowerCase()}">{hax.type}</span>
+								<span class="hax-type {hax.type.toLowerCase()}">{hax.type}</span
+								>
 								{#if hax.diff_score !== null && hax.diff_score !== undefined}
 									<span class="hax-score">{Math.round(hax.diff_score)}%</span>
 								{/if}
@@ -225,9 +226,9 @@
 		gap: 24px;
 		align-items: flex-start;
 		padding: 24px;
-		background: hsl(from var(--black) h s 6%);
+		background: var(--surface-0);
 		border-radius: var(--br-l);
-		border: 1px solid rgb(255 255 255 / 0.08);
+		border: 1px solid var(--border-subtle);
 	}
 
 	.avatar-section {
@@ -240,7 +241,7 @@
 		height: 120px;
 		border-radius: 50%;
 		object-fit: cover;
-		border: 3px solid rgb(255 255 255 / 0.1);
+		border: 3px solid var(--border-subtle);
 	}
 
 	.banned-overlay {
@@ -291,7 +292,7 @@
 		text-transform: uppercase;
 		padding: 4px 10px;
 		border-radius: 999px;
-		background: rgb(0 0 0 / 0.4);
+		background: var(--surface-0);
 	}
 
 	.role-badge.syntax {
@@ -300,7 +301,7 @@
 	}
 
 	.role-badge.user {
-		border: 1px solid rgb(255 255 255 / 0.2);
+		border: 1px solid var(--border-default);
 		color: var(--slate);
 	}
 
@@ -320,8 +321,8 @@
 
 	.verified-badge.unverified {
 		color: var(--slate);
-		background: rgb(255 255 255 / 0.05);
-		border: 1px solid rgb(255 255 255 / 0.1);
+		background: var(--surface-0);
+		border: 1px solid var(--border-subtle);
 	}
 
 	h2 {
@@ -335,9 +336,9 @@
 	.battles-section,
 	.hax-section {
 		padding: 20px;
-		background: hsl(from var(--black) h s 4%);
+		background: var(--surface-0);
 		border-radius: var(--br-m);
-		border: 1px solid rgb(255 255 255 / 0.06);
+		border: 1px solid var(--border-subtle);
 	}
 
 	.ban-section {
@@ -392,9 +393,9 @@
 
 	.hax-card {
 		padding: 16px;
-		background: hsl(from var(--black) h s 6%);
+		background: var(--surface-1);
 		border-radius: var(--br-m);
-		border: 1px solid rgb(255 255 255 / 0.08);
+		border: 1px solid var(--border-subtle);
 	}
 
 	.hax-header {
@@ -488,4 +489,3 @@
 		color: var(--slate);
 	}
 </style>
-

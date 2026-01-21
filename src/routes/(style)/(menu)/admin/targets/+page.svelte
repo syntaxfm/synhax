@@ -49,7 +49,7 @@
 </svelte:head>
 
 <div class="stack" style:--gap="40px;">
-	<h1>Targets</h1>
+	<h1 class="game-title">Targets</h1>
 	<div class="actions">
 		<a href="/admin/targets/init" class="button go_button">Create Target</a>
 	</div>

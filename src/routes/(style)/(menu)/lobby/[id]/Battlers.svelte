@@ -140,7 +140,7 @@
 </script>
 
 <section class="stack">
-	<h2>Battlers</h2>
+	<h2 class="game-title">Battlers</h2>
 
 	{#if !me_participant}
 		<button
