@@ -79,7 +79,7 @@
 </svelte:head>
 
 <div class="stack" style:--gap="40px;">
-	<h1>Users</h1>
+	<h1 class="game-title">Users</h1>
 	<Table data={users.data} {columns} />
 </div>
 
@@ -89,7 +89,7 @@
 		height: 36px;
 		border-radius: 50%;
 		object-fit: cover;
-		border: 2px solid rgb(255 255 255 / 0.1);
+		border: 2px solid var(--border-subtle);
 	}
 
 	:global(.user-link) {
@@ -122,7 +122,7 @@
 		text-transform: uppercase;
 		padding: 3px 8px;
 		border-radius: 999px;
-		background: rgb(0 0 0 / 0.4);
+		background: var(--surface-0);
 	}
 
 	:global(.role-badge.syntax) {
@@ -131,7 +131,7 @@
 	}
 
 	:global(.role-badge.user) {
-		border: 1px solid rgb(255 255 255 / 0.2);
+		border: 1px solid var(--border-default);
 		color: var(--slate);
 	}
 
@@ -150,7 +150,7 @@
 
 	:global(.verified-badge.unverified) {
 		color: var(--slate);
-		background: rgb(255 255 255 / 0.05);
+		background: var(--surface-0);
 	}
 
 	:global(.ban-badge) {

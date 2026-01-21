@@ -196,7 +196,7 @@
 {#if battle.data}
 	{@const battleData = battle.data}
 	<div class="layout-readable stack battle-surface">
-		<h1>{battle?.data?.target?.name} Battle</h1>
+		<h1 class="game-title">{battle?.data?.target?.name} Battle</h1>
 
 		<!-- Show countdown when battle is active -->
 		{#if battle.data.status === 'ACTIVE' && battle.data.type === 'TIMED_MATCH'}

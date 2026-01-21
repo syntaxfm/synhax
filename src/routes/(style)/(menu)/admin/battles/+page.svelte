@@ -180,7 +180,7 @@
 </svelte:head>
 
 <div class="stack" style:--gap="20px;">
-	<h1>Battles</h1>
+	<h1 class="game-title">Battles</h1>
 	<Table data={battles.data} {columns} />
 </div>
 
@@ -188,7 +188,7 @@
 	:global(.target-cell) {
 		display: flex;
 		align-items: center;
-		gap: 8px;
+		gap: var(--pad-m);
 		text-decoration: none;
 		color: inherit;
 	}
@@ -198,26 +198,26 @@
 	}
 
 	:global(.target-thumb) {
-		width: 40px;
-		height: 40px;
+		width: 2rem;
+		height: 2rem;
 		border-radius: var(--br-s);
 		object-fit: cover;
-		border: 1px solid rgb(255 255 255 / 0.1);
+		border: 1px solid var(--border-subtle);
 	}
 
 	:global(.participants-cell) {
 		display: flex;
 		align-items: center;
-		gap: 4px;
+		gap: var(--pad-xs);
 	}
 
 	:global(.participant) {
-		width: 28px;
-		height: 28px;
+		width: 1.5rem;
+		height: 1.5rem;
 		border-radius: 50%;
 		overflow: hidden;
-		border: 2px solid rgb(255 255 255 / 0.2);
-		margin-right: -8px;
+		border: 2px solid var(--surface-1);
+		margin-right: -0.5rem;
 	}
 
 	:global(.participant img) {
@@ -227,20 +227,20 @@
 	}
 
 	:global(.participant-count) {
-		margin-left: 12px;
-		font-size: 0.75rem;
-		color: var(--slate);
+		margin-left: var(--pad-m);
+		font-size: 0.7rem;
+		color: var(--fg-5);
 	}
 
 	:global(.status-badge) {
 		display: inline-block;
-		font-size: 10px;
-		font-weight: 700;
-		letter-spacing: 0.1em;
+		font-size: 0.6rem;
+		font-weight: 600;
+		letter-spacing: 0.05em;
 		text-transform: uppercase;
-		padding: 3px 8px;
-		border-radius: 999px;
-		background: rgb(0 0 0 / 0.4);
+		padding: var(--pad-xs) var(--pad-m);
+		border-radius: var(--br-s);
+		background: transparent;
 	}
 
 	:global(.status-badge.pending) {
@@ -260,20 +260,20 @@
 	}
 
 	:global(.status-badge.active.critical) {
-		border-color: var(--red, #ff4444);
-		color: var(--red, #ff4444);
+		border-color: var(--red);
+		color: var(--red);
 		animation: pulse 0.5s ease-in-out infinite;
 	}
 
 	:global(.status-badge.active.expired) {
-		border-color: var(--slate);
-		color: var(--slate);
+		border-color: var(--fg-3);
+		color: var(--fg-5);
 		animation: none;
 	}
 
 	:global(.status-badge.completed) {
-		border: 1px solid var(--slate);
-		color: var(--slate);
+		border: 1px solid var(--fg-3);
+		color: var(--fg-5);
 	}
 
 	@keyframes pulse {
@@ -288,81 +288,80 @@
 
 	:global(.visibility-badge) {
 		display: inline-block;
-		font-size: 10px;
+		font-size: 0.6rem;
 		font-weight: 600;
 		letter-spacing: 0.05em;
 		text-transform: uppercase;
-		padding: 3px 8px;
-		border-radius: 999px;
-		background: rgb(0 0 0 / 0.4);
+		padding: var(--pad-xs) var(--pad-m);
+		border-radius: var(--br-s);
+		background: transparent;
 	}
 
 	:global(.visibility-badge.public) {
-		border: 1px solid rgb(255 255 255 / 0.3);
-		color: var(--white);
+		border: 1px solid var(--border-default);
+		color: var(--fg-7);
 	}
 
 	:global(.visibility-badge.private) {
-		border: 1px solid rgb(255 200 50 / 0.4);
+		border: 1px solid oklch(from var(--yellow) l c h / 0.4);
 		color: var(--yellow);
 	}
 
 	:global(.muted) {
-		color: var(--slate);
+		color: var(--fg-5);
 		font-style: italic;
 	}
 
 	:global(.views-bar) {
 		display: flex;
 		align-items: center;
-		gap: 6px;
-		padding: 6px 10px;
-		background: rgb(0 0 0 / 0.3);
-		border-radius: 6px;
-		border: 1px solid rgb(255 255 255 / 0.08);
+		gap: var(--pad-s);
+		padding: var(--pad-s) var(--pad-m);
+		background: var(--surface-0);
+		border-radius: var(--br-s);
+		border: 1px solid var(--border-subtle);
 	}
 
 	:global(.view-link) {
 		display: inline-flex;
 		align-items: center;
-		gap: 4px;
-		padding: 4px 8px;
-		font-size: 11px;
+		gap: var(--pad-xs);
+		padding: var(--pad-xs) var(--pad-s);
+		font-size: 0.65rem;
 		font-weight: 600;
-		border-radius: 4px;
-		background: rgb(255 255 255 / 0.05);
-		border: 1px solid rgb(255 255 255 / 0.1);
-		color: var(--white);
+		border-radius: var(--br-xs);
+		background: var(--surface-2);
+		border: 1px solid var(--border-subtle);
+		color: var(--fg-7);
 		text-decoration: none;
-		transition: all 0.15s ease;
+		transition: background 0.15s ease;
 		margin: 0;
 		white-space: nowrap;
 	}
 
 	:global(.view-link:hover) {
-		background: rgb(255 255 255 / 0.1);
-		border-color: rgb(255 255 255 / 0.2);
+		background: var(--surface-3);
 		color: var(--yellow);
 	}
 
 	:global(.view-divider) {
 		width: 1px;
-		height: 16px;
-		background: rgb(255 255 255 / 0.1);
+		height: 1rem;
+		background: var(--border-subtle);
 	}
 
 	:global(.id-label) {
 		display: inline-flex;
 		align-items: center;
-		gap: 4px;
-		padding: 4px 8px;
-		font-size: 11px;
+		gap: var(--pad-xs);
+		padding: var(--pad-xs) var(--pad-s);
+		font-size: 0.65rem;
 		font-weight: 600;
 		font-family: var(--font-mono, monospace);
-		border-radius: 4px;
-		background: rgb(255 255 255 / 0.03);
-		border: 1px solid rgb(255 255 255 / 0.08);
-		color: var(--slate);
+		border-radius: var(--br-xs);
+		background: var(--surface-2);
+		border: 1px solid var(--border-subtle);
+		color: var(--fg-5);
 		white-space: nowrap;
 	}
 
@@ -370,27 +369,26 @@
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		width: 24px;
-		height: 24px;
+		width: 1.25rem;
+		height: 1.25rem;
 		padding: 0;
 		margin: 0;
-		font-size: 12px;
-		border-radius: 4px;
-		border: 1px solid rgb(255 255 255 / 0.1);
-		background: rgb(255 255 255 / 0.03);
-		color: var(--slate);
+		font-size: 0.7rem;
+		border-radius: var(--br-xs);
+		border: 1px solid var(--border-subtle);
+		background: var(--surface-2);
+		color: var(--fg-5);
 		cursor: pointer;
-		transition: all 0.15s ease;
+		transition: background 0.15s ease;
 	}
 
 	:global(.copy-icon-btn:hover) {
-		background: rgb(255 255 255 / 0.08);
-		border-color: rgb(255 255 255 / 0.2);
-		color: var(--white);
+		background: var(--surface-3);
+		color: var(--fg);
 	}
 
 	:global(.copy-icon-btn.copied) {
-		background: rgb(34 197 94 / 0.2);
+		background: oklch(from var(--green) l c h / 0.2);
 		border-color: var(--green);
 		color: var(--green);
 	}

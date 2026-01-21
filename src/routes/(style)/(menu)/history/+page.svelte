@@ -9,7 +9,7 @@
 </svelte:head>
 
 <div class="battle-surface">
-	<h1>History</h1>
+	<h1 class="game-title">History</h1>
 
 	{#if history.data.length === 0}
 		<p>No battles found.</p>
