@@ -150,6 +150,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>{battle.data?.target?.name ?? 'Battle'} Recap - Synhax</title>
+</svelte:head>
+
 {#if battle.data && canView}
 	{@const battleData = battle.data}
 	<div class="stack battle-surface recap-layout" style="--gap: 2rem;">

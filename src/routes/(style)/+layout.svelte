@@ -2,7 +2,7 @@
 	import '../reset.css';
 	import '@drop-in/graffiti';
 	import './style.css';
-	import favicon from '$lib/assets/favicon.svg';
+	import favicon from '$lib/assets/favicon.png';
 	let { children } = $props();
 </script>
 

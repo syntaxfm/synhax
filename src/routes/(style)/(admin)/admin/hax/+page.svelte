@@ -38,6 +38,10 @@
 	];
 </script>
 
+<svelte:head>
+	<title>Hax | Admin - Synhax</title>
+</svelte:head>
+
 <div class="stack" style:--gap="40px;">
 	<h1>Hax</h1>
 	<Table data={hax.data} {columns} />

@@ -189,6 +189,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>{battle.data?.target?.name ?? 'Battle'} Lobby - Synhax</title>
+</svelte:head>
+
 {#if battle.data}
 	{@const battleData = battle.data}
 	<div class="layout-readable stack battle-surface">

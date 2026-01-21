@@ -107,6 +107,10 @@
 	});
 </script>
 
+<svelte:head>
+	<title>{battle.data?.target?.name ?? 'Battle'} - Synhax</title>
+</svelte:head>
+
 {#if battle.data}
 	<main class="stack battle-code-page" style="--gap: 0;">
 		<Header

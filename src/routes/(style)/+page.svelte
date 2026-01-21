@@ -11,6 +11,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Synhax - CSS Battle</title>
+</svelte:head>
+
 <section class="stack battle-surface login-surface" style="--gap: 2.5rem;">
 	<svg
 		class="synhax-logo"
@@ -68,7 +72,7 @@
 			/>
 		</svg>
 	</div>
-	<!-- 
+	<!--
 	<p>Real UI, Real Battler</p> -->
 
 	<button class="battle-button login-button" onclick={sign_in}>

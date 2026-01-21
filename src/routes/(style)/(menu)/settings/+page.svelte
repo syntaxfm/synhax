@@ -11,6 +11,10 @@
 	const has_folder = $derived(Boolean(files.synhax_directory_handle));
 </script>
 
+<svelte:head>
+	<title>Settings - Synhax</title>
+</svelte:head>
+
 <div class="battle-surface stack" style="--gap: var(--space-l);">
 	<h1>Settings</h1>
 

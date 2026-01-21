@@ -4,6 +4,10 @@
 	const history = z.createQuery(queries.battleParticipants.myHistory());
 </script>
 
+<svelte:head>
+	<title>Battle History - Synhax</title>
+</svelte:head>
+
 <div class="battle-surface">
 	<h1>History</h1>
 

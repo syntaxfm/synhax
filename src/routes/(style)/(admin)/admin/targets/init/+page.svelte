@@ -48,6 +48,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Create Target | Admin - Synhax</title>
+</svelte:head>
+
 <h1>Create New Target</h1>
 
 <TargetForm

@@ -4,6 +4,10 @@
 	import { z, queries } from '$lib/zero.svelte';
 </script>
 
+<svelte:head>
+	<title>Dashboard - Synhax</title>
+</svelte:head>
+
 <section class="stack battle-surface" style="--gap: 1.5rem;">
 	<header class="stack" style="--gap: 0.5rem; text-align: center;">
 		<h1>Latest Targets</h1>
@@ -11,3 +15,7 @@
 	</header>
 	<LatestTargets />
 </section>
+
+<svelte:head>
+	<title>Dashboard - Synhax</title>
+</svelte:head>

@@ -39,6 +39,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Edit {target?.data?.name ?? 'Target'} | Admin - Synhax</title>
+</svelte:head>
+
 <h1>Edit {target?.data?.name}</h1>
 
 {#if target.data}
