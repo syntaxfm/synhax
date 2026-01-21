@@ -32,6 +32,10 @@
 	];
 </script>
 
+<svelte:head>
+	<title>Users | Admin - Synhax</title>
+</svelte:head>
+
 <div class="stack" style:--gap="40px;">
 	<h1>Users</h1>
 	<Table data={users.data} {columns} />

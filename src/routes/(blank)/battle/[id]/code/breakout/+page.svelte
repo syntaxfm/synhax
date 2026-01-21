@@ -31,6 +31,10 @@
 	const code = $derived(combine_html_and_css(hax?.data?.html, hax?.data?.css));
 </script>
 
+<svelte:head>
+	<title>Breakout View - Synhax</title>
+</svelte:head>
+
 {@html code}
 
 <style>

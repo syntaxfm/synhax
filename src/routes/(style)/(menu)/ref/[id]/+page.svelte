@@ -16,6 +16,10 @@
 	);
 </script>
 
+<svelte:head>
+	<title>{battle.data?.target?.name ?? 'Battle'} - Referee - Synhax</title>
+</svelte:head>
+
 {#if battle.data}
 	<div class="stack battle-surface ref-layout" style="--gap: 2rem;">
 		<header class="stack" style="--gap: 0.75rem;">

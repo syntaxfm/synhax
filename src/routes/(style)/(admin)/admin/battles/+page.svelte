@@ -30,6 +30,10 @@
 	];
 </script>
 
+<svelte:head>
+	<title>Battles | Admin - Synhax</title>
+</svelte:head>
+
 <div class="stack" style:--gap="20px;">
 	<h1>Battles</h1>
 	<Table data={battles.data} {columns} />
