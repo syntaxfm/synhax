@@ -1,5 +1,14 @@
 <script lang="ts">
 	import { authClient } from '$lib/auth-client';
+	import { dev } from '$app/environment';
+	import { goto } from '$app/navigation';
+
+	let email = $state('');
+	let password = $state('');
+	let name = $state('');
+	let isSignUp = $state(false);
+	let error = $state('');
+	let loading = $state(false);
 
 	async function sign_in() {
 		await authClient.signIn.social({
@@ -8,6 +17,43 @@
 			errorCallbackURL: '/error',
 			newUserCallbackURL: '/dashboard'
 		});
+	}
+
+	async function handleEmailAuth(e: Event) {
+		e.preventDefault();
+		error = '';
+		loading = true;
+
+		try {
+			if (isSignUp) {
+				const { data, error: signUpError } = await authClient.signUp.email({
+					name: name || email.split('@')[0],
+					email,
+					password,
+					callbackURL: '/dashboard'
+				});
+				if (signUpError) {
+					error = signUpError.message || 'Sign up failed';
+				} else if (data) {
+					goto('/dashboard');
+				}
+			} else {
+				const { data, error: signInError } = await authClient.signIn.email({
+					email,
+					password,
+					callbackURL: '/dashboard'
+				});
+				if (signInError) {
+					error = signInError.message || 'Sign in failed';
+				} else if (data) {
+					goto('/dashboard');
+				}
+			}
+		} catch (err) {
+			error = err instanceof Error ? err.message : 'An error occurred';
+		} finally {
+			loading = false;
+		}
 	}
 </script>
 
@@ -68,7 +114,7 @@
 			/>
 		</svg>
 	</div>
-	<!-- 
+	<!--
 	<p>Real UI, Real Battler</p> -->
 
 	<button class="battle-button login-button" onclick={sign_in}>
@@ -81,6 +127,60 @@
 		</svg>
 		Login With Github
 	</button>
+
+	{#if dev}
+		<div class="dev-divider">
+			<span>DEV MODE ONLY</span>
+		</div>
+
+		<form class="email-form" onsubmit={handleEmailAuth}>
+			{#if isSignUp}
+				<input
+					type="text"
+					placeholder="Name (optional)"
+					bind:value={name}
+					class="email-input"
+					autocomplete="name"
+				/>
+			{/if}
+			<input
+				type="email"
+				placeholder="Email"
+				bind:value={email}
+				required
+				class="email-input"
+				autocomplete="email"
+			/>
+			<input
+				type="password"
+				placeholder="Password"
+				bind:value={password}
+				required
+				minlength="8"
+				class="email-input"
+				autocomplete={isSignUp ? 'new-password' : 'current-password'}
+			/>
+			{#if error}
+				<p class="error-message">{error}</p>
+			{/if}
+			<button
+				type="submit"
+				class="battle-button email-button"
+				disabled={loading}
+			>
+				{loading ? 'Loading...' : isSignUp ? 'Sign Up' : 'Sign In'}
+			</button>
+			<button
+				type="button"
+				class="toggle-mode"
+				onclick={() => (isSignUp = !isSignUp)}
+			>
+				{isSignUp
+					? 'Already have an account? Sign In'
+					: "Don't have an account? Sign Up"}
+			</button>
+		</form>
+	{/if}
 </section>
 
 <style>
@@ -127,5 +227,87 @@
 		right: 100px;
 		display: flex;
 		border-top: solid 1px var(--hot);
+	}
+
+	/* Dev mode email auth styles */
+	.dev-divider {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		width: 100%;
+		max-width: 320px;
+		color: var(--hot);
+		font-size: 0.75rem;
+		letter-spacing: 0.15em;
+		text-transform: uppercase;
+	}
+
+	.dev-divider::before,
+	.dev-divider::after {
+		content: '';
+		flex: 1;
+		height: 1px;
+		background: var(--hot);
+		opacity: 0.5;
+	}
+
+	.email-form {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+		width: 100%;
+		max-width: 320px;
+	}
+
+	.email-input {
+		background: rgba(0, 0, 0, 0.4);
+		border: 1px solid var(--yellow);
+		border-radius: 4px;
+		padding: 0.75rem 1rem;
+		color: var(--fg);
+		font-size: 1rem;
+		outline: none;
+		transition: border-color 0.2s;
+	}
+
+	.email-input:focus {
+		border-color: var(--hot);
+	}
+
+	.email-input::placeholder {
+		color: rgba(255, 255, 255, 0.4);
+	}
+
+	.email-button {
+		font-size: 1rem;
+		padding: 0.75rem 1.5rem;
+		color: var(--yellow);
+	}
+
+	.email-button:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
+	}
+
+	.toggle-mode {
+		background: none;
+		border: none;
+		color: var(--fg);
+		opacity: 0.7;
+		font-size: 0.85rem;
+		cursor: pointer;
+		padding: 0.5rem;
+		transition: opacity 0.2s;
+	}
+
+	.toggle-mode:hover {
+		opacity: 1;
+	}
+
+	.error-message {
+		color: var(--hot);
+		font-size: 0.85rem;
+		margin: 0;
+		text-align: center;
 	}
 </style>
