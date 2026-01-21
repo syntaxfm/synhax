@@ -9,10 +9,19 @@
 	const { children } = $props();
 
 	const user = z.createQuery(queries.user.current());
+	const isAdmin = $derived(user.data?.role === 'syntax');
+
 	const hideSidebarByDefault = $derived(
 		page.url.pathname.startsWith('/recap') ||
 			page.url.pathname.startsWith('/ref')
 	);
+
+	const adminSubLinks = [
+		{ label: 'Users', href: '/admin/users' },
+		{ label: 'Targets', href: '/admin/targets' },
+		{ label: 'Battles', href: '/admin/battles' },
+		{ label: 'Hax', href: '/admin/hax' }
+	];
 
 	// Silently check if user already has file system permission
 	// This uses queryPermission() which doesn't require user interaction
@@ -95,13 +104,21 @@
 					aria-current={page.url.pathname === '/settings' ? 'page' : undefined}
 					>Settings</a
 				>
-				{#if user.data?.role === 'syntax'}
+				{#if isAdmin}
 					<a
-						href="/admin/"
-						aria-current={page.url.pathname.startsWith('/admin')
-							? 'page'
-							: undefined}>Admin</a
+						href="/admin"
+						aria-current={page.url.pathname === '/admin' ? 'page' : undefined}
+						>Admin</a
 					>
+					{#each adminSubLinks as link}
+						<a
+							class="nav-nested"
+							href={link.href}
+							aria-current={page.url.pathname === link.href
+								? 'page'
+								: undefined}>{link.label}</a
+						>
+					{/each}
 				{/if}
 			</nav>
 			<div>
@@ -153,5 +170,10 @@
 
 	.layout-sidebar.sidebar-hidden > aside {
 		display: none;
+	}
+
+	/* Nested nav links (admin sub-items) */
+	.nav-nested {
+		padding-left: var(--pad-l, 24px);
 	}
 </style>
