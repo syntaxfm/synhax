@@ -55,23 +55,6 @@
 		});
 	});
 
-	let headerBattlers = $derived.by(() => {
-		if (!battlers.length) {
-			return [];
-		}
-
-		const meIndex = battlers.findIndex(
-			(participant) => participant.user_id === z.userID
-		);
-		if (meIndex === -1) {
-			return battlers;
-		}
-
-		const me = battlers[meIndex];
-		const opponent = battlers.find((_, index) => index !== meIndex);
-		return opponent ? [me, opponent] : [me];
-	});
-
 	// Modern Svelte 5 approach with runes
 	let poll_timer: NodeJS.Timeout | null = $state(null);
 
@@ -130,7 +113,7 @@
 			battle={battle.data}
 			target={false}
 			diffScore={hax.data?.diff_score ?? null}
-			battlers={headerBattlers}
+			{battlers}
 		>
 			{#snippet detail()}{/snippet}
 			{#snippet countdown()}
