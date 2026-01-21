@@ -36,6 +36,23 @@
 	font-display: swap;
 }
 
+@font-face {
+	font-family: 'Jamboree';
+	src: url('/font/Jamboree.woff') format('woff');
+	font-weight: normal;
+	font-style: normal;
+	font-display: swap;
+}
+
+h1, h2, h3, h4, h5, h6 {
+	font-family: 'Jamboree', sans-serif;
+  text-transform: uppercase;
+}
+
+button, .button, [type="button"], [type="submit"], [type="reset"] {
+	font-family: 'Jamboree', sans-serif;
+}
+
 body {
 	min-height: 100vh;
 	scrollbar-width: none;

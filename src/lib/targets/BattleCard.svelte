@@ -288,7 +288,6 @@
 		justify-content: center;
 		background: hsl(from var(--black) h s 8%);
 		color: var(--slate);
-		font-size: 0.875rem;
 	}
 
 	.preview-btn {
@@ -486,10 +485,8 @@
 			border: 1px solid rgb(255 255 255 / 0.18);
 			border-radius: 999px;
 			color: var(--yellow);
-			font-weight: 600;
 			letter-spacing: 0.08em;
 			text-transform: uppercase;
-			font-size: 0.9rem;
 			padding: 0.8rem 1.25rem;
 			box-shadow:
 				0 12px 24px rgb(0 0 0 / 0.4),
