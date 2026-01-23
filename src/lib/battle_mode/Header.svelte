@@ -140,6 +140,7 @@
 
 	.battler-side.left {
 		justify-content: flex-start;
+		color: var(--black);
 	}
 
 	.battler-side.right {

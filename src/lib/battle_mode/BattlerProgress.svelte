@@ -67,7 +67,7 @@
 		position: relative;
 		flex: 1;
 		height: 20px;
-		background: var(--fg-1);
+		background: var(--fg-2);
 		--radius: 500px;
 		border-radius: var(--radius);
 		box-shadow: var(--shadow-2);
@@ -123,14 +123,17 @@
 	}
 
 	.avatar {
-		width: 36px;
-		height: 36px;
-		min-width: 36px;
-		min-height: 36px;
+		--size: 36px;
+		width: var(--size);
+		height: var(--size);
+		min-width: var(--size);
+		min-height: var(--size);
 		border-radius: 50%;
 		border: 2px solid var(--black);
 		box-shadow: var(--shadow-2);
 		object-fit: cover;
 		display: block;
+		background: var(--black);
+		font-size: 0;
 	}
 </style>

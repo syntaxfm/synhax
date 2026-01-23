@@ -1,6 +1,8 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { browser } from '$app/environment';
 	import { page } from '$app/state';
+	import { authClient } from '$lib/auth-client';
 	import { queries } from '$lib/queries';
 	import { get_user_avatar_url } from '$lib/user/utils';
 	import { z } from '$lib/zero.svelte';
@@ -8,6 +10,16 @@
 	import Logo from '$lib/ui/Logo.svelte';
 
 	const { children } = $props();
+
+	async function logout() {
+		await authClient.signOut({
+			fetchOptions: {
+				onSuccess: () => {
+					goto('/');
+				}
+			}
+		});
+	}
 
 	const user = z.createQuery(queries.user.current());
 	const isAdmin = $derived(user.data?.role === 'syntax');
@@ -79,6 +91,23 @@
 					/>
 				</span>
 				<span class="user-name">{user.data?.name || 'User'}</span>
+			</button>
+			<button class="logout-button" onclick={logout} title="Sign out">
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width="18"
+					height="18"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				>
+					<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+					<polyline points="16 17 21 12 16 7" />
+					<line x1="21" y1="12" x2="9" y2="12" />
+				</svg>
 			</button>
 		</div>
 	</aside>
@@ -183,6 +212,31 @@
 		margin-top: var(--pad-xl);
 		padding-top: var(--pad-l);
 		border-top: 1px solid var(--border-subtle);
+		display: flex;
+		align-items: center;
+		gap: var(--pad-s);
+	}
+
+	.logout-button {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: var(--pad-s);
+		background: transparent;
+		border: 1px solid transparent;
+		border-radius: var(--br-s);
+		color: var(--fg-6);
+		cursor: pointer;
+		transition:
+			background 0.1s ease,
+			border-color 0.1s ease,
+			color 0.1s ease;
+	}
+
+	.logout-button:hover {
+		background: var(--surface-2);
+		border-color: var(--border-subtle);
+		color: var(--fg);
 	}
 
 	.user-button {

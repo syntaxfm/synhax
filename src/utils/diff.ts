@@ -10,6 +10,7 @@
 
 import { snapdom } from '@zumer/snapdom';
 
+
 // ============================================================================
 // Types
 // ============================================================================
@@ -258,9 +259,13 @@ export function compareImages(
 			const aDiff = Math.abs(a1 - a2);
 
 			// Weight alpha low so shadows/transparency differences are less impactful
+      const redWeight = 0.299;
+      const greenWeight = 0.587;
+      const blueWeight = 0.114;
+      const alphaWeight = 0.1;
 			const pixelDiff =
-				(rDiff * 0.299 + gDiff * 0.587 + bDiff * 0.114 + aDiff * 0.1) /
-				(255 * 1.1);
+				(rDiff * redWeight + gDiff * greenWeight + bDiff * blueWeight + aDiff * alphaWeight) /
+				(255 * (redWeight + greenWeight + blueWeight + alphaWeight));
 
 			pixelDiffs[idx] = pixelDiff;
 		}
@@ -295,9 +300,10 @@ export function compareImages(
 			continue;
 		}
 
-		// Color from green (low diff) to red (high diff) using HSL
-		// Hue: 0.7 (blue-ish green) down to 0 (red) based on diff
-		const hsl = hslToRgb((1 - pixelDiff) * 0.7, 1, 0.5);
+		// Color from blue (low diff) to red (high diff) using HSL
+		// Hue: 0.67 (blue, 240°) down to 0 (red) based on diff
+		const hue = (1 - pixelDiff) * 0.67;
+		const hsl = hslToRgb(hue, 1, 0.5);
 		diffImageData.data[rgbaIdx] = hsl[0];
 		diffImageData.data[rgbaIdx + 1] = hsl[1];
 		diffImageData.data[rgbaIdx + 2] = hsl[2];

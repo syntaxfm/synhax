@@ -2,15 +2,35 @@
 	import AppFrame from '$lib/battle_mode/AppFrame.svelte';
 	import DiffEngine from '$lib/battle_mode/DiffEngine.svelte';
 	import SeverityScale from '$lib/battle_mode/SeverityScale.svelte';
-	import type { Battle, Hax, Target } from '$sync/schema';
+	import type { Battle, Hax, Target, User, Participants } from '$sync/schema';
 	import { z, mutators } from '$lib/zero.svelte';
 	import { parseTargetCode } from '$utils/code';
+
+	type ParticipantWithRelations = Participants & {
+		user?: User | null;
+		hax?: Hax | null;
+	};
+
 	type BattleWithParticipants = Battle & {
 		target?: Target | null;
-		participants?: readonly { hax?: Hax | null }[];
+		participants?: readonly ParticipantWithRelations[];
 	};
 
 	let { battle, hax }: { battle: BattleWithParticipants; hax: Hax } = $props();
+
+	// Get competitors (other participants, not the current user)
+	const competitors = $derived.by(() => {
+		const participants = battle.participants ?? [];
+		return participants
+			.filter((p) => p.hax && p.hax.id !== hax.id)
+			.map((p) => ({
+				id: p.id,
+				user: p.user,
+				hax: p.hax!,
+				display_order: p.display_order ?? 0
+			}))
+			.sort((a, b) => a.display_order - b.display_order);
+	});
 
 	const targetImage = $derived(battle.target?.image ?? '');
 	const isCodeTarget = $derived(battle.target?.type === 'CODE');
@@ -30,7 +50,6 @@
 	// Fixed dimensions for both panes (TODO: make configurable per target)
 	const FRAME_WIDTH = 600;
 	const FRAME_HEIGHT = 400;
-
 
 	// Overlay state: 'off', 'app', or 'diff'
 	type OverlayMode = 'off' | 'app' | 'diff';
@@ -279,8 +298,43 @@
 		enabled={diffEnabled}
 		onPerfectScore={handlePerfectScore}
 		onDiffCanvasUpdate={handleDiffCanvasUpdate}
-		debug={false}
+		debug={true}
 	/>
+
+	<!-- Competitors section -->
+	{#if competitors.length > 0}
+		{@const COMPETITOR_SCALE = 0.5}
+		<div class="competitors-section">
+			<h2 class="battle-header">
+				<div class="battle-header__title">
+					<span class="battle-header__label">Competitors</span>
+				</div>
+			</h2>
+			<div class="competitors-frames">
+				{#each competitors as competitor (competitor.id)}
+					<div class="competitor-frame-wrapper">
+						<div class="competitor-name">
+							{competitor.user?.name ?? 'Unknown'}
+						</div>
+						<div
+							class="competitor-frame-container"
+							style:width="{FRAME_WIDTH * COMPETITOR_SCALE}px"
+							style:height="{FRAME_HEIGHT * COMPETITOR_SCALE}px"
+						>
+							<div
+								class="battle-frame competitor-frame"
+								style:width="{FRAME_WIDTH}px"
+								style:height="{FRAME_HEIGHT}px"
+								style:transform="scale({COMPETITOR_SCALE})"
+							>
+								<AppFrame hax={competitor.hax} />
+							</div>
+						</div>
+					</div>
+				{/each}
+			</div>
+		</div>
+	{/if}
 </section>
 
 <style>
@@ -341,11 +395,6 @@
 		margin-bottom: 0;
 	}
 
-	/* Overlay layers */
-	.battle-frame {
-		position: relative;
-	}
-
 	.overlay {
 		position: absolute;
 		inset: 0;
@@ -358,9 +407,54 @@
 		border: none;
 	}
 
+	.diff-overlay {
+		background: var(--black);
+	}
 	.diff-overlay img {
 		width: 100%;
 		height: 100%;
 		object-fit: contain;
+	}
+
+	/* Competitors section */
+	.competitors-section {
+		grid-column: 1 / -1;
+		display: flex;
+		flex-direction: column;
+		border-top: var(--border);
+	}
+
+	.competitors-frames {
+		display: flex;
+		gap: var(--pad-m);
+		padding: var(--pad-m);
+		justify-content: center;
+		flex-wrap: wrap;
+	}
+
+	.competitor-frame-wrapper {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: var(--pad-s);
+	}
+
+	.competitor-name {
+		font-size: var(--font-s);
+		color: var(--grey);
+		font-weight: 500;
+	}
+
+	.competitor-frame-container {
+		overflow: hidden;
+		border: 1px solid var(--grey-dark);
+		border-radius: var(--radius-s);
+	}
+
+	.competitor-frame {
+		flex-shrink: 0;
+		overflow: hidden;
+		position: relative;
+		transform-origin: top left;
 	}
 </style>
