@@ -69,5 +69,6 @@
 		"svelte-highlight": "^7.9.0",
 		"svelte-splitpanes": "^8.0.12",
 		"zero-svelte": "^1.2.2"
-	}
+	},
+	"packageManager": "pnpm@9.10.0+sha1.216899f511c8dfde183c7cb50b69009c779534a8"
 }
