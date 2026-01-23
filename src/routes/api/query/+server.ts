@@ -12,12 +12,12 @@ import { schema } from '$sync/schema';
  */
 export async function POST({ request, locals }: RequestEvent) {
 	// Get auth context from locals (set by hooks.server.ts)
-	console.log('zero query auth', {
-		locals,
-		header: request.headers.get('authorization'),
-		authHeader: request.headers.get('authorization') ? 'present' : 'missing',
-		user: locals.user ?? null
-	});
+	// console.log('zero query auth', {
+	// 	locals,
+	// 	header: request.headers.get('authorization'),
+	// 	authHeader: request.headers.get('authorization') ? 'present' : 'missing',
+	// 	user: locals.user ?? null
+	// });
 	const userID = locals.user?.id ?? 'anon';
 	const userRole = locals.user?.role;
 
