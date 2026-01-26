@@ -22,9 +22,14 @@
 	import { goto } from '$app/navigation';
 	import Countdown from '$lib/battle_mode/Countdown.svelte';
 	import { files } from '$lib/state/FileState.svelte';
+	import { play_sound } from '$lib/ui/sounds';
 
 	import Header from '$lib/battle_mode/Header.svelte';
 	import Modal from '$lib/ui/Modal.svelte';
+
+	// Air horn sound for battle start
+	let airHorn: HTMLAudioElement;
+	let previousStatus: string | null = $state(null);
 
 	let battle = $derived(
 		z.createQuery(queries.battles.byIdSimple({ id: page?.params?.id || '' }))
@@ -62,6 +67,17 @@
 		if (battle.data?.id) {
 			files.load_hax_directory(battle.data.id);
 		}
+	});
+
+	// Play air horn when battle starts (READY -> ACTIVE)
+	$effect(() => {
+		const currentStatus = battle.data?.status;
+		if (previousStatus === 'READY' && currentStatus === 'ACTIVE') {
+			if (airHorn) {
+				play_sound(airHorn);
+			}
+		}
+		previousStatus = currentStatus ?? null;
 	});
 
 	// Auto-redirect to recap when battle completes
@@ -110,6 +126,9 @@
 <svelte:head>
 	<title>{battle.data?.target?.name ?? 'Battle'} - Synhax</title>
 </svelte:head>
+
+<!-- Air horn for battle start -->
+<audio bind:this={airHorn} src="/air-horn.mp3" preload="auto"></audio>
 
 {#if battle.data}
 	<main class="stack battle-code-page" style="--stack-gap: 0;">

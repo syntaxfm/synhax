@@ -5,7 +5,7 @@
 	import AppFrame from './AppFrame.svelte';
 	import { FRAME_HEIGHT, FRAME_WIDTH } from '$lib/constants';
 
-	type BattleStatus = 'PENDING' | 'ACTIVE' | 'COMPLETED' | null;
+	type BattleStatus = 'PENDING' | 'READY' | 'ACTIVE' | 'COMPLETED' | null;
 	type ParticipantStatus =
 		| 'PENDING'
 		| 'ACTIVE'

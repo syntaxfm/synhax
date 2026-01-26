@@ -69,7 +69,7 @@ export const queries = defineQueries({
 	battles: {
 		/** Get battles by status with target */
 		byStatus: defineQuery(
-			type({ status: "'PENDING' | 'ACTIVE' | 'COMPLETED'" }),
+			type({ status: "'PENDING' | 'READY' | 'ACTIVE' | 'COMPLETED'" }),
 			({ args }) => zql.battles.where('status', args.status).related('target')
 		),
 

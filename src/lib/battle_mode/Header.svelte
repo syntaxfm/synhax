@@ -32,9 +32,6 @@
 	const leftBattler = $derived(battlers[0]);
 	const rightBattler = $derived(battlers[1]);
 
-	const leftColor = leftBattler?.color ?? 'var(--blue)';
-	const rightColor = rightBattler?.color ?? 'var(--red)';
-
 	// Determine who's winning (higher diff_score is better)
 	const leftScore = $derived(leftBattler?.hax?.diff_score ?? 0);
 	const rightScore = $derived(rightBattler?.hax?.diff_score ?? 0);
@@ -55,7 +52,7 @@
 					user={leftBattler.user}
 					hax={leftBattler.hax ?? null}
 					position="left"
-					color={leftColor}
+					color={'var(--blue)'}
 				/>
 			{/if}
 		</div>
@@ -75,7 +72,7 @@
 					user={rightBattler.user}
 					hax={rightBattler.hax ?? null}
 					position="right"
-					color={rightColor}
+					color={'var(--red)'}
 				/>
 			{/if}
 		</div>

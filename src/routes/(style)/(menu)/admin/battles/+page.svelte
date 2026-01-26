@@ -9,7 +9,7 @@
 	// Type for battle with relations
 	type BattleWithRelations = {
 		id: string;
-		status: 'PENDING' | 'ACTIVE' | 'COMPLETED' | null;
+		status: 'PENDING' | 'READY' | 'ACTIVE' | 'COMPLETED' | null;
 		visibility: 'PUBLIC' | 'PRIVATE' | null;
 		zero_room_id: string;
 		target_id: string;
@@ -246,6 +246,11 @@
 	:global(.status-badge.pending) {
 		border: 1px solid var(--yellow);
 		color: var(--yellow);
+	}
+
+	:global(.status-badge.ready) {
+		border: 1px solid var(--blue);
+		color: var(--blue);
 	}
 
 	:global(.status-badge.active) {

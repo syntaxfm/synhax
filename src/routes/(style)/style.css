@@ -242,8 +242,10 @@ table {
 .status-pending {
 	color: var(--yellow);
 }
-.status-active,
 .status-ready {
+	color: var(--blue, #3b82f6);
+}
+.status-active {
 	color: var(--green, #22c55e);
 }
 .status-completed {

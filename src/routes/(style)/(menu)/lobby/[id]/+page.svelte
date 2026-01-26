@@ -48,6 +48,7 @@
 
 	$effect(() => {
 		if (!battle.data) return;
+		// ACTIVE state: redirect everyone to their respective views
 		if (battle.data.status === 'ACTIVE') {
 			if (is_referee) {
 				goto(`/ref/${battle.data.id}`);
@@ -128,8 +129,27 @@
 		);
 	}
 
-	async function start() {
+	/**
+	 * Lock in the battle - transitions from PENDING to READY
+	 * Players will be redirected to the code screen to prepare
+	 */
+	async function lock_in() {
 		if (!battle.data || !is_referee) return;
+		z.mutate(
+			mutators.battles.update({
+				id: battle.data.id,
+				status: 'READY' as const
+			})
+		);
+	}
+
+	async function start() {
+		if (!battle.data || !is_referee) {
+			toast.error('You are not authorized to start this battle');
+			return;
+		}
+		// Can only start from READY state
+		if (battle.data.status !== 'READY') return;
 
 		const now = Date.now();
 		const updates: any = {
@@ -315,31 +335,52 @@
 				<h2 class="game-title">Invite Player</h2>
 				<InviteUser
 					battle_id={battle.data.id}
-					existing_user_ids={battle.data.participants?.map((p) => p.user_id) ?? []}
+					existing_user_ids={battle.data.participants?.map((p) => p.user_id) ??
+						[]}
 				/>
 			</section>
 		{/if}
 
-		<!-- Start button when PENDING -->
+		<!-- Lock In button when PENDING (ref only) -->
 		{#if battle.data?.status === 'PENDING' && is_referee}
 			<div class="cluster" style="justify-content: center;">
 				<button
 					class="go_button big_button"
-					onclick={start}
+					onclick={lock_in}
 					disabled={!can_start}
 				>
-					Start Battle
+					Lock In Players
 				</button>
 			</div>
 			{#if !can_start}
 				<p class="muted" style="text-align: center;">
 					Need at least {MIN_PARTICIPANTS} battler{MIN_PARTICIPANTS === 1
 						? ''
-						: 's'} locked in to start ({ready_count}/{MIN_PARTICIPANTS})
+						: 's'} ready to lock in ({ready_count}/{MIN_PARTICIPANTS})
 				</p>
 			{/if}
-		{:else if battle.data?.status === 'PENDING' && can_start && is_participant}
-			<p class="waiting-message">Your battle will start soon. Sit tight!</p>
+		{:else if battle.data?.status === 'PENDING' && is_participant}
+			<p class="waiting-message">Waiting for referee to lock in players...</p>
+		{/if}
+
+		<!-- READY state controls -->
+		{#if battle.data?.status === 'READY'}
+			<div class="stack" style="align-items: center; --gap: 1rem;">
+				{#if is_referee}
+					<button class="go_button big_button" onclick={start}>
+						Start Battle
+					</button>
+					<p class="muted" style="text-align: center;">
+						Players are preparing. Click to start the clock!
+					</p>
+				{/if}
+
+				{#if is_participant}
+					<a href={`/battle/${battle.data.id}/code`} class="button primary">
+						Battle Ready! Please click to enter the battle →
+					</a>
+				{/if}
+			</div>
 		{/if}
 
 		<!-- Controls when ACTIVE -->
