@@ -1,0 +1,16 @@
+{
+  "id": "mtp6n6vi",
+  "parent_id": null,
+  "description": "Use battle ID for local hax folder names instead of target name",
+  "context": "Beads description:\nCurrently hax folders are created using the target name (e.g. ~/.synhax/my_target/). This causes conflicts when the same target is used in multiple battles. Change to use battle ID so each battle has its own isolated folder (e.g. ~/.synhax/battle-uuid/).\n\nMetadata:\nbeads_id: battle_mode-04f\nbeads_status: closed\nbeads_type: task\nbeads_priority: 2\nlabels: []\nassignee: null\nnotes: null\ncreated_at: 2026-01-07T14:29:38.387128-07:00\nupdated_at: 2026-01-07T14:34:42.05819-07:00\nclosed_at: 2026-01-07T14:34:42.05819-07:00\n\ndependencies: []",
+  "priority": 1,
+  "completed": true,
+  "result": "Migrated from Beads with closed status preserved. closed_at: 2026-01-07T14:34:42.05819-07:00",
+  "metadata": null,
+  "created_at": "2026-01-26T19:30:15.585Z",
+  "updated_at": "2026-01-26T19:34:37.396Z",
+  "completed_at": "2026-01-26T19:34:37.396Z",
+  "blockedBy": [],
+  "blocks": [],
+  "children": []
+}

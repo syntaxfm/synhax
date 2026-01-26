@@ -1,0 +1,18 @@
+{
+  "id": "ae5vet87",
+  "parent_id": "k95uuqo8",
+  "description": "Add diff score display to battle Header component",
+  "context": "Beads description:\nDisplay the live diff score prominently in the battle header.\n\n## File: src/lib/battle_mode/Header.svelte\n\n## IMPORTANT: Graffiti-First CSS\nCheck https://graffiti-ui.com/llms.txt before writing any CSS.\nThe Header likely already uses Graffiti patterns - maintain consistency.\n\n## Current Header\nThe Header component shows:\n- Battle info\n- Countdown timer\n- Custom snippets\n\n## Enhancement\nAdd a score indicator showing:\n- Current similarity percentage\n- Visual indicator (color-coded)\n- Optional mini diff thumbnail\n\n## Reuse from DiffPreview\nIf DiffPreview.svelte creates a ScoreBadge pattern, REUSE it here.\nDon't duplicate the score display styling.\n\n```svelte\n<!-- Option: Extract score display to shared component -->\n<ScoreBadge score={diffScore} size=\"sm\" />\n```\n\n## Design Options\n\n### Option A: Score badge next to countdown\nUse existing header layout, add score badge inline.\n```\n[Target: Nature Scene] [12:45 remaining] [87.3% match]\n```\n\n### Option B: Score in its own section\nLarger display with trend indicator (improving/declining).\n\n### Option C: Animated score bar\nProgress bar that fills based on score - check if Graffiti has progress utilities.\n\n## Implementation\n1. Check if score display should be a shared component\n2. Use Graffiti color/state utilities for score states\n3. Use existing header spacing/layout patterns\n4. Add smooth transition animations (Graffiti transition utilities?)\n\n## Props to add\n```ts\ninterface HeaderProps {\n  // existing...\n  diffScore?: number | null;\n  showDiffScore?: boolean;\n}\n```\n\n## Acceptance Criteria\n- Score visible in header during battle\n- Reuses score styling from DiffPreview (not duplicated)\n- Fits naturally with existing header design\n- Uses Graffiti utilities, minimal scoped CSS\n\nMetadata:\nbeads_id: battle_mode-0ep.9\nbeads_status: closed\nbeads_type: task\nbeads_priority: 2\nlabels: []\nassignee: null\nnotes: null\ncreated_at: 2026-01-08T14:12:08.693244-07:00\nupdated_at: 2026-01-08T15:51:57.413853-07:00\nclosed_at: 2026-01-08T15:51:57.413853-07:00\n\ndependencies:\n- type=parent-child issue_id=battle_mode-0ep.9 depends_on_id=battle_mode-0ep created_at=2026-01-08T14:12:08.693783-07:00 created_by=daemon\n- type=blocks issue_id=battle_mode-0ep.9 depends_on_id=battle_mode-0ep.6 created_at=2026-01-08T14:12:51.810212-07:00 created_by=daemon",
+  "priority": 1,
+  "completed": true,
+  "result": "Migrated from Beads with closed status preserved. closed_at: 2026-01-08T15:51:57.413853-07:00",
+  "metadata": null,
+  "created_at": "2026-01-26T19:34:14.043Z",
+  "updated_at": "2026-01-26T19:35:24.908Z",
+  "completed_at": "2026-01-26T19:35:24.908Z",
+  "blockedBy": [
+    "4hgolz1r"
+  ],
+  "blocks": [],
+  "children": []
+}

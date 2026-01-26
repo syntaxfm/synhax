@@ -1,0 +1,18 @@
+{
+  "id": "aan2txh9",
+  "parent_id": "k95uuqo8",
+  "description": "Modify AppFrame to expose iframe content for capture",
+  "context": "Beads description:\nThe current AppFrame uses an iframe with srcdoc. We need to capture its rendered content.\n\n## Current Implementation\nFile: src/lib/battle_mode/AppFrame.svelte\n- Uses iframe with srcdoc containing combined HTML+CSS\n- No reference to the iframe or its content is exposed\n\n## Challenge\nsnapdom typically captures DOM elements, but iframe content is in a separate document.\n\n## Approaches to investigate\n\n### Approach A: Capture the iframe element directly\nSome DOM capture libraries can screenshot iframe content.\nTest if snapdom handles this automatically.\n\n### Approach B: Access iframe.contentDocument\nSince it's same-origin (srcdoc), we can access:\n```ts\nconst doc = iframe.contentDocument;\nconst body = doc?.body;\n// Then capture body\n```\n\n### Approach C: Use a different rendering approach\nInstead of iframe, render in a shadow DOM or scoped div.\nThis would be a bigger change but might simplify capture.\n\n### Approach D: Breakout page approach\nThe /battle/[id]/code/breakout route renders the code directly.\nCould capture that in a hidden iframe and use its document.\n\n## Implementation\n1. Add bind:this to the iframe element\n2. Expose the iframe reference to parent via bindable\n3. Create helper function to get capturable element:\n```ts\nexport function getCaptureElement(iframe: HTMLIFrameElement): HTMLElement | null {\n  return iframe.contentDocument?.body ?? null;\n}\n```\n\n## Testing\n- Verify same-origin access works with srcdoc\n- Test that captured element renders correctly\n- Handle case where contentDocument is null\n\n## Acceptance Criteria\n- AppFrame exposes iframe reference\n- Parent component can access iframe.contentDocument.body\n- Works with the DiffEngine component\n\nMetadata:\nbeads_id: battle_mode-0ep.4\nbeads_status: closed\nbeads_type: task\nbeads_priority: 1\nlabels: []\nassignee: null\nnotes: null\ncreated_at: 2026-01-08T14:11:05.04926-07:00\nupdated_at: 2026-01-08T15:29:10.061117-07:00\nclosed_at: 2026-01-08T15:29:10.061117-07:00\n\ndependencies:\n- type=parent-child issue_id=battle_mode-0ep.4 depends_on_id=battle_mode-0ep created_at=2026-01-08T14:11:05.049823-07:00 created_by=daemon",
+  "priority": 1,
+  "completed": true,
+  "result": "Migrated from Beads with closed status preserved. closed_at: 2026-01-08T15:29:10.061117-07:00",
+  "metadata": null,
+  "created_at": "2026-01-26T19:31:53.328Z",
+  "updated_at": "2026-01-26T19:35:33.271Z",
+  "completed_at": "2026-01-26T19:35:33.271Z",
+  "blockedBy": [],
+  "blocks": [
+    "4hgolz1r"
+  ],
+  "children": []
+}

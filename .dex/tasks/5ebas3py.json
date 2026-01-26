@@ -1,0 +1,18 @@
+{
+  "id": "5ebas3py",
+  "parent_id": "9mtg8euq",
+  "description": "Hide target details until battle starts for mystery challenges",
+  "context": "Beads description:\nModify lobby and battle UI to hide target information for mystery challenges until countdown completes\n\nMetadata:\nbeads_id: battle_mode-hty.5\nbeads_status: open\nbeads_type: task\nbeads_priority: 1\nlabels: []\nassignee: null\nnotes: null\ncreated_at: 2025-12-18T10:15:37.626465-07:00\nupdated_at: 2025-12-18T10:15:37.626465-07:00\nclosed_at: None\n\ndependencies:\n- type=parent-child issue_id=battle_mode-hty.5 depends_on_id=battle_mode-hty created_at=2025-12-18T10:15:37.627085-07:00 created_by=daemon\n- type=blocks issue_id=battle_mode-hty.5 depends_on_id=battle_mode-hty.1 created_at=2025-12-18T10:15:43.691927-07:00 created_by=daemon",
+  "priority": 1,
+  "completed": false,
+  "result": null,
+  "metadata": null,
+  "created_at": "2026-01-26T19:33:37.645Z",
+  "updated_at": "2026-01-26T19:33:37.645Z",
+  "completed_at": null,
+  "blockedBy": [
+    "uxs3t9sn"
+  ],
+  "blocks": [],
+  "children": []
+}

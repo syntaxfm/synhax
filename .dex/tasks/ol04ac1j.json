@@ -1,0 +1,16 @@
+{
+  "id": "ol04ac1j",
+  "parent_id": null,
+  "description": "Tighten Zero auth checks and admin query gating",
+  "context": "Beads description:\n(empty)\n\nMetadata:\nbeads_id: battle_mode-z7d\nbeads_status: closed\nbeads_type: task\nbeads_priority: 1\nlabels: []\nassignee: null\nnotes: null\ncreated_at: 2026-01-14T17:15:05.167263-07:00\nupdated_at: 2026-01-14T17:24:16.151078-07:00\nclosed_at: 2026-01-14T17:24:16.151078-07:00\n\ndependencies: []",
+  "priority": 1,
+  "completed": true,
+  "result": "Migrated from Beads with closed status preserved. closed_at: 2026-01-14T17:24:16.151078-07:00",
+  "metadata": null,
+  "created_at": "2026-01-26T19:31:44.868Z",
+  "updated_at": "2026-01-26T19:35:43.159Z",
+  "completed_at": "2026-01-26T19:35:43.159Z",
+  "blockedBy": [],
+  "blocks": [],
+  "children": []
+}

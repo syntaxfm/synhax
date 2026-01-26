@@ -1,0 +1,16 @@
+{
+  "id": "w325h1g3",
+  "parent_id": null,
+  "description": "Voting updating broken",
+  "context": "Beads description:\n(empty)\n\nMetadata:\nbeads_id: battle_mode-hgd\nbeads_status: open\nbeads_type: bug\nbeads_priority: 1\nlabels: []\nassignee: null\nnotes: null\ncreated_at: 2026-01-05T17:10:37.301995-07:00\nupdated_at: 2026-01-05T17:10:37.301995-07:00\nclosed_at: None\n\ndependencies: []",
+  "priority": 1,
+  "completed": false,
+  "result": null,
+  "metadata": null,
+  "created_at": "2026-01-26T19:31:04.050Z",
+  "updated_at": "2026-01-26T19:31:04.050Z",
+  "completed_at": null,
+  "blockedBy": [],
+  "blocks": [],
+  "children": []
+}

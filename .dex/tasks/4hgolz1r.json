@@ -1,0 +1,23 @@
+{
+  "id": "4hgolz1r",
+  "parent_id": "k95uuqo8",
+  "description": "Integrate DiffEngine into BattleMode.svelte",
+  "context": "Beads description:\nWire up the diff engine into the battle mode UI.\n\n## File: src/routes/(style)/(app)/battle/[id]/code/BattleMode.svelte\n\n## Current Layout\n- Splitpanes with left pane (App output) and right pane (Target image)\n- AppFrame component renders user's HTML/CSS in iframe\n\n## Integration Points\n\n### 1. Get reference to AppFrame's iframe\n```svelte\n<AppFrame {hax} bind:iframeElement />\n```\n\n### 2. Add DiffEngine component\n```svelte\n<DiffEngine\n  contestantElement={captureElement}\n  targetImageSrc={battle?.target?.image}\n  enabled={battleActive}\n  bind:score={diffScore}\n  bind:diffCanvas\n/>\n```\n\n### 3. Display DiffPreview\nAdd to the layout - options:\n- Below the target image\n- In the header bar\n- As a floating overlay\n- In a new splitpane section\n\n### 4. Conditional enabling\nOnly run diff when:\n- Battle is active (between starts_at and ends_at)\n- User has code to compare\n- Tab is visible (consider Page Visibility API)\n\n## State to manage\n```ts\nlet iframeElement: HTMLIFrameElement | null = $state(null);\nlet diffScore: number | null = $state(null);\nlet diffCanvas: HTMLCanvasElement | null = $state(null);\n\nconst captureElement = $derived(iframeElement?.contentDocument?.body ?? null);\nconst battleActive = $derived(battle.status === 'ACTIVE');\n```\n\n## Layout considerations\nThe current layout uses svelte-splitpanes. Consider:\n- Adding a third pane for diff preview\n- Putting diff info in the header\n- Toggle-able diff overlay\n\n## Acceptance Criteria\n- Diff score updates in real-time during active battle\n- Diff preview visible somewhere in the UI\n- No performance degradation\n- Clean integration with existing components\n\nMetadata:\nbeads_id: battle_mode-0ep.6\nbeads_status: closed\nbeads_type: task\nbeads_priority: 1\nlabels: []\nassignee: null\nnotes: ## CSS Guidelines\n- Always check Graffiti UI first before writing scoped CSS\n- If creating a score badge component, make it reusable across Header, DiffPreview, and future Recap/Leaderboard views\n- Keep BattleMode.svelte styling minimal - delegate visual patterns to child components\ncreated_at: 2026-01-08T14:11:30.610715-07:00\nupdated_at: 2026-01-08T15:31:19.762334-07:00\nclosed_at: 2026-01-08T15:31:19.762334-07:00\n\ndependencies:\n- type=parent-child issue_id=battle_mode-0ep.6 depends_on_id=battle_mode-0ep created_at=2026-01-08T14:11:30.611275-07:00 created_by=daemon\n- type=blocks issue_id=battle_mode-0ep.6 depends_on_id=battle_mode-0ep.3 created_at=2026-01-08T14:12:46.053731-07:00 created_by=daemon\n- type=blocks issue_id=battle_mode-0ep.6 depends_on_id=battle_mode-0ep.4 created_at=2026-01-08T14:12:46.164593-07:00 created_by=daemon\n- type=blocks issue_id=battle_mode-0ep.6 depends_on_id=battle_mode-0ep.5 created_at=2026-01-08T14:12:46.277313-07:00 created_by=daemon",
+  "priority": 1,
+  "completed": true,
+  "result": "Migrated from Beads with closed status preserved. closed_at: 2026-01-08T15:31:19.762334-07:00",
+  "metadata": null,
+  "created_at": "2026-01-26T19:34:06.552Z",
+  "updated_at": "2026-01-26T19:35:29.931Z",
+  "completed_at": "2026-01-26T19:35:29.931Z",
+  "blockedBy": [
+    "2y8efqma",
+    "aan2txh9",
+    "5bwsnk0c"
+  ],
+  "blocks": [
+    "zn5h8qvq",
+    "ae5vet87"
+  ],
+  "children": []
+}

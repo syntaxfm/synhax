@@ -1,0 +1,18 @@
+{
+  "id": "balcmjrb",
+  "parent_id": null,
+  "description": "End timed match early when participant reaches 100% accuracy",
+  "context": "Beads description:\nWhen a participant achieves 100% accuracy in a timed battle, the match should end early rather than waiting for the timer to expire. This rewards perfect solutions and keeps the game moving. Implementation should: detect when any participant's hax reaches 100% match score, trigger battle end for all participants, and transition to the recap/voting phase.\n\nMetadata:\nbeads_id: battle_mode-1wt\nbeads_status: in_progress\nbeads_type: feature\nbeads_priority: 2\nlabels: []\nassignee: null\nnotes: null\ncreated_at: 2026-01-07T12:21:08.043405-07:00\nupdated_at: 2026-01-08T16:05:39.702319-07:00\nclosed_at: None\n\ndependencies:\n- type=blocks issue_id=battle_mode-1wt depends_on_id=battle_mode-0ep.10 created_at=2026-01-08T15:19:31.172527-07:00 created_by=daemon",
+  "priority": 1,
+  "completed": false,
+  "result": null,
+  "metadata": null,
+  "created_at": "2026-01-26T19:33:25.104Z",
+  "updated_at": "2026-01-26T19:33:25.104Z",
+  "completed_at": null,
+  "blockedBy": [
+    "is29jo0b"
+  ],
+  "blocks": [],
+  "children": []
+}

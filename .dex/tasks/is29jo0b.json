@@ -1,0 +1,19 @@
+{
+  "id": "is29jo0b",
+  "parent_id": "k95uuqo8",
+  "description": "Store diff score in hax table for live sync",
+  "context": "Beads description:\nPersist diff scores to the database so they sync in real-time via Zero.\n\n## Why This is Core (not future)\n- Enables live spectator/referee views to see all participants' scores\n- Score visible on producer dashboard during battle\n- Enables 'end battle early on 100% accuracy' feature (battle_mode-1wt)\n- Historical data for recap and leaderboards\n\n## Step 1: Database Schema Change\nFile: src/db/schema.ts\n\nAdd to hax table:\n```ts\n// In hax table definition, add these fields:\ndiff_score: integer(),  // 0-100, null if not yet calculated\ndiff_score_updated_at: timestamp({ withTimezone: true }),\n```\n\n## Step 2: Run Database Migration\nPush the schema changes to the database:\n```bash\npnpm db:push\n```\n\n## Step 3: Regenerate Zero Schema\nGenerate the updated Zero schema from Drizzle:\n```bash\npnpm sync-generate\n# or: pnpm drizzle-zero generate --format -o ./src/sync/zero-schema.gen.ts\n```\n\nThis updates `src/sync/zero-schema.gen.ts` (DO NOT edit manually).\n\n## Step 4: Create Zero Mutation\nFile: src/lib/mutators.ts\n\n```ts\nupdateDiffScore: {\n  args: {\n    haxId: 'string',\n    score: 'number',\n  },\n  fn: async ({ args, tx, ctx }) => {\n    // Verify user owns this hax\n    const existing = await tx.query.hax.findFirst({\n      where: eq(hax.id, args.haxId)\n    });\n    if (existing?.user_id !== ctx.userId) {\n      throw new Error('Unauthorized');\n    }\n    \n    await tx.update(hax)\n      .set({ \n        diff_score: Math.round(args.score),\n        diff_score_updated_at: new Date()\n      })\n      .where(eq(hax.id, args.haxId));\n  }\n}\n```\n\n## Step 5: Verify Zero Sync\n- Start dev server: `pnpm dev`\n- Start zero-cache: `pnpm sync`\n- Verify the new fields sync correctly\n\n## Update Frequency\nDon't update on every comparison (too many writes). Options:\n- Only update when score changes by >= 1%\n- Throttle to max once per 2-3 seconds\n- Update on significant milestones (crosses 50%, 80%, 90%, 95%, 100%)\n\n## Acceptance Criteria\n- [ ] diff_score field added to hax table in schema.ts\n- [ ] diff_score_updated_at field added to hax table\n- [ ] Database migrated successfully (pnpm db:push)\n- [ ] Zero schema regenerated (pnpm sync-generate)\n- [ ] Mutation created in mutators.ts\n- [ ] Score syncs to other clients in real-time\n- [ ] Verified in dev environment\n\nMetadata:\nbeads_id: battle_mode-0ep.10\nbeads_status: closed\nbeads_type: feature\nbeads_priority: 1\nlabels: []\nassignee: null\nnotes: null\ncreated_at: 2026-01-08T14:12:21.094941-07:00\nupdated_at: 2026-01-08T15:28:05.162481-07:00\nclosed_at: 2026-01-08T15:28:05.162481-07:00\n\ndependencies:\n- type=parent-child issue_id=battle_mode-0ep.10 depends_on_id=battle_mode-0ep created_at=2026-01-08T14:12:21.095656-07:00 created_by=daemon",
+  "priority": 1,
+  "completed": true,
+  "result": "Migrated from Beads with closed status preserved. closed_at: 2026-01-08T15:28:05.162481-07:00",
+  "metadata": null,
+  "created_at": "2026-01-26T19:31:51.314Z",
+  "updated_at": "2026-01-26T19:35:38.224Z",
+  "completed_at": "2026-01-26T19:35:38.224Z",
+  "blockedBy": [],
+  "blocks": [
+    "balcmjrb",
+    "2y8efqma"
+  ],
+  "children": []
+}

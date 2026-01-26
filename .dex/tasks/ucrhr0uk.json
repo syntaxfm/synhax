@@ -1,0 +1,20 @@
+{
+  "id": "ucrhr0uk",
+  "parent_id": null,
+  "description": "Update to Zero 0.25 syntax",
+  "context": "Beads description:\nMigrate codebase to Zero 0.25 syntax including custom mutators and synced queries\n\nMetadata:\nbeads_id: battle_mode-nri\nbeads_status: closed\nbeads_type: epic\nbeads_priority: 1\nlabels: []\nassignee: null\nnotes: null\ncreated_at: 2025-12-18T11:24:23.123012-07:00\nupdated_at: 2025-12-18T22:50:35.615376-07:00\nclosed_at: 2025-12-18T22:50:35.615376-07:00\n\ndependencies: []",
+  "priority": 1,
+  "completed": true,
+  "result": "Migrated from Beads with closed status preserved. closed_at: 2025-12-18T22:50:35.615376-07:00",
+  "metadata": null,
+  "created_at": "2026-01-26T19:31:21.361Z",
+  "updated_at": "2026-01-26T19:35:57.261Z",
+  "completed_at": "2026-01-26T19:35:57.261Z",
+  "blockedBy": [],
+  "blocks": [
+    "1ecejduu",
+    "nnyyw97n",
+    "bu51ic8c"
+  ],
+  "children": []
+}

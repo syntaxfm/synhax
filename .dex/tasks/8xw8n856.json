@@ -1,0 +1,16 @@
+{
+  "id": "8xw8n856",
+  "parent_id": null,
+  "description": "Only show battle settings in lobby if user created the battle",
+  "context": "Beads description:\nIn src/routes/(style)/(menu)/lobby/[id]/+page.svelte, battle settings should only be visible to the user who created the battle. Currently settings may be shown to all users in the lobby. Need to check if current user ID matches the battle creator ID before rendering settings UI.\n\nMetadata:\nbeads_id: battle_mode-5s2\nbeads_status: open\nbeads_type: feature\nbeads_priority: 2\nlabels: []\nassignee: null\nnotes: null\ncreated_at: 2026-01-08T12:13:43.142478-07:00\nupdated_at: 2026-01-08T12:13:49.72294-07:00\nclosed_at: None\n\ndependencies: []",
+  "priority": 1,
+  "completed": false,
+  "result": null,
+  "metadata": null,
+  "created_at": "2026-01-26T19:30:25.776Z",
+  "updated_at": "2026-01-26T19:30:25.776Z",
+  "completed_at": null,
+  "blockedBy": [],
+  "blocks": [],
+  "children": []
+}

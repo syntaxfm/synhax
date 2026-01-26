@@ -1,0 +1,16 @@
+{
+  "id": "ywkqa7eo",
+  "parent_id": null,
+  "description": "Set up Sentry for Cloudflare Workers using @sentry/cloudflare-workers",
+  "context": "Beads description:\n(empty)\n\nMetadata:\nbeads_id: battle_mode-pfd\nbeads_status: open\nbeads_type: chore\nbeads_priority: 3\nlabels: []\nassignee: null\nnotes: null\ncreated_at: 2026-01-05T17:10:37.744916-07:00\nupdated_at: 2026-01-05T17:10:37.744916-07:00\nclosed_at: None\n\ndependencies: []",
+  "priority": 1,
+  "completed": false,
+  "result": null,
+  "metadata": null,
+  "created_at": "2026-01-26T19:31:27.682Z",
+  "updated_at": "2026-01-26T19:31:27.682Z",
+  "completed_at": null,
+  "blockedBy": [],
+  "blocks": [],
+  "children": []
+}

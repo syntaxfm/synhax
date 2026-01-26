@@ -1,0 +1,16 @@
+{
+  "id": "3wqsaij2",
+  "parent_id": null,
+  "description": "Add small private toggle to referee page",
+  "context": "Beads description:\n(empty)\n\nMetadata:\nbeads_id: battle_mode-e86\nbeads_status: open\nbeads_type: feature\nbeads_priority: 2\nlabels: []\nassignee: null\nnotes: null\ncreated_at: 2026-01-05T17:10:39.176983-07:00\nupdated_at: 2026-01-05T17:10:39.176983-07:00\nclosed_at: None\n\ndependencies: []",
+  "priority": 1,
+  "completed": false,
+  "result": null,
+  "metadata": null,
+  "created_at": "2026-01-26T19:30:58.466Z",
+  "updated_at": "2026-01-26T19:30:58.466Z",
+  "completed_at": null,
+  "blockedBy": [],
+  "blocks": [],
+  "children": []
+}

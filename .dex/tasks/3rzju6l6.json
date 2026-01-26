@@ -1,0 +1,16 @@
+{
+  "id": "3rzju6l6",
+  "parent_id": "y0q4nfj0",
+  "description": "Add hax history query for playback",
+  "context": "Beads description:\nCreate a Zero query to fetch all history entries for a hax, ordered by timestamp. Support filtering by time range for efficient scrubbing.\n\nMetadata:\nbeads_id: battle_mode-2uh.2\nbeads_status: open\nbeads_type: task\nbeads_priority: 2\nlabels: []\nassignee: null\nnotes: null\ncreated_at: 2025-12-19T10:52:10.253064-07:00\nupdated_at: 2025-12-19T10:52:10.253064-07:00\nclosed_at: None\n\ndependencies:\n- type=parent-child issue_id=battle_mode-2uh.2 depends_on_id=battle_mode-2uh created_at=2025-12-19T10:52:10.253588-07:00 created_by=daemon",
+  "priority": 1,
+  "completed": false,
+  "result": null,
+  "metadata": null,
+  "created_at": "2026-01-26T19:33:32.341Z",
+  "updated_at": "2026-01-26T19:33:32.341Z",
+  "completed_at": null,
+  "blockedBy": [],
+  "blocks": [],
+  "children": []
+}

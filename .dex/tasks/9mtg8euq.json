@@ -1,0 +1,26 @@
+{
+  "id": "9mtg8euq",
+  "parent_id": null,
+  "description": "Invite-only mystery challenges",
+  "context": "Beads description:\n(empty)\n\nMetadata:\nbeads_id: battle_mode-hty\nbeads_status: open\nbeads_type: epic\nbeads_priority: 1\nlabels: []\nassignee: null\nnotes: null\ncreated_at: 2025-12-18T10:15:26.588654-07:00\nupdated_at: 2025-12-18T11:13:47.313727-07:00\nclosed_at: None\n\ndependencies: []",
+  "priority": 1,
+  "completed": false,
+  "result": null,
+  "metadata": null,
+  "created_at": "2026-01-26T19:31:05.880Z",
+  "updated_at": "2026-01-26T19:31:05.880Z",
+  "completed_at": null,
+  "blockedBy": [],
+  "blocks": [
+    "r39li3vb",
+    "sw6eaxg6"
+  ],
+  "children": [
+    "uxs3t9sn",
+    "425swfhh",
+    "5ebas3py",
+    "vr51zata",
+    "h7j572sd",
+    "kkov60q0"
+  ]
+}

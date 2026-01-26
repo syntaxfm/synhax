@@ -1,0 +1,18 @@
+{
+  "id": "atagwvsp",
+  "parent_id": "2ty38olh",
+  "description": "Auto-redirect to recap when battle ends if extension disabled",
+  "context": "Beads description:\nWhen a battle's timer expires and allow_time_extension is false, automatically redirect all participants to the recap page.\n\n## Files to modify\n- src/routes/(style)/(app)/battle/[id]/code/BattleMode.svelte (or wherever timer logic lives)\n- May need to check battle status handling\n\n## Current Behavior\nWhen timer reaches 0, battle stays in pending/waiting state until referee clicks 'End Battle'.\n\n## New Behavior\nWhen timer reaches 0:\n- If allow_time_extension is true: Current behavior (wait for ref)\n- If allow_time_extension is false: \n  1. Update battle status to ENDED (may need server action)\n  2. Redirect all participants to /recap/[battleId]\n\n## Implementation Notes\n- Need to detect timer expiration\n- Check battle.allow_time_extension value\n- Either trigger mutation to end battle, or have server-side cron/check\n- Navigate to recap page: goto(`/recap/${battle.id}`)\n\n## Consideration\nThe redirect should happen for ALL participants in the battle simultaneously.\nMay need to use Zero's real-time sync - when battle status changes to ENDED, \ncomponents should detect and redirect.\n\n## Acceptance Criteria\n- Battles with allow_time_extension=false auto-end when timer expires\n- All participants redirected to recap\n- Battles with allow_time_extension=true work as before\n- No race conditions or double-redirects\n\nMetadata:\nbeads_id: battle_mode-8f0.3\nbeads_status: closed\nbeads_type: task\nbeads_priority: 1\nlabels: []\nassignee: null\nnotes: null\ncreated_at: 2026-01-08T14:27:24.727789-07:00\nupdated_at: 2026-01-08T15:20:39.809039-07:00\nclosed_at: 2026-01-08T15:20:39.809039-07:00\n\ndependencies:\n- type=parent-child issue_id=battle_mode-8f0.3 depends_on_id=battle_mode-8f0 created_at=2026-01-08T14:27:24.72842-07:00 created_by=daemon\n- type=blocks issue_id=battle_mode-8f0.3 depends_on_id=battle_mode-8f0.1 created_at=2026-01-08T14:27:55.336245-07:00 created_by=daemon",
+  "priority": 1,
+  "completed": true,
+  "result": "Migrated from Beads with closed status preserved. closed_at: 2026-01-08T15:20:39.809039-07:00",
+  "metadata": null,
+  "created_at": "2026-01-26T19:33:26.962Z",
+  "updated_at": "2026-01-26T19:35:20.034Z",
+  "completed_at": "2026-01-26T19:35:20.034Z",
+  "blockedBy": [
+    "ztibg57t"
+  ],
+  "blocks": [],
+  "children": []
+}

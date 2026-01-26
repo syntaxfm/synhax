@@ -1,0 +1,16 @@
+{
+  "id": "i5v7llzl",
+  "parent_id": null,
+  "description": "Address a11y warnings in battle UI components",
+  "context": "Beads description:\n(empty)\n\nMetadata:\nbeads_id: battle_mode-cdp\nbeads_status: open\nbeads_type: task\nbeads_priority: 3\nlabels: []\nassignee: null\nnotes: null\ncreated_at: 2026-01-15T12:24:17.472865-07:00\nupdated_at: 2026-01-15T12:24:17.472865-07:00\nclosed_at: None\n\ndependencies: []",
+  "priority": 1,
+  "completed": false,
+  "result": null,
+  "metadata": null,
+  "created_at": "2026-01-26T19:30:54.621Z",
+  "updated_at": "2026-01-26T19:30:54.621Z",
+  "completed_at": null,
+  "blockedBy": [],
+  "blocks": [],
+  "children": []
+}

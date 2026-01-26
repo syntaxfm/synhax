@@ -1,0 +1,16 @@
+{
+  "id": "fxz7yj0o",
+  "parent_id": null,
+  "description": "Redesign battle code view layout",
+  "context": "Beads description:\n(empty)\n\nMetadata:\nbeads_id: battle_mode-a8e\nbeads_status: open\nbeads_type: feature\nbeads_priority: 2\nlabels: []\nassignee: null\nnotes: null\ncreated_at: 2026-01-16T16:14:19.177067-07:00\nupdated_at: 2026-01-16T16:14:19.177067-07:00\nclosed_at: None\n\ndependencies: []",
+  "priority": 1,
+  "completed": false,
+  "result": null,
+  "metadata": null,
+  "created_at": "2026-01-26T19:30:47.266Z",
+  "updated_at": "2026-01-26T19:30:47.266Z",
+  "completed_at": null,
+  "blockedBy": [],
+  "blocks": [],
+  "children": []
+}

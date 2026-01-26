@@ -1,0 +1,18 @@
+{
+  "id": "o21dfxno",
+  "parent_id": "k95uuqo8",
+  "description": "Handle target image CORS for canvas access",
+  "context": "Beads description:\nTarget images are stored in Cloudflare R2. Need to ensure they can be loaded into a canvas without CORS issues.\n\n## The Problem\nWhen loading an image into a canvas and then reading pixel data (getImageData), the canvas becomes 'tainted' if the image is cross-origin without proper CORS headers.\n\nError: 'The canvas has been tainted by cross-origin data'\n\n## Current Setup\n- Target images stored in Cloudflare R2\n- Served via some URL (need to verify CORS headers)\n\n## Solutions\n\n### Option A: Ensure R2 bucket has proper CORS\nConfigure R2 bucket CORS rules to allow canvas access:\n```json\n{\n  \"AllowedOrigins\": [\"https://battlemode.dev\", \"http://localhost:*\"],\n  \"AllowedMethods\": [\"GET\"],\n  \"AllowedHeaders\": [\"*\"]\n}\n```\n\n### Option B: Use crossOrigin attribute\nWhen loading images, set crossOrigin:\n```ts\nconst img = new Image();\nimg.crossOrigin = 'anonymous';\nimg.src = targetUrl;\n```\n\n### Option C: Proxy through same-origin endpoint\nCreate an API route that proxies the image:\n```\n/api/target-image/[id]\n```\n\n## Implementation\n1. Check current R2 CORS configuration\n2. Test loading target image into canvas\n3. If tainted, implement appropriate solution\n4. Update loadImageAsCanvas utility to handle CORS\n\n## Testing\n- Test with production R2 URLs\n- Test with localhost dev server\n- Verify getImageData doesn't throw\n\n## Acceptance Criteria\n- Target images can be loaded and read pixel data\n- Works in both dev and production environments\n\nMetadata:\nbeads_id: battle_mode-0ep.7\nbeads_status: closed\nbeads_type: task\nbeads_priority: 2\nlabels: []\nassignee: null\nnotes: null\ncreated_at: 2026-01-08T14:11:42.711198-07:00\nupdated_at: 2026-01-08T15:49:35.539023-07:00\nclosed_at: 2026-01-08T15:49:35.539023-07:00\n\ndependencies:\n- type=parent-child issue_id=battle_mode-0ep.7 depends_on_id=battle_mode-0ep created_at=2026-01-08T14:11:42.711681-07:00 created_by=daemon\n- type=blocks issue_id=battle_mode-0ep.7 depends_on_id=battle_mode-0ep.2 created_at=2026-01-08T14:12:51.567498-07:00 created_by=daemon",
+  "priority": 1,
+  "completed": true,
+  "result": "Migrated from Beads with closed status preserved. closed_at: 2026-01-08T15:49:35.539023-07:00",
+  "metadata": null,
+  "created_at": "2026-01-26T19:33:51.950Z",
+  "updated_at": "2026-01-26T19:35:28.270Z",
+  "completed_at": "2026-01-26T19:35:28.270Z",
+  "blockedBy": [
+    "02yasbrf"
+  ],
+  "blocks": [],
+  "children": []
+}

@@ -1,0 +1,16 @@
+{
+  "id": "murzj4bs",
+  "parent_id": null,
+  "description": "Fix battle data typing mismatches in battle routes/components",
+  "context": "Beads description:\n(empty)\n\nMetadata:\nbeads_id: battle_mode-bqb\nbeads_status: closed\nbeads_type: bug\nbeads_priority: 2\nlabels: []\nassignee: null\nnotes: null\ncreated_at: 2026-01-15T12:24:17.269148-07:00\nupdated_at: 2026-01-15T13:08:23.094768-07:00\nclosed_at: 2026-01-15T13:08:23.094768-07:00\n\ndependencies: []",
+  "priority": 1,
+  "completed": true,
+  "result": "Migrated from Beads with closed status preserved. closed_at: 2026-01-15T13:08:23.094768-07:00",
+  "metadata": null,
+  "created_at": "2026-01-26T19:30:50.996Z",
+  "updated_at": "2026-01-26T19:36:11.596Z",
+  "completed_at": "2026-01-26T19:36:11.596Z",
+  "blockedBy": [],
+  "blocks": [],
+  "children": []
+}

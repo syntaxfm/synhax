@@ -1,0 +1,18 @@
+{
+  "id": "icqchuz3",
+  "parent_id": "nfqaopws",
+  "description": "Add playlist sharing and invite links",
+  "context": "Beads description:\nGenerate shareable links for playlists, allow importing/cloning playlists\n\nMetadata:\nbeads_id: battle_mode-lfg.6\nbeads_status: open\nbeads_type: task\nbeads_priority: 1\nlabels: []\nassignee: null\nnotes: null\ncreated_at: 2025-12-18T10:16:19.912208-07:00\nupdated_at: 2025-12-18T10:16:19.912208-07:00\nclosed_at: None\n\ndependencies:\n- type=parent-child issue_id=battle_mode-lfg.6 depends_on_id=battle_mode-lfg created_at=2025-12-18T10:16:19.912984-07:00 created_by=daemon\n- type=blocks issue_id=battle_mode-lfg.6 depends_on_id=battle_mode-lfg.3 created_at=2025-12-18T10:16:25.58606-07:00 created_by=daemon",
+  "priority": 1,
+  "completed": false,
+  "result": null,
+  "metadata": null,
+  "created_at": "2026-01-26T19:34:10.273Z",
+  "updated_at": "2026-01-26T19:34:10.273Z",
+  "completed_at": null,
+  "blockedBy": [
+    "rirl99kc"
+  ],
+  "blocks": [],
+  "children": []
+}

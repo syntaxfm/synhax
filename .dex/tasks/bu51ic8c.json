@@ -1,0 +1,20 @@
+{
+  "id": "bu51ic8c",
+  "parent_id": null,
+  "description": "Complete permissions system",
+  "context": "Beads description:\nImplement full permissions system for Zero - requires 0.25 syntax migration to be complete first\n\nMetadata:\nbeads_id: battle_mode-4k0\nbeads_status: open\nbeads_type: task\nbeads_priority: 1\nlabels: []\nassignee: null\nnotes: null\ncreated_at: 2025-12-18T11:24:33.095621-07:00\nupdated_at: 2025-12-18T11:24:33.095621-07:00\nclosed_at: None\n\ndependencies:\n- type=blocks issue_id=battle_mode-4k0 depends_on_id=battle_mode-nri created_at=2025-12-18T11:24:37.106627-07:00 created_by=daemon\n- type=blocks issue_id=battle_mode-4k0 depends_on_id=battle_mode-wad created_at=2025-12-18T11:24:37.208857-07:00 created_by=daemon\n- type=blocks issue_id=battle_mode-4k0 depends_on_id=battle_mode-qi9 created_at=2025-12-18T11:24:37.30638-07:00 created_by=daemon",
+  "priority": 1,
+  "completed": false,
+  "result": null,
+  "metadata": null,
+  "created_at": "2026-01-26T19:33:48.319Z",
+  "updated_at": "2026-01-26T19:33:48.319Z",
+  "completed_at": null,
+  "blockedBy": [
+    "ucrhr0uk",
+    "nnyyw97n",
+    "1ecejduu"
+  ],
+  "blocks": [],
+  "children": []
+}

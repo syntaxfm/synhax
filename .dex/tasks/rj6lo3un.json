@@ -1,0 +1,18 @@
+{
+  "id": "rj6lo3un",
+  "parent_id": "nfqaopws",
+  "description": "Add playlists table to schema",
+  "context": "Beads description:\nCreate playlists table with id, name, description, creator_id, visibility (public/private), created_at\n\nMetadata:\nbeads_id: battle_mode-lfg.1\nbeads_status: closed\nbeads_type: task\nbeads_priority: 1\nlabels: []\nassignee: null\nnotes: null\ncreated_at: 2025-12-18T10:16:14.684067-07:00\nupdated_at: 2025-12-18T17:57:44.132265-07:00\nclosed_at: 2025-12-18T17:57:44.132265-07:00\n\ndependencies:\n- type=parent-child issue_id=battle_mode-lfg.1 depends_on_id=battle_mode-lfg created_at=2025-12-18T10:16:14.685634-07:00 created_by=daemon",
+  "priority": 1,
+  "completed": true,
+  "result": "Migrated from Beads with closed status preserved. closed_at: 2025-12-18T17:57:44.132265-07:00",
+  "metadata": null,
+  "created_at": "2026-01-26T19:33:17.722Z",
+  "updated_at": "2026-01-26T19:35:11.638Z",
+  "completed_at": "2026-01-26T19:35:11.638Z",
+  "blockedBy": [],
+  "blocks": [
+    "xjtvmqdr"
+  ],
+  "children": []
+}
