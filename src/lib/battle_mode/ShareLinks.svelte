@@ -4,13 +4,15 @@
 	import { PUBLIC_APP_URL } from '$env/static/public';
 	const {
 		battle,
-		code = true,
+		lobby = true,
+		battleCode = false,
 		watch = true,
 		ref = false,
 		alwaysEnabled = false
 	}: {
 		battle: Battle;
-		code?: boolean;
+		lobby?: boolean;
+		battleCode?: boolean;
 		watch?: boolean;
 		ref?: boolean;
 		alwaysEnabled?: boolean;
@@ -18,11 +20,19 @@
 </script>
 
 <div class="stack">
-	{#if code}
+	{#if lobby}
 		<Copybutton
-			label="Code"
+			label="Lobby"
 			disabled={!alwaysEnabled && battle.status !== 'PENDING'}
 			link={`${PUBLIC_APP_URL}/lobby/${battle.id}`}
+		/>
+	{/if}
+
+	{#if battleCode}
+		<Copybutton
+			label="Battle View"
+			disabled={!alwaysEnabled && battle.status === 'COMPLETED'}
+			link={`${PUBLIC_APP_URL}/battle/${battle.id}/code`}
 		/>
 	{/if}
 
@@ -37,7 +47,7 @@
 
 	{#if ref}
 		<Copybutton
-			label="Ref"
+			label="Referee View"
 			disabled={!alwaysEnabled && battle.status === 'COMPLETED'}
 			link={`${PUBLIC_APP_URL}/ref/${battle.id}`}
 		/>

@@ -19,18 +19,31 @@
 			image?: string | null;
 			avatar?: string | null;
 		};
+		hax?: {
+			id: string;
+		} | null;
 	};
 
 	type Props = {
 		battler: Battler;
+		is_referee?: boolean;
 		onlockin: () => void;
 		onleave: () => void;
+		onkick?: () => void;
 	};
 
-	const { battler, onlockin, onleave }: Props = $props();
+	const {
+		battler,
+		is_referee = false,
+		onlockin,
+		onleave,
+		onkick
+	}: Props = $props();
 
 	let is_me = $derived(battler.user_id === z.userID);
 	let is_ready = $derived(battler.status === 'READY');
+	// User was invited but hasn't set up their files yet
+	let needs_file_setup = $derived(is_me && !battler.hax);
 	let user = $derived(
 		battler.user ?? {
 			name: 'Anonymous',
@@ -65,10 +78,20 @@
 					<span class="initials">{get_initials(user.name)}</span>
 				{/if}
 
-				<div class="card-status" class:ready={is_ready}>
-					<span class="status-text"
-						>{is_ready ? 'Locked In' : 'Warming Up'}</span
-					>
+				<div
+					class="card-status"
+					class:ready={is_ready}
+					class:invited={needs_file_setup}
+				>
+					<span class="status-text">
+						{#if is_ready}
+							Locked In
+						{:else if needs_file_setup}
+							Invited
+						{:else}
+							Warming Up
+						{/if}
+					</span>
 				</div>
 			</div>
 			<div class="card-nameplate">
@@ -79,12 +102,16 @@
 
 	{#if is_me}
 		<div class="cluster" style="justify-content: center;">
-			{#if !is_ready}
+			{#if !is_ready && !needs_file_setup}
 				<button class="battle-button" onclick={onlockin}>Lock In</button>
 			{/if}
 			<button class="battle-button battle-button--ghost" onclick={onleave}>
 				Leave
 			</button>
+		</div>
+	{:else if is_referee && onkick}
+		<div class="cluster" style="justify-content: center;">
+			<button class="battle-button danger" onclick={onkick}> Remove </button>
 		</div>
 	{/if}
 </article>
@@ -147,15 +174,24 @@
 		left: 50%;
 		transform: translateX(-50%);
 		background: rgb(0 0 0 / 0.7);
-		padding: var(--pad-xs) var(--pad-s);
+		line-height: 1;
+		padding: var(--pad-s) var(--pad-m);
 		border-radius: 999px;
 		border: 1px solid rgb(255 255 255 / 0.2);
 		box-shadow: 0 10px 18px rgb(0 0 0 / 0.4);
 		white-space: nowrap;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 
 	.card-status.ready {
 		border-color: rgb(34 197 94 / 0.6);
+		color: var(--white);
+	}
+
+	.card-status.invited {
+		border-color: rgb(251 191 36 / 0.6);
 		color: var(--white);
 	}
 
