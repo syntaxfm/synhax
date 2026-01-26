@@ -557,3 +557,10 @@ table {
 	background: var(--surface-1);
 	border: 1px solid var(--border-subtle);
 }
+
+/* Snapdom pseudo element fix - prevents duplicate pseudo elements during DOM capture */
+/* Reference: https://github.com/zumerlab/snapdom/issues/360#issuecomment-3798718210 */
+*:has(> span[data-snapdom-pseudo='::after'])::after,
+*:has(> span[data-snapdom-pseudo='::before'])::before {
+	display: none !important;
+}
