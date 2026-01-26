@@ -376,6 +376,91 @@ export const mutators = defineMutators({
 				await assertParticipantOwner(tx, ctx, args.id);
 				await tx.mutate.battle_participants.delete({ id: args.id });
 			}
+		),
+		/** Invite a user to a battle (ref only) */
+		invite: defineMutator(
+			type({
+				id: 'string',
+				battle_id: 'string',
+				user_id: 'string',
+				'display_order?': 'number'
+			}),
+			async ({ tx, args, ctx }) => {
+				assertAuthenticated(ctx);
+				// Verify caller is the battle's referee or admin
+				const battle = (await getBattle(tx, args.battle_id)) as {
+					referee_id?: string;
+				} | null;
+				if (!battle?.referee_id) {
+					throw new Error('Battle not found');
+				}
+				if (!isAdmin(ctx) && battle.referee_id !== ctx.userID) {
+					throw new Error('Only the referee can invite users');
+				}
+				// Check participant limit
+				const participants = (await tx.run(
+					zql.battle_participants.where('battle_id', args.battle_id)
+				)) as { id?: string; status?: string | null }[];
+				const activeCount = Array.isArray(participants)
+					? participants.filter((p) => p.status !== 'DROPPED').length
+					: 0;
+				if (activeCount >= 2) {
+					throw new Error('Battle already has two participants');
+				}
+				// Check if user is already a participant
+				const existingParticipant = Array.isArray(participants)
+					? participants.find((p) => p.id === args.user_id)
+					: null;
+				if (existingParticipant) {
+					throw new Error('User is already a participant in this battle');
+				}
+				// Create participant in PENDING state
+				const now = Date.now();
+				await tx.mutate.battle_participants.insert({
+					id: args.id,
+					battle_id: args.battle_id,
+					user_id: args.user_id,
+					status: 'PENDING',
+					display_order: args.display_order,
+					joined_at: now,
+					created_at: now,
+					updated_at: now
+				});
+			}
+		),
+		/** Remove a participant from a battle (ref only, before battle starts) */
+		kick: defineMutator(
+			type({
+				id: 'string',
+				battle_id: 'string'
+			}),
+			async ({ tx, args, ctx }) => {
+				assertAuthenticated(ctx);
+				// Verify caller is the battle's referee or admin
+				const battle = (await getBattle(tx, args.battle_id)) as {
+					referee_id?: string;
+					status?: string | null;
+				} | null;
+				if (!battle?.referee_id) {
+					throw new Error('Battle not found');
+				}
+				if (!isAdmin(ctx) && battle.referee_id !== ctx.userID) {
+					throw new Error('Only the referee can remove participants');
+				}
+				// Only allow kicking before battle starts
+				if (battle.status !== 'PENDING') {
+					throw new Error('Cannot remove participants after battle has started');
+				}
+				// Verify participant exists
+				const participant = (await getParticipant(tx, args.id)) as {
+					id?: string;
+				} | null;
+				if (!participant) {
+					throw new Error('Participant not found');
+				}
+				// Delete the participant
+				await tx.mutate.battle_participants.delete({ id: args.id });
+			}
 		)
 	},
 
