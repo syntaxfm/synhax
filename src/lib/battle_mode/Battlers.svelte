@@ -268,10 +268,6 @@
 		width: calc(var(--frame-width) * 1px);
 		height: calc(var(--frame-height) * 1px);
 		overflow: hidden;
-		border-radius: var(--br-s);
-		box-shadow:
-			0 0 0 1px rgb(255 255 255 / 0.1),
-			0 18px 30px rgb(0 0 0 / 0.35);
 	}
 
 	wa-tab-group {

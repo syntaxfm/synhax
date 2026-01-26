@@ -1,6 +1,6 @@
 import type { HandleServerError, Handle } from '@sveltejs/kit';
 import { svelteKitHandler } from 'better-auth/svelte-kit';
-import { building } from '$app/environment';
+import { building, dev } from '$app/environment';
 import { sequence } from '@sveltejs/kit/hooks';
 import postgres from 'postgres';
 import {
@@ -54,6 +54,12 @@ export const handle: Handle = async ({ event, resolve }) => {
 		database: drizzleAdapter(db, {
 			provider: 'pg',
 			schema
+		}),
+		// Email/password auth only in development mode
+		...(dev && {
+			emailAndPassword: {
+				enabled: true
+			}
 		}),
 		socialProviders: {
 			github: {

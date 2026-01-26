@@ -112,7 +112,7 @@
 </svelte:head>
 
 {#if battle.data}
-	<main class="stack battle-code-page" style="--gap: 0;">
+	<main class="stack battle-code-page" style="--stack-gap: 0;">
 		<Header
 			battle={battle.data}
 			target={false}
@@ -143,13 +143,14 @@
 
 <style>
 	.battle-code-page {
-		min-height: 100vh;
+		/* min-height: 100vh; */
 		width: 1200px;
+		max-height: 960px;
 		margin: 0 auto;
-		height: 100vh;
+		/* height: 100vh; */
 		display: flex;
 		flex-direction: column;
-		overflow: hidden;
+		overflow-y: auto;
 		background: var(--black);
 	}
 

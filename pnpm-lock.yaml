@@ -36,8 +36,8 @@ importers:
         specifier: ^8.21.3
         version: 8.21.3
       '@zumer/snapdom':
-        specifier: ^2.0.1
-        version: 2.0.1
+        specifier: ^2.0.2
+        version: 2.0.2
       arktype:
         specifier: ^2.1.29
         version: 2.1.29
@@ -2776,8 +2776,8 @@ packages:
   '@types/trusted-types@2.0.7':
     resolution: {integrity: sha512-ScaPdn1dQczgbl0QFTeTOmVHFULt394XJgOQNoyVhZ6r2vLnMLJfBPd53SB52T/3G36VI1/g2MZaX0cwDuXsfw==}
 
-  '@zumer/snapdom@2.0.1':
-    resolution: {integrity: sha512-78/qbYl2FTv4H6qaXcNfAujfIOSzdvs83NW63VbyC9QA3sqNPfPvhn4xYMO6Gy11hXwJUEhd0z65yKiNzDwy9w==}
+  '@zumer/snapdom@2.0.2':
+    resolution: {integrity: sha512-W6quT4lMcPu8Q9O/Q6witSfc6/+xuY8C8yDoHug/+o7zYKCNE/e0I3//XsWDkyq9C0mDE0TAWF/8bwCR7x3gHQ==}
 
   abstract-logging@2.0.1:
     resolution: {integrity: sha512-2BjRTZxTPvheOvGbBslFSYOUkr+SjPtOnrLP33f+VIWLzezQpZcqVg7ja3L4dBXmzzgwT+a029jRx5PCi3JuiA==}
@@ -7732,7 +7732,7 @@ snapshots:
 
   '@types/trusted-types@2.0.7': {}
 
-  '@zumer/snapdom@2.0.1': {}
+  '@zumer/snapdom@2.0.2': {}
 
   abstract-logging@2.0.1: {}
 
