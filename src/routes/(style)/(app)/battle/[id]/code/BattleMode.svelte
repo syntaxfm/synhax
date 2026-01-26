@@ -205,6 +205,7 @@
 				{#if isCodeTarget}
 					<div class="target-preview-layer">
 						<AppFrame
+							disableInspect={true}
 							hax={targetFrameData}
 							bind:iframeElement={targetIframeElement}
 							onload={handleTargetLoad}
