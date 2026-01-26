@@ -4,6 +4,7 @@
 	import Avatar from '$lib/ui/Avatar.svelte';
 	import { s } from '$lib/user/utils';
 	import { z, queries, mutators } from '$lib/zero.svelte';
+	import { parseTargetCode } from '$utils/code';
 	import { fade } from 'svelte/transition';
 
 	type ParticipantStatus =
@@ -17,6 +18,10 @@
 	type BattleJoin = {
 		id: string;
 		target_id: string | null;
+		target?: {
+			type?: string | null;
+			inspo?: string | null;
+		} | null;
 		participants: readonly {
 			id: string;
 			status?: ParticipantStatus;
@@ -64,8 +69,17 @@
 			return;
 		}
 
+		// Parse target code to get starter HTML/CSS if available
+		const targetCode = parseTargetCode(battle.target?.inspo ?? '');
+		const starterHtml = targetCode.starter_html || HTML_TEMPLATE;
+		const starterCss = targetCode.starter_css || CSS_TEMPLATE;
+
 		try {
-			await files.create_hax_directory(battle.id);
+			await files.create_hax_directory(
+				battle.id,
+				targetCode.starter_html || undefined,
+				targetCode.starter_css || undefined
+			);
 		} catch (error) {
 			console.error('Failed to create battle folder:', error);
 			alert('Unable to create your battle folder.');
@@ -83,8 +97,8 @@
 				user_id: z.userID,
 				target_id: battle?.target_id || '',
 				battle_id: battle?.id || '',
-				html: HTML_TEMPLATE,
-				css: CSS_TEMPLATE,
+				html: starterHtml,
+				css: starterCss,
 				type: 'BATTLE'
 			})
 		);

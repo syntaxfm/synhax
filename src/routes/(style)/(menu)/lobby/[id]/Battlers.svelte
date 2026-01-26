@@ -2,6 +2,7 @@
 	import { CSS_TEMPLATE, HTML_TEMPLATE } from '$lib/constants';
 	import { files } from '$lib/state/FileState.svelte';
 	import { mutators, z } from '$lib/zero.svelte';
+	import { parseTargetCode } from '$utils/code';
 	import PlayerCard from './PlayerCard.svelte';
 
 	type ParticipantStatus =
@@ -33,6 +34,8 @@
 		target_id: string | null;
 		target?: {
 			name?: string | null;
+			type?: string | null;
+			inspo?: string | null;
 		} | null;
 		participants: readonly Battler[];
 	};
@@ -79,8 +82,17 @@
 			return;
 		}
 
+		// Parse target code to get starter HTML/CSS if available
+		const targetCode = parseTargetCode(battle.target?.inspo ?? '');
+		const starterHtml = targetCode.starter_html || HTML_TEMPLATE;
+		const starterCss = targetCode.starter_css || CSS_TEMPLATE;
+
 		try {
-			await files.create_hax_directory(battle.id);
+			await files.create_hax_directory(
+				battle.id,
+				targetCode.starter_html || undefined,
+				targetCode.starter_css || undefined
+			);
 		} catch (error) {
 			console.error('Failed to create battle folder:', error);
 			alert('Unable to create your battle folder.');
@@ -98,8 +110,8 @@
 				user_id: z.userID,
 				target_id: battle.target_id || '',
 				battle_id: battle.id,
-				html: HTML_TEMPLATE,
-				css: CSS_TEMPLATE,
+				html: starterHtml,
+				css: starterCss,
 				type: 'BATTLE'
 			})
 		);

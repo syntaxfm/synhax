@@ -46,12 +46,16 @@ export function combine_html_and_css(html = '', css = ''): string {
 export type TargetCode = {
 	html: string;
 	css: string;
+	starter_html: string;
+	starter_css: string;
+	/** URL for IMAGE/VIDEO type targets */
+	url: string;
 };
 
 export function parseTargetCode(inspo = ''): TargetCode {
 	const trimmed = inspo.trim();
 	if (!trimmed) {
-		return { html: '', css: '' };
+		return { html: '', css: '', starter_html: '', starter_css: '', url: '' };
 	}
 
 	try {
@@ -59,23 +63,49 @@ export function parseTargetCode(inspo = ''): TargetCode {
 		if (parsed && typeof parsed === 'object') {
 			return {
 				html: typeof parsed.html === 'string' ? parsed.html : '',
-				css: typeof parsed.css === 'string' ? parsed.css : ''
+				css: typeof parsed.css === 'string' ? parsed.css : '',
+				starter_html:
+					typeof parsed.starter_html === 'string' ? parsed.starter_html : '',
+				starter_css:
+					typeof parsed.starter_css === 'string' ? parsed.starter_css : '',
+				url: typeof parsed.url === 'string' ? parsed.url : ''
 			};
 		}
 	} catch {
 		// fall through to legacy parsing
 	}
 
+	// Legacy: check for HTML with embedded <style> tags
 	const styleMatch = trimmed.match(/<style[^>]*>([\s\S]*?)<\/style>/i);
 	if (styleMatch) {
 		const css = styleMatch[1].trim();
 		const html = trimmed.replace(styleMatch[0], '').trim();
-		return { html, css };
+		return { html, css, starter_html: '', starter_css: '', url: '' };
 	}
 
-	return { html: trimmed, css: '' };
+	// Legacy: for IMAGE/VIDEO, inspo might be a plain URL string
+	if (trimmed.startsWith('http') || trimmed.startsWith('/')) {
+		return { html: '', css: '', starter_html: '', starter_css: '', url: trimmed };
+	}
+
+	return { html: trimmed, css: '', starter_html: '', starter_css: '', url: '' };
 }
 
-export function serializeTargetCode(html = '', css = ''): string {
-	return JSON.stringify({ html, css });
+/** Serialize CODE target data */
+export function serializeTargetCode(
+	html = '',
+	css = '',
+	starter_html = '',
+	starter_css = ''
+): string {
+	return JSON.stringify({ html, css, starter_html, starter_css });
+}
+
+/** Serialize IMAGE/VIDEO target data */
+export function serializeTargetMedia(
+	url = '',
+	starter_html = '',
+	starter_css = ''
+): string {
+	return JSON.stringify({ url, starter_html, starter_css });
 }

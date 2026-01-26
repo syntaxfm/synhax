@@ -8,7 +8,18 @@
 </script>
 
 <script lang="ts">
-	import { parseTargetCode, serializeTargetCode } from '$utils/code';
+	import {
+		parseTargetCode,
+		serializeTargetCode,
+		serializeTargetMedia
+	} from '$utils/code';
+	import AppFrame from '$lib/battle_mode/AppFrame.svelte';
+	import {
+		CSS_TEMPLATE,
+		HTML_TEMPLATE,
+		FRAME_WIDTH,
+		FRAME_HEIGHT
+	} from '$lib/constants';
 
 	type Props = {
 		submitText?: string;
@@ -26,7 +37,7 @@
 		initial_target = {
 			name: '',
 			image: '',
-			type: 'IMAGE',
+			type: 'CODE',
 			inspo: ''
 		}
 	}: Props = $props();
@@ -36,11 +47,29 @@
 	let name = $state(initial_target.name);
 	let image = $state(initial_target.image);
 	let type: 'CODE' | 'IMAGE' | 'VIDEO' = $state(initial_target.type);
-	let inspo = $state(initial_target.inspo);
+	// For IMAGE/VIDEO: use url from parsed JSON, fallback to raw inspo for backward compat
+	let inspo = $state(
+		initial_target.type !== 'CODE'
+			? initialCode.url || initial_target.inspo
+			: initial_target.inspo
+	);
 	let code_html = $state(
 		initial_target.type === 'CODE' ? initialCode.html : ''
 	);
 	let code_css = $state(initial_target.type === 'CODE' ? initialCode.css : '');
+	// Starter code available for all target types
+	let starter_html = $state(initialCode.starter_html);
+	let starter_css = $state(initialCode.starter_css);
+
+	// Preview data for AppFrame components
+	let targetPreview = $derived({
+		html: code_html || '',
+		css: code_css || ''
+	});
+	let starterPreview = $derived({
+		html: starter_html || HTML_TEMPLATE,
+		css: starter_css || CSS_TEMPLATE
+	});
 
 	let imageUploading = $state(false);
 	let imageUploadError = $state('');
@@ -143,6 +172,8 @@
 		const trimmedInspo = inspo.trim();
 		const trimmedHtml = code_html.trim();
 		const trimmedCss = code_css.trim();
+		const trimmedStarterHtml = starter_html.trim();
+		const trimmedStarterCss = starter_css.trim();
 
 		if (!trimmedName || !trimmedImage || !type) {
 			alert('Please fill out all fields');
@@ -159,11 +190,17 @@
 				name: trimmedName,
 				image: trimmedImage,
 				type,
-				inspo: serializeTargetCode(trimmedHtml, trimmedCss)
+				inspo: serializeTargetCode(
+					trimmedHtml,
+					trimmedCss,
+					trimmedStarterHtml,
+					trimmedStarterCss
+				)
 			});
 			return;
 		}
 
+		// IMAGE or VIDEO type
 		if (!trimmedInspo) {
 			alert('Please fill out all fields');
 			return;
@@ -173,7 +210,11 @@
 			name: trimmedName,
 			image: trimmedImage,
 			type,
-			inspo: trimmedInspo
+			inspo: serializeTargetMedia(
+				trimmedInspo,
+				trimmedStarterHtml,
+				trimmedStarterCss
+			)
 		});
 	}
 
@@ -330,7 +371,56 @@
 				disabled={isLoading}
 			></textarea>
 		</div>
+
+		{#if code_html || code_css}
+			<div class="preview-section">
+				<label>Target Preview</label>
+				<div
+					class="preview-frame"
+					style="width: {FRAME_WIDTH}px; height: {FRAME_HEIGHT}px;"
+				>
+					<AppFrame hax={targetPreview} />
+				</div>
+			</div>
+		{/if}
 	{/if}
+
+	<hr />
+	<p class="field-hint">
+		Starter code is optional. If provided, battlers will start with this code
+		instead of the default template.
+	</p>
+
+	<div class="field">
+		<label for="starter-html">Starter HTML (optional)</label>
+		<textarea
+			id="starter-html"
+			placeholder="Initial HTML battlers start with (leave empty for default)"
+			bind:value={starter_html}
+			rows="4"
+			disabled={isLoading}
+		></textarea>
+	</div>
+	<div class="field">
+		<label for="starter-css">Starter CSS (optional)</label>
+		<textarea
+			id="starter-css"
+			placeholder="Initial CSS battlers start with (leave empty for default)"
+			bind:value={starter_css}
+			rows="4"
+			disabled={isLoading}
+		></textarea>
+	</div>
+
+	<div class="preview-section">
+		<label>Starter Preview {starter_html || starter_css ? '' : '(default)'}</label>
+		<div
+			class="preview-frame"
+			style="width: {FRAME_WIDTH}px; height: {FRAME_HEIGHT}px;"
+		>
+			<AppFrame hax={starterPreview} />
+		</div>
+	</div>
 
 	<div class="form-actions">
 		<button class="go_button" type="submit" disabled={isLoading}>
@@ -366,5 +456,28 @@
 
 	input[type='file'] {
 		margin-bottom: 0.5rem;
+	}
+
+	.field-hint {
+		font-size: 0.875rem;
+		color: var(--fg-muted, #888);
+		margin: 0;
+	}
+
+	.preview-section {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.preview-section label {
+		font-weight: 500;
+	}
+
+	.preview-frame {
+		border: 1px solid var(--border, #333);
+		border-radius: 4px;
+		overflow: hidden;
+		background: #1a1a1a;
 	}
 </style>
