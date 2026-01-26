@@ -114,7 +114,7 @@
 		height: 100%;
 		display: flex;
 		align-items: center;
-		& > :global(*) {
+		& > :global(div) {
 			height: 100%;
 		}
 	}

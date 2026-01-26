@@ -31,9 +31,11 @@
 		border: none;
 		z-index: 1;
 		overflow: visible;
-
+		height: fit-content;
+		border: 3px solid var(--border-subtle);
 		&::backdrop {
-			background: rgb(0 0 0 / 0.8);
+			background: rgb(0 0 0 / 0.5);
+			backdrop-filter: blur(4px);
 		}
 		div {
 			z-index: 1;
