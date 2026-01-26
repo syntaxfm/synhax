@@ -50,6 +50,7 @@
 	// Fixed dimensions for both panes (TODO: make configurable per target)
 	const FRAME_WIDTH = 600;
 	const FRAME_HEIGHT = 400;
+	const PANEL_SCALE = 0.66;
 
 	// Overlay state: 'off', 'app', or 'diff'
 	type OverlayMode = 'off' | 'app' | 'diff';
@@ -128,11 +129,11 @@
 <section class="battle-mode">
 	<div class="output code-output">
 		<h2 class="battle-header">
-			<div class="battle-header__title">
-				<span class="battle-header__label">App</span>
-				<span class="battle-header__meta">{FRAME_WIDTH} × {FRAME_HEIGHT}</span>
+			<div class="battle-header-title">
+				<span class="battle-header-label">Your App</span>
+				<span class="battle-header-meta">{FRAME_WIDTH} × {FRAME_HEIGHT}</span>
 			</div>
-			<div class="battle-header__actions">
+			<div class="battle-header-actions">
 				<a
 					class="battle-icon-button"
 					target="_blank"
@@ -191,56 +192,8 @@
 	</div>
 	<div class="output">
 		<h2 class="battle-header">
-			<div class="battle-header__title">
-				<span class="battle-header__label">Target</span>
-			</div>
-			<div class="battle-controls">
-				{#if showOverlayControls}
-					<div class="battle-control">
-						<div class="button-group">
-							<button
-								class="battle-chip"
-								class:selected={overlayMode === 'off'}
-								onclick={() => setOverlay('off')}
-							>
-								Target
-							</button>
-							<button
-								class="battle-chip"
-								class:selected={overlayMode === 'app'}
-								onclick={() => setOverlay('app')}
-							>
-								Overlay
-							</button>
-							<button
-								class="battle-chip"
-								class:selected={overlayMode === 'diff'}
-								onclick={() => setOverlay('diff')}
-							>
-								Diff
-							</button>
-						</div>
-					</div>
-					<div class="battle-control-slot">
-						{#if overlayMode === 'app'}
-							<div class="battle-control">
-								<span class="battle-control__label">Opacity</span>
-								<div class="battle-opacity">
-									<input
-										type="range"
-										class="battle-slider"
-										min="0"
-										max="100"
-										bind:value={overlayOpacity}
-										title="Overlay opacity: {overlayOpacity}%"
-									/>
-								</div>
-							</div>
-						{:else if overlayMode === 'diff'}
-							<SeverityScale />
-						{/if}
-					</div>
-				{/if}
+			<div class="battle-header-title">
+				<span class="battle-header-label">Target</span>
 			</div>
 		</h2>
 		<div class="battle-frame-shell">
@@ -260,26 +213,10 @@
 				{:else}
 					<img
 						src={targetImage}
-						alt="Battle Image"
+						alt="Battle target"
 						width={FRAME_WIDTH}
 						height={FRAME_HEIGHT}
 					/>
-				{/if}
-
-				<!-- Overlay layer -->
-				{#if showOverlayControls}
-					{#if overlayMode === 'app'}
-						<div
-							class="overlay app-overlay"
-							style:opacity={overlayOpacity / 100}
-						>
-							<AppFrame {hax} />
-						</div>
-					{:else if overlayMode === 'diff' && diffCanvasSrc}
-						<div class="overlay diff-overlay">
-							<img src={diffCanvasSrc} alt="Diff overlay" />
-						</div>
-					{/if}
 				{/if}
 			</div>
 		</div>
@@ -298,43 +235,146 @@
 		enabled={diffEnabled}
 		onPerfectScore={handlePerfectScore}
 		onDiffCanvasUpdate={handleDiffCanvasUpdate}
-		debug={true}
+		debug={false}
 	/>
 
-	<!-- Competitors section -->
-	{#if competitors.length > 0}
-		{@const COMPETITOR_SCALE = 0.5}
-		<div class="competitors-section">
+	<!-- Bottom panels section -->
+	<div class="bottom-panels">
+		<!-- Overlay View panel with preview -->
+		<div class="control-panel">
 			<h2 class="battle-header">
-				<div class="battle-header__title">
-					<span class="battle-header__label">Competitors</span>
+				<div class="battle-header-title">
+					<span class="battle-header-label">Overlay</span>
+				</div>
+				<div class="battle-header-actions">
+					<div class="control-row">
+						<input
+							type="range"
+							class="battle-slider"
+							min="0"
+							max="100"
+							bind:value={overlayOpacity}
+							title="Overlay opacity: {overlayOpacity}%"
+						/>
+						<span class="control-value">{overlayOpacity}%</span>
+					</div>
 				</div>
 			</h2>
-			<div class="competitors-frames">
-				{#each competitors as competitor (competitor.id)}
-					<div class="competitor-frame-wrapper">
-						<div class="competitor-name">
-							{competitor.user?.name ?? 'Unknown'}
-						</div>
+			<div class="panel-preview">
+				<div
+					class="panel-frame-container"
+					style:width="{FRAME_WIDTH * PANEL_SCALE}px"
+					style:height="{FRAME_HEIGHT * PANEL_SCALE}px"
+				>
+					<div
+						class="battle-frame panel-frame"
+						style:width="{FRAME_WIDTH}px"
+						style:height="{FRAME_HEIGHT}px"
+						style:transform="scale({PANEL_SCALE})"
+					>
+						<!-- Target layer -->
+						{#if isCodeTarget}
+							<AppFrame hax={targetFrameData} />
+						{:else}
+							<img
+								src={targetImage}
+								alt="Target"
+								width={FRAME_WIDTH}
+								height={FRAME_HEIGHT}
+							/>
+						{/if}
+						<!-- App overlay -->
 						<div
-							class="competitor-frame-container"
-							style:width="{FRAME_WIDTH * COMPETITOR_SCALE}px"
-							style:height="{FRAME_HEIGHT * COMPETITOR_SCALE}px"
+							class="overlay app-overlay"
+							style:opacity={overlayOpacity / 100}
 						>
-							<div
-								class="battle-frame competitor-frame"
-								style:width="{FRAME_WIDTH}px"
-								style:height="{FRAME_HEIGHT}px"
-								style:transform="scale({COMPETITOR_SCALE})"
-							>
-								<AppFrame hax={competitor.hax} />
-							</div>
+							<AppFrame {hax} />
 						</div>
 					</div>
-				{/each}
+				</div>
 			</div>
 		</div>
-	{/if}
+
+		<!-- Diff View panel with preview -->
+		<div class="control-panel">
+			<h2 class="battle-header">
+				<div class="battle-header-title">
+					<span class="battle-header-label">Diff</span>
+				</div>
+				<div class="battle-header-actions">
+					<SeverityScale />
+				</div>
+			</h2>
+			<div class="panel-preview">
+				<div
+					class="panel-frame-container"
+					style:width="{FRAME_WIDTH * PANEL_SCALE}px"
+					style:height="{FRAME_HEIGHT * PANEL_SCALE}px"
+				>
+					<div
+						class="battle-frame panel-frame"
+						style:width="{FRAME_WIDTH}px"
+						style:height="{FRAME_HEIGHT}px"
+						style:transform="scale({PANEL_SCALE})"
+					>
+						{#if diffCanvasSrc}
+							<img
+								class="diff-image"
+								src={diffCanvasSrc}
+								alt="Diff visualization"
+							/>
+						{:else}
+							<div class="diff-placeholder">Computing diff...</div>
+						{/if}
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Competitors section -->
+		<div class="control-panel">
+			<h2 class="battle-header">
+				<div class="battle-header-title">
+					<span class="battle-header-label">
+						{#if competitors.length === 1}
+							{competitors[0].user?.name ?? 'Competitor'}
+						{:else}
+							Competitors
+						{/if}
+					</span>
+				</div>
+			</h2>
+			{#if competitors.length > 0}
+				<div class="competitors-frames">
+					{#each competitors as competitor (competitor.id)}
+						<div class="competitor-frame-wrapper">
+							{#if competitors.length > 1}
+								<div class="competitor-name">
+									{competitor.user?.name ?? 'Unknown'}
+								</div>
+							{/if}
+							<div
+								class="panel-frame-container"
+								style:width="{FRAME_WIDTH * PANEL_SCALE}px"
+								style:height="{FRAME_HEIGHT * PANEL_SCALE}px"
+							>
+								<div
+									class="battle-frame panel-frame"
+									style:width="{FRAME_WIDTH}px"
+									style:height="{FRAME_HEIGHT}px"
+									style:transform="scale({PANEL_SCALE})"
+								>
+									<AppFrame hax={competitor.hax} />
+								</div>
+							</div>
+						</div>
+					{/each}
+				</div>
+			{:else}
+				<div class="panel-empty">No competitors yet</div>
+			{/if}
+		</div>
+	</div>
 </section>
 
 <style>
@@ -371,30 +411,17 @@
 		padding: 0;
 	}
 
-	.target-preview-layer,
-	.target-code-layer {
+	.target-preview-layer {
 		position: absolute;
 		inset: 0;
-	}
-
-	.target-preview-layer {
 		z-index: 0;
-	}
-
-	.target-code-layer {
-		z-index: 1;
-		overflow: auto;
-		background: var(--black);
-	}
-
-	.target-code-layer :global(pre) {
-		margin: 0;
 	}
 
 	a {
 		margin-bottom: 0;
 	}
 
+	/* Overlay styles */
 	.overlay {
 		position: absolute;
 		inset: 0;
@@ -407,27 +434,106 @@
 		border: none;
 	}
 
-	.diff-overlay {
-		background: var(--black);
+	/* Bottom panels section */
+	.bottom-panels {
+		grid-column: 1 / -1;
+		display: flex;
+		padding: 0;
+		border-top: var(--border);
+		background: var(--bg-1);
+		align-items: flex-start;
 	}
-	.diff-overlay img {
+
+	.control-panel {
+		display: flex;
+		flex-direction: column;
+		background: var(--bg-2);
+		border: var(--border);
+		border-radius: var(--radius-m);
+		flex: 1;
+		min-width: 0;
+	}
+
+	.control-panel .battle-header {
+		border-bottom: var(--border);
+		padding: var(--pad-s) var(--pad-m);
+	}
+
+	.control-row {
+		display: flex;
+		align-items: center;
+		gap: var(--pad-s);
+	}
+
+	.control-label {
+		font-size: var(--font-s);
+		color: var(--grey);
+	}
+
+	.control-value {
+		font-size: var(--font-s);
+		color: var(--fg);
+		min-width: 36px;
+		text-align: right;
+	}
+
+	.battle-slider {
+		width: 80px;
+	}
+
+	/* Panel preview frames */
+	.panel-preview {
+		display: flex;
+		justify-content: center;
+		padding: 0;
+	}
+
+	.panel-frame-container {
+		overflow: hidden;
+		border: 1px solid var(--grey-dark);
+		border-radius: var(--radius-s);
+	}
+
+	.panel-frame {
+		flex-shrink: 0;
+		overflow: hidden;
+		position: relative;
+		transform-origin: top left;
+	}
+
+	/* Diff panel styles */
+	.diff-image {
 		width: 100%;
 		height: 100%;
 		object-fit: contain;
+		display: block;
 	}
 
-	/* Competitors section */
-	.competitors-section {
-		grid-column: 1 / -1;
+	.diff-placeholder {
+		width: 100%;
+		height: 100%;
 		display: flex;
-		flex-direction: column;
-		border-top: var(--border);
+		align-items: center;
+		justify-content: center;
+		background: var(--bg-1);
+		color: var(--grey);
+		font-size: var(--font-s);
+	}
+
+	/* Panel empty state */
+	.panel-empty {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: var(--pad-l);
+		color: var(--grey);
+		font-size: var(--font-s);
 	}
 
 	.competitors-frames {
 		display: flex;
 		gap: var(--pad-m);
-		padding: var(--pad-m);
+		padding: 0;
 		justify-content: center;
 		flex-wrap: wrap;
 	}
@@ -443,18 +549,5 @@
 		font-size: var(--font-s);
 		color: var(--grey);
 		font-weight: 500;
-	}
-
-	.competitor-frame-container {
-		overflow: hidden;
-		border: 1px solid var(--grey-dark);
-		border-radius: var(--radius-s);
-	}
-
-	.competitor-frame {
-		flex-shrink: 0;
-		overflow: hidden;
-		position: relative;
-		transform-origin: top left;
 	}
 </style>

@@ -54,7 +54,7 @@
 		flex: 1;
 		min-width: 0;
 		/* Add padding to prevent avatar clipping at edges */
-		padding: 0 20px;
+		padding: 0;
 	}
 
 	.score {
@@ -135,5 +135,6 @@
 		display: block;
 		background: var(--black);
 		font-size: 0;
+		background: white;
 	}
 </style>

@@ -145,7 +145,7 @@
 	.battle-code-page {
 		/* min-height: 100vh; */
 		width: 1200px;
-		height: 960px;
+		max-height: 960px;
 		margin: 0 auto;
 		/* height: 100vh; */
 		display: flex;

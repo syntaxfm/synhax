@@ -296,33 +296,11 @@ table {
 	border-block: 1px solid var(--border-subtle);
 	background: var(--surface-1);
 	color: var(--fg);
-
-	&__title {
-		display: flex;
-		align-items: center;
-		gap: var(--pad-m);
-	}
-
-	&__label {
-		font-size: 0.8rem;
-		letter-spacing: 0.04em;
-		font-weight: 600;
-		text-transform: uppercase;
-	}
-
-	&__meta {
-		font-size: 0.65rem;
-		color: var(--fg-5);
-		font-weight: normal;
-	}
-
-	&__actions {
-		display: flex;
-		align-items: center;
-		gap: var(--pad-m);
-	}
 }
 
+.battle-header-meta {
+	font-size: 0.8rem;
+}
 .battle-controls {
 	display: flex;
 	flex-wrap: wrap;
@@ -334,24 +312,6 @@ table {
 	display: flex;
 	align-items: center;
 	gap: var(--pad-m);
-
-	&__label {
-		font-size: 0.65rem;
-		font-weight: 600;
-		text-transform: uppercase;
-		color: var(--fg-5);
-	}
-
-	&-slot {
-		width: auto;
-		flex: 1;
-		display: flex;
-		align-items: center;
-
-		> * {
-			width: 100%;
-		}
-	}
 }
 
 .battle-chip {
