@@ -167,6 +167,7 @@ export const mutators = defineMutators({
 		insert: defineMutator(
 			type({
 				id: 'string',
+				'name?': 'string',
 				target_id: 'string',
 				zero_room_id: 'string',
 				referee_id: 'string',
@@ -189,6 +190,7 @@ export const mutators = defineMutators({
 				const now = Date.now();
 				await tx.mutate.battles.insert({
 					id: args.id,
+					name: args.name,
 					target_id: args.target_id,
 					zero_room_id: args.zero_room_id,
 					referee_id: refereeId,
@@ -210,6 +212,7 @@ export const mutators = defineMutators({
 		update: defineMutator(
 			type({
 				id: 'string',
+				'name?': 'string',
 				'status?': battleStatusEnum,
 				'visibility?': visibilityEnum,
 				'type?': battleTypeEnum,
@@ -252,6 +255,7 @@ export const mutators = defineMutators({
 				}
 				await tx.mutate.battles.update({
 					id: args.id,
+					name: args.name,
 					status: args.status,
 					visibility: args.visibility,
 					type: args.type,

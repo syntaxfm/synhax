@@ -9,6 +9,7 @@
 	// Type for battle with relations
 	type BattleWithRelations = {
 		id: string;
+		name: string | null;
 		status: 'PENDING' | 'ACTIVE' | 'COMPLETED' | null;
 		visibility: 'PUBLIC' | 'PRIVATE' | null;
 		zero_room_id: string;
@@ -72,6 +73,16 @@
 	}
 
 	const columns: ColumnDef<BattleWithRelations, any>[] = [
+		{
+			id: 'name',
+			header: 'Battle Name',
+			accessorFn: (row) => row.name,
+			cell: (info) => {
+				const name = info.getValue() as string | null;
+				if (!name) return '<span class="muted">—</span>';
+				return `<span>${name}</span>`;
+			}
+		},
 		{
 			id: 'target',
 			header: 'Target',
