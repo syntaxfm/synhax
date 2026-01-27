@@ -16,11 +16,15 @@
 	);
 </script>
 
+<svelte:head>
+	<title>{battle.data?.target?.name ?? 'Battle'} - Referee - Synhax</title>
+</svelte:head>
+
 {#if battle.data}
 	<div class="stack battle-surface ref-layout" style="--gap: 2rem;">
 		<header class="stack" style="--gap: 0.75rem;">
 			<div class="stack" style="--gap: 0.35rem; text-align: center;">
-				<h1>{battle.data.target?.name ?? 'Battle'}</h1>
+				<h1 class="game-title">{battle.data.target?.name ?? 'Battle'}</h1>
 				<div class="cluster recap-tags" style="justify-content: center;">
 					<span class="tag muted" style="--tag-color: var(--slate);">
 						{remove_screaming(battle.data.type ?? '')}

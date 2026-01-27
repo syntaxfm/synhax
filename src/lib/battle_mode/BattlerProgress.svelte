@@ -21,7 +21,7 @@
 	// Get the score (0-100) or default to 0
 	const score = $derived(Math.max(0, Math.min(100, hax?.diff_score ?? 0)));
 
-	// Default colors based on position (using Graffiti colors)
+	// Default colors based on position (using Mad CSS colors)
 	const barColor = $derived(
 		color ?? (position === 'left' ? 'var(--blue)' : 'var(--red)')
 	);
@@ -54,7 +54,7 @@
 		flex: 1;
 		min-width: 0;
 		/* Add padding to prevent avatar clipping at edges */
-		padding: 0 20px;
+		padding: 0;
 	}
 
 	.score {
@@ -67,7 +67,7 @@
 		position: relative;
 		flex: 1;
 		height: 20px;
-		background: var(--fg-1);
+		background: var(--fg-2);
 		--radius: 500px;
 		border-radius: var(--radius);
 		box-shadow: var(--shadow-2);
@@ -123,14 +123,18 @@
 	}
 
 	.avatar {
-		width: 36px;
-		height: 36px;
-		min-width: 36px;
-		min-height: 36px;
+		--size: 36px;
+		width: var(--size);
+		height: var(--size);
+		min-width: var(--size);
+		min-height: var(--size);
 		border-radius: 50%;
 		border: 2px solid var(--black);
 		box-shadow: var(--shadow-2);
 		object-fit: cover;
 		display: block;
+		background: var(--black);
+		font-size: 0;
+		background: white;
 	}
 </style>

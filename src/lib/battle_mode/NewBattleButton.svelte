@@ -28,7 +28,7 @@
 </script>
 
 {#if files.status === 'ACCESS'}
-	<button onclick={new_battle}>Start Battle</button>
+	<button onclick={new_battle}>Create Battle</button>
 {:else}
 	<RequestAccess />
 {/if}

@@ -34,6 +34,12 @@
 
 	const leftColor = leftBattler?.color ?? 'var(--blue)';
 	const rightColor = rightBattler?.color ?? 'var(--red)';
+
+	// Determine who's winning (higher diff_score is better)
+	const leftScore = $derived(leftBattler?.hax?.diff_score ?? 0);
+	const rightScore = $derived(rightBattler?.hax?.diff_score ?? 0);
+	const leftIsWinning = $derived(leftScore > rightScore && leftScore > 0);
+	const rightIsWinning = $derived(rightScore > leftScore && rightScore > 0);
 </script>
 
 <header class:has-battlers={battlers.length > 0}>
@@ -41,6 +47,10 @@
 		<!-- Battle mode header with progress bars -->
 		<div class="battler-side left">
 			{#if leftBattler?.user}
+				<h3>
+					{leftBattler.user.name}
+					{#if leftIsWinning}<span class="winning">WINNING</span>{/if}
+				</h3>
 				<BattlerProgress
 					user={leftBattler.user}
 					hax={leftBattler.hax ?? null}
@@ -49,7 +59,7 @@
 				/>
 			{/if}
 		</div>
-		<div class="center">
+		<div class="clock-wrap">
 			{@render countdown()}
 			{#if diffScore !== null}
 				<!-- <DiffPreview score={diffScore} compact /> -->
@@ -57,6 +67,10 @@
 		</div>
 		<div class="battler-side right">
 			{#if rightBattler?.user}
+				<h3>
+					{#if rightIsWinning}<span class="winning">WINNING</span>{/if}
+					{rightBattler.user.name}
+				</h3>
 				<BattlerProgress
 					user={rightBattler.user}
 					hax={rightBattler.hax ?? null}
@@ -69,11 +83,11 @@
 		<!-- Default header layout -->
 		<div class="target">
 			{#if target && battle.target}
-				<img src={battle.target.image} alt="Battle Image" />
+				<img src={battle.target.image} alt="Battle Target" />
 				<p>The Target</p>
 			{/if}
 		</div>
-		<div class="center">
+		<div>
 			{@render countdown()}
 			{#if diffScore !== null}
 				<DiffPreview score={diffScore} compact />
@@ -89,7 +103,7 @@
 	header {
 		display: grid;
 		background: var(--black);
-		gap: 20px;
+		gap: 0;
 		grid-template-columns: 1fr auto 1fr;
 		box-shadow:
 			0 5px 10px rgb(0 0 0 / 0.2),
@@ -97,7 +111,15 @@
 	}
 
 	header.has-battlers {
+		/* align-items: center; */
+	}
+	.clock-wrap {
+		height: 100%;
+		display: flex;
 		align-items: center;
+		& > :global(*) {
+			height: 100%;
+		}
 	}
 
 	.target {
@@ -116,14 +138,6 @@
 		}
 	}
 
-	.center {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		gap: var(--pad-s);
-	}
-
 	.detail {
 		padding: 20px;
 		text-align: right;
@@ -131,18 +145,43 @@
 	}
 
 	.battler-side {
-		display: flex;
-		align-items: center;
+		display: grid;
+		grid-template-rows: auto auto;
+		grid-template-columns: 100%;
+		/* flex-direction: column; */
+		justify-items: stretch;
+		/* align-items: center; */
 		min-width: 0;
 		/* Allow avatar to overflow vertically */
 		overflow: visible;
+		gap: var(--pad-m);
+		padding: var(--pad-m);
+
+		h3 {
+			width: 100%;
+			color: var(--white);
+			font-size: 20px;
+			margin: 0;
+			display: flex;
+			align-items: center;
+			gap: 10px;
+		}
+		.winning {
+			color: var(--green);
+			font-size: 15px;
+		}
 	}
 
 	.battler-side.left {
 		justify-content: flex-start;
+		color: var(--black);
 	}
 
 	.battler-side.right {
 		justify-content: flex-end;
+		h3 {
+			text-align: right;
+			justify-content: end;
+		}
 	}
 </style>

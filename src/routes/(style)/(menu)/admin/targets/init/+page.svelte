@@ -48,7 +48,11 @@
 	}
 </script>
 
-<h1>Create New Target</h1>
+<svelte:head>
+	<title>Create Target | Admin - Synhax</title>
+</svelte:head>
+
+<h1 class="game-title">Create New Target</h1>
 
 <TargetForm
 	submitText="Create Target"

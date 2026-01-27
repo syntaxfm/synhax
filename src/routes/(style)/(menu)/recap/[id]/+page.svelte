@@ -150,12 +150,16 @@
 	}
 </script>
 
+<svelte:head>
+	<title>{battle.data?.target?.name ?? 'Battle'} Recap - Synhax</title>
+</svelte:head>
+
 {#if battle.data && canView}
 	{@const battleData = battle.data}
 	<div class="stack battle-surface recap-layout" style="--gap: 2rem;">
 		<header class="stack" style="--gap: 0.75rem;">
 			<div class="stack" style="--gap: 0.35rem; text-align: center;">
-				<h1>{battleData.target?.name ?? 'Battle'} Recap</h1>
+				<h1 class="game-title">{battleData.target?.name ?? 'Battle'} Recap</h1>
 				<div class="cluster recap-tags" style="justify-content: center;">
 					<span class="tag muted" style="--tag-color: var(--slate);">
 						{remove_screaming(battleData.win_condition ?? '')}

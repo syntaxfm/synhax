@@ -56,9 +56,10 @@
 		"@tanstack/match-sorter-utils": "^8.19.4",
 		"@tanstack/svelte-table": "npm:tanstack-table-8-svelte-5@^0.1",
 		"@tanstack/table-core": "^8.21.3",
-		"@zumer/snapdom": "^2.0.1",
+		"@zumer/snapdom": "^2.0.2",
 		"arktype": "^2.1.29",
 		"better-auth": "^1.4.10",
+		"bits-ui": "^2.15.4",
 		"dotenv": "^17.2.3",
 		"drizzle-orm": "^0.45.1",
 		"drizzle-zero": "0.17.0",
@@ -69,5 +70,6 @@
 		"svelte-highlight": "^7.9.0",
 		"svelte-splitpanes": "^8.0.12",
 		"zero-svelte": "^1.2.2"
-	}
+	},
+	"packageManager": "pnpm@9.10.0+sha1.216899f511c8dfde183c7cb50b69009c779534a8"
 }

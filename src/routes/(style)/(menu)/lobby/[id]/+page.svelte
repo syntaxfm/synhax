@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import Countdown from '$lib/battle_mode/Countdown.svelte';
+	import InviteUser from '$lib/battle_mode/InviteUser.svelte';
 	import ShareLinks from '$lib/battle_mode/ShareLinks.svelte';
 	import Modal from '$lib/ui/Modal.svelte';
 	import ToggleButton from '$lib/ui/ToggleButton.svelte';
@@ -11,6 +12,9 @@
 	let battle = $derived(
 		z.createQuery(queries.battles.byId({ id: page?.params?.id || '' }))
 	);
+
+	const user = z.createQuery(queries.user.current());
+	const is_admin = $derived(user.data?.role === 'syntax');
 
 	// Track countdown status for modal
 	let over_status: 'ACTIVE' | 'OVER' = $state('ACTIVE');
@@ -35,6 +39,11 @@
 	let is_referee = $derived(
 		battle.data?.referee_id === z.userID ||
 			battle.data?.referee?.id === z.userID
+	);
+
+	// Count active participants (not dropped)
+	let active_participants = $derived(
+		battle.data?.participants?.filter((p) => p.status !== 'DROPPED') ?? []
 	);
 
 	$effect(() => {
@@ -189,10 +198,14 @@
 	}
 </script>
 
+<svelte:head>
+	<title>{battle.data?.target?.name ?? 'Battle'} Lobby - Synhax</title>
+</svelte:head>
+
 {#if battle.data}
 	{@const battleData = battle.data}
 	<div class="layout-readable stack battle-surface">
-		<h1>{battle?.data?.target?.name} Battle</h1>
+		<h1 class="game-title">{battle?.data?.target?.name} Battle</h1>
 
 		<!-- Show countdown when battle is active -->
 		{#if battle.data.status === 'ACTIVE' && battle.data.type === 'TIMED_MATCH'}
@@ -283,15 +296,29 @@
 			</section>
 		{/if}
 
-		<ShareLinks
-			battle={battleData}
-			code={true}
-			watch={false}
-			ref={true}
-			alwaysEnabled={true}
-		/>
+		{#if is_referee || is_admin}
+			<ShareLinks
+				battle={battleData}
+				lobby={true}
+				battleCode={true}
+				watch={false}
+				ref={true}
+				alwaysEnabled={true}
+			/>
+		{/if}
 
-		<Battlers battle={battleData} />
+		<Battlers battle={battleData} {is_referee} />
+
+		<!-- Invite players (ref only, when PENDING and less than 2 participants) -->
+		{#if battle.data?.status === 'PENDING' && is_referee && active_participants.length < 2}
+			<section class="stack">
+				<h2 class="game-title">Invite Player</h2>
+				<InviteUser
+					battle_id={battle.data.id}
+					existing_user_ids={battle.data.participants?.map((p) => p.user_id) ?? []}
+				/>
+			</section>
+		{/if}
 
 		<!-- Start button when PENDING -->
 		{#if battle.data?.status === 'PENDING' && is_referee}
@@ -311,6 +338,8 @@
 						: 's'} locked in to start ({ready_count}/{MIN_PARTICIPANTS})
 				</p>
 			{/if}
+		{:else if battle.data?.status === 'PENDING' && can_start && is_participant}
+			<p class="waiting-message">Your battle will start soon. Sit tight!</p>
 		{/if}
 
 		<!-- Controls when ACTIVE -->
@@ -369,6 +398,16 @@
 
 	.muted {
 		color: var(--fg-muted);
+	}
+
+	.waiting-message {
+		text-align: center;
+		padding: var(--pad-m) var(--pad-l);
+		background: hsl(from var(--black) h s 8%);
+		border-radius: var(--br-m);
+		border: 1px solid rgb(255 255 255 / 0.1);
+		color: var(--yellow);
+		font-weight: 600;
 	}
 
 	.help-text {

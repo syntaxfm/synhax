@@ -55,23 +55,6 @@
 		});
 	});
 
-	let headerBattlers = $derived.by(() => {
-		if (!battlers.length) {
-			return [];
-		}
-
-		const meIndex = battlers.findIndex(
-			(participant) => participant.user_id === z.userID
-		);
-		if (meIndex === -1) {
-			return battlers;
-		}
-
-		const me = battlers[meIndex];
-		const opponent = battlers.find((_, index) => index !== meIndex);
-		return opponent ? [me, opponent] : [me];
-	});
-
 	// Modern Svelte 5 approach with runes
 	let poll_timer: NodeJS.Timeout | null = $state(null);
 
@@ -124,13 +107,17 @@
 	});
 </script>
 
+<svelte:head>
+	<title>{battle.data?.target?.name ?? 'Battle'} - Synhax</title>
+</svelte:head>
+
 {#if battle.data}
-	<main class="stack battle-code-page" style="--gap: 0;">
+	<main class="stack battle-code-page" style="--stack-gap: 0;">
 		<Header
 			battle={battle.data}
 			target={false}
 			diffScore={hax.data?.diff_score ?? null}
-			battlers={headerBattlers}
+			{battlers}
 		>
 			{#snippet detail()}{/snippet}
 			{#snippet countdown()}
@@ -156,13 +143,14 @@
 
 <style>
 	.battle-code-page {
-		min-height: 100vh;
+		/* min-height: 100vh; */
 		width: 1200px;
+		max-height: 960px;
 		margin: 0 auto;
-		height: 100vh;
+		/* height: 100vh; */
 		display: flex;
 		flex-direction: column;
-		overflow: hidden;
+		overflow-y: auto;
 		background: var(--black);
 	}
 

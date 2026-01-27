@@ -183,7 +183,11 @@ export class FileState {
 		return false;
 	}
 
-	async create_hax_directory(target_name: string) {
+	async create_hax_directory(
+		target_name: string,
+		starter_html?: string,
+		starter_css?: string
+	) {
 		// Create new directory
 		if (!this.synhax_directory_handle) {
 			this.set_error('No synhax directory handle available.');
@@ -194,19 +198,19 @@ export class FileState {
 			await this.synhax_directory_handle.getDirectoryHandle(target_name, {
 				create: true
 			});
-		// HTML
+		// HTML - use starter code if provided, otherwise fall back to default template
 		const html_file_handle = await project_handle.getFileHandle('index.html', {
 			create: true
 		});
 		const htmlWritable = await html_file_handle.createWritable();
-		await htmlWritable.write(HTML_TEMPLATE);
+		await htmlWritable.write(starter_html || HTML_TEMPLATE);
 		await htmlWritable.close();
-		// CSS
+		// CSS - use starter code if provided, otherwise fall back to default template
 		const css_file_handle = await project_handle.getFileHandle('styles.css', {
 			create: true
 		});
 		const cssWritable = await css_file_handle.createWritable();
-		await cssWritable.write(CSS_TEMPLATE);
+		await cssWritable.write(starter_css || CSS_TEMPLATE);
 		await cssWritable.close();
 
 		const validation = await validate_and_load_project_files(

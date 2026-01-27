@@ -47,6 +47,19 @@ export const queries = defineQueries({
 			ctx.userRole === 'syntax'
 				? zql.user
 				: zql.user.where('id', '__admin_only__')
+		),
+
+		/** Get a single user by ID with their battles and hax (admin) */
+		byId: defineQuery(type({ id: 'string' }), ({ args, ctx }) =>
+			ctx.userRole === 'syntax'
+				? zql.user
+						.where('id', args.id)
+						.one()
+						.related('participants', (q) =>
+							q.related('battle', (b) => b.related('target'))
+						)
+						.related('hax', (h) => h.related('target').related('battle'))
+				: zql.user.where('id', '__admin_only__').one()
 		)
 	},
 
@@ -98,6 +111,15 @@ export const queries = defineQueries({
 		all: defineQuery(({ ctx }) =>
 			ctx.userRole === 'syntax'
 				? zql.battles
+				: zql.battles.where('id', '__admin_only__')
+		),
+
+		/** Get all battles with target and participants (admin) */
+		allWithRelations: defineQuery(({ ctx }) =>
+			ctx.userRole === 'syntax'
+				? zql.battles
+						.related('target')
+						.related('participants', (q) => q.related('user'))
 				: zql.battles.where('id', '__admin_only__')
 		)
 	},
