@@ -1,17 +1,22 @@
 <script lang="ts">
 	import NewBattleButton from '$lib/battle_mode/NewBattleButton.svelte';
 	import { type Rating, type Target } from '$sync/schema';
+	import type { Snippet } from 'svelte';
 
 	const {
-		target
+		target,
+		action
 	}: {
 		target: Target & {
-			ratings: readonly Rating[];
+			ratings?: readonly Rating[] | null;
 		};
+		action?: Snippet;
 	} = $props();
 
+	const ratings = $derived(target.ratings ?? []);
+
 	const averaged_ratings = $derived.by(() => {
-		if (target.ratings.length === 0) {
+		if (ratings.length === 0) {
 			return {
 				difficulty: 0,
 				creativity: 0,
@@ -20,7 +25,7 @@
 			};
 		}
 
-		const totals = target.ratings.reduce(
+		const totals = ratings.reduce(
 			(acc, r) => ({
 				difficulty: acc.difficulty + r.difficulty,
 				creativity: acc.creativity + r.creativity,
@@ -129,7 +134,11 @@
 
 	<!-- Button at bottom with pill shape -->
 	<div class="action">
-		<NewBattleButton target_id={target.id} />
+		{#if action}
+			{@render action()}
+		{:else}
+			<NewBattleButton target_id={target.id} />
+		{/if}
 	</div>
 </article>
 
