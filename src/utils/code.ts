@@ -1,5 +1,5 @@
 // Base styles to ensure iframe body fills container and is capturable
-const BASE_STYLES = `
+const BASE_STYLES = /*css*/`
 	*, *::before, *::after { box-sizing: border-box; }
 	html, body {
 		margin: 0;
@@ -11,6 +11,10 @@ const BASE_STYLES = `
 	body {
 		background: #1a1a1a;
 	}
+  /* This is the most cursed CSS ever. This fixes a big where global styles are applied to the snapdom container. */
+  foreignObject div:has(> html) {
+    all: unset;
+  }
 `;
 
 // Tailwind CSS CDN for client-side JIT compilation
@@ -23,21 +27,24 @@ export function combine_html_and_css(html = '', css = ''): string {
 	const csp = usesTailwind
 		? `<meta http-equiv="Content-Security-Policy" content="script-src ${TAILWIND_CDN}">`
 		: '';
-	const tailwindScript = usesTailwind ? `<script async src="${TAILWIND_CDN}"></script>` : '';
-
+	const tailwindScript = usesTailwind
+		? `<script async src="${TAILWIND_CDN}"></script>`
+		: '';
 
 	return `<!DOCTYPE html>
 <html>
   <head>
-	<style>
-		${BASE_STYLES}
-		${css}
-	</style>
-	${csp}
-	${tailwindScript}
+  ${csp}
+  ${tailwindScript}
+  <style>
+  ${BASE_STYLES}
+
+  ${css}
+  </style>
+
   </head>
   <body>
-    ${html}
+  ${html}
   </body>
 </html>
 `;
