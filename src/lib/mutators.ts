@@ -357,8 +357,8 @@ export const mutators = defineMutators({
 				}
 				const userId = isAdmin(ctx) ? args.user_id : ctx.userID;
 				const now = Date.now();
-				const joinedAt = existing?.joined_at ?? now;
-				const createdAt = existing?.created_at ?? now;
+				const joinedAt = Math.trunc(existing?.joined_at ?? now);
+				const createdAt = Math.trunc(existing?.created_at ?? now);
 				await tx.mutate.battle_participants.upsert({
 					id: args.id,
 					battle_id: args.battle_id,
@@ -453,7 +453,9 @@ export const mutators = defineMutators({
 				}
 				// Only allow kicking before battle starts
 				if (battle.status !== 'PENDING') {
-					throw new Error('Cannot remove participants after battle has started');
+					throw new Error(
+						'Cannot remove participants after battle has started'
+					);
 				}
 				// Verify participant exists
 				const participant = (await getParticipant(tx, args.id)) as {
