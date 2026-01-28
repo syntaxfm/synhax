@@ -236,7 +236,7 @@
 		enabled={diffEnabled}
 		onPerfectScore={handlePerfectScore}
 		onDiffCanvasUpdate={handleDiffCanvasUpdate}
-		debug={true}
+		debug={false}
 	/>
 
 	<!-- Bottom panels section -->
