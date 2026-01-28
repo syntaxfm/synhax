@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { combine_html_and_css } from '$utils/code';
-
+	import { FRAME_HEIGHT, FRAME_WIDTH } from '$lib/constants';
 	type HaxData = {
 		html: string;
 		css: string;
@@ -33,7 +33,12 @@
 	}
 </script>
 
-<div class="frame-container" class:disable-inspect={disableInspect}>
+<div
+	class="frame-container"
+	class:disable-inspect={disableInspect}
+	style:--frame-width="{FRAME_WIDTH}px"
+	style:--frame-height="{FRAME_HEIGHT}px"
+>
 	<iframe
 		bind:this={iframeElement}
 		srcdoc={code}
@@ -59,8 +64,8 @@
 	}
 
 	iframe {
-		width: 100%;
-		height: 100%;
+		width: var(--frame-width);
+		height: var(--frame-height);
 		border: none;
 		padding: 0;
 	}
