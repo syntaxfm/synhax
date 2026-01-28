@@ -263,6 +263,7 @@
 	.avatar {
 		border-color: var(--primary);
 		border-width: 2px;
+		border-style: solid;
 		--avatar-size: 1.75rem;
 		flex-shrink: 0;
 		width: var(--avatar-size);
