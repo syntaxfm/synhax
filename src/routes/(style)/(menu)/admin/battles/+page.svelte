@@ -4,7 +4,7 @@
 	import type { ColumnDef } from '@tanstack/svelte-table';
 	import { get_user_avatar_url } from '$lib/user/utils';
 	import { onMount } from 'svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 
 	// Type for battle with relations
 	type BattleWithRelations = {
@@ -35,7 +35,7 @@
 	};
 
 	let battles = z.createQuery(queries.battles.allWithRelations());
-	const baseUrl = $derived($page.url.origin);
+	const baseUrl = $derived(page.url.origin);
 
 	// Live countdown for active battles
 	let now = $state(Date.now());
