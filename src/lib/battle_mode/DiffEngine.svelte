@@ -74,7 +74,7 @@
 	function getIframeBody(iframe: HTMLIFrameElement | null): HTMLElement | null {
 		if (!iframe) return null;
 		try {
-			return iframe.contentDocument?.documentElement ?? null;
+			return iframe.contentDocument?.body ?? null;
 		} catch {
 			return null;
 		}
