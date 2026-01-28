@@ -265,6 +265,17 @@
 		border-width: 2px;
 		--avatar-size: 1.75rem;
 		flex-shrink: 0;
+		width: var(--avatar-size);
+		height: var(--avatar-size);
+		overflow: hidden;
+		border-radius: 50%;
+		display: inline-block;
+	}
+
+	.avatar img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
 	}
 
 	.user-name {
