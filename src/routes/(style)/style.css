@@ -466,7 +466,6 @@ table {
 .battle-frame {
 	flex-shrink: 0;
 	overflow: hidden;
-	border: 1px solid var(--border-subtle);
 	position: relative;
 	img {
 		display: block;
