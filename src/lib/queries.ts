@@ -120,6 +120,7 @@ export const queries = defineQueries({
 				? zql.battles
 						.related('target')
 						.related('participants', (q) => q.related('user'))
+						.orderBy('created_at', 'desc')
 				: zql.battles.where('id', '__admin_only__')
 		)
 	},
