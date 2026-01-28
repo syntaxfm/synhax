@@ -128,6 +128,17 @@
 		);
 	}
 
+	function update_battle_name(event: Event) {
+		if (!battle.data || !is_referee) return;
+		const input = event.target as HTMLInputElement;
+		z.mutate(
+			mutators.battles.update({
+				id: battle.data.id,
+				name: input.value || undefined
+			})
+		);
+	}
+
 	async function start() {
 		if (!battle.data || !is_referee) return;
 
@@ -199,13 +210,13 @@
 </script>
 
 <svelte:head>
-	<title>{battle.data?.target?.name ?? 'Battle'} Lobby - Synhax</title>
+	<title>{battle.data?.name || battle.data?.target?.name || 'Battle'} Lobby - Synhax</title>
 </svelte:head>
 
 {#if battle.data}
 	{@const battleData = battle.data}
 	<div class="layout-readable stack battle-surface">
-		<h1 class="game-title">{battle?.data?.target?.name} Battle</h1>
+		<h1 class="game-title">{battle.data.name || `${battle.data.target?.name} Battle`}</h1>
 
 		<!-- Show countdown when battle is active -->
 		{#if battle.data.status === 'ACTIVE' && battle.data.type === 'TIMED_MATCH'}
@@ -231,6 +242,17 @@
 		<!-- Settings only shown when PENDING -->
 		{#if battle.data.status === 'PENDING' && is_referee}
 			<section class="stack">
+				<div class="cluster">
+					<label for="battle-name">Battle Name:</label>
+					<input
+						id="battle-name"
+						type="text"
+						placeholder={`${battle.data.target?.name} Battle`}
+						value={battle.data.name || ''}
+						onchange={update_battle_name}
+					/>
+				</div>
+
 				<div class="cluster">
 					<ToggleButton
 						toggle={battle.data.visibility === 'PUBLIC'}
@@ -417,5 +439,10 @@
 
 	input[type='number'] {
 		width: 80px;
+	}
+
+	input[type='text']#battle-name {
+		flex: 1;
+		min-width: 200px;
 	}
 </style>

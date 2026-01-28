@@ -196,6 +196,7 @@ export const battles = pgTable(
 	'battles',
 	{
 		id: uuid().primaryKey().defaultRandom(),
+		name: text(),
 		date: timestamp({ withTimezone: true }).notNull().defaultNow(),
 		referee_id: text()
 			.notNull()
