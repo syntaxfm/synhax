@@ -2,16 +2,18 @@
 	import Highlight from 'svelte-highlight';
 	import css from 'svelte-highlight/languages/css';
 	import xml from 'svelte-highlight/languages/xml';
-	const { html_text, css_text }: { html_text: string; css_text: string } =
+	const { html_text, css_text }: { html_text?: string; css_text: string } =
 		$props();
 </script>
 
-<article class="stack">
-	<h2>HTML</h2>
-	<div class="wrap">
-		<Highlight language={xml} code={html_text} />
-	</div>
-</article>
+{#if html_text}
+	<article class="stack">
+		<h2>HTML</h2>
+		<div class="wrap">
+			<Highlight language={xml} code={html_text} />
+		</div>
+	</article>
+{/if}
 
 <article class="stack">
 	<h2>CSS</h2>
