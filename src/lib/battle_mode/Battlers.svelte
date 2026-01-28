@@ -51,7 +51,7 @@
 
 	import { copyToClipboard } from '$utils/clipboard';
 	import { z } from '$lib/zero.svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 
 	const {
 		battle,
@@ -77,7 +77,7 @@
 	const getExpression = (place?: number) =>
 		EXPRESSIONS[place ?? 0] ?? defaultExpression;
 	let copied = $state(false);
-	const baseUrl = $derived($page.url.origin);
+	const baseUrl = $derived(page.url.origin);
 
 	/**
 	 * Copies text to clipboard and updates the copied state after 1 second

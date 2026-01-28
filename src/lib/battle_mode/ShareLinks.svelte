@@ -1,8 +1,8 @@
 <script lang="ts">
 	import Copybutton from '$lib/ui/Copybutton.svelte';
 	import type { Battle } from '$sync/schema';
-	import { page } from '$app/stores';
-	const baseUrl = $derived($page.url.origin);
+	import { page } from '$app/state';
+	const baseUrl = $derived(page.url.origin);
 	const {
 		battle,
 		lobby = true,
