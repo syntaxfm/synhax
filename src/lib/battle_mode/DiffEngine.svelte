@@ -11,7 +11,8 @@
 	import {
 		compareElementToElement,
 		compareElementToImage,
-		captureElement
+		captureElement,
+		type DiffMode
 	} from '$utils/diff';
 	import { z, mutators } from '$lib/zero.svelte';
 
@@ -68,6 +69,12 @@
 	let debugLastScore = $state<number | null>(null);
 	let debugCompareCount = $state(0);
 
+	// Debug controls for diff options
+	let debugMode = $state<DiffMode>('euclidean');
+	let debugColorTolerance = $state(30);
+	let debugIgnoreTransparent = $state(true);
+	let debugPanelCollapsed = $state(false);
+
 	/**
 	 * Get the capturable element from the iframe.
 	 */
@@ -121,17 +128,18 @@
 		console.log('[DiffEngine] Running comparison #', debugCompareCount);
 
 		try {
+			const diffOptions = {
+				compareWidth,
+				compareHeight,
+				threshold: 0.005,
+				mode: debugMode,
+				colorTolerance: debugColorTolerance,
+				ignoreTransparent: debugIgnoreTransparent
+			};
+
 			const result = targetElement
-				? await compareElementToElement(element, targetElement, {
-						compareWidth,
-						compareHeight,
-						threshold: 0.005
-					})
-				: await compareElementToImage(element, targetImageSrc ?? '', {
-						compareWidth,
-						compareHeight,
-						threshold: 0.005
-					});
+				? await compareElementToElement(element, targetElement, diffOptions)
+				: await compareElementToImage(element, targetImageSrc ?? '', diffOptions);
 
 			const normalizedScore =
 				Math.floor(Math.max(0, Math.min(100, result.score)) * 100) / 100;
@@ -209,38 +217,83 @@
 </script>
 
 {#if debug}
-	<div class="diff-debug">
-		<h4>
-			DiffEngine Debug (Compare #{debugCompareCount}, Score: {debugLastScore}%)
-		</h4>
-		<p class="debug-dimensions">Compare size: {compareWidth}×{compareHeight}</p>
-		<div class="debug-images">
-			<div>
-				<p>Captured (contestant)</p>
-				{#if debugContestantSrc}
-					<img src={debugContestantSrc} alt="Captured contestant" />
-				{:else}
-					<p>Not captured yet</p>
+	<div class="diff-debug" class:collapsed={debugPanelCollapsed}>
+		<button
+			class="collapse-toggle"
+			onclick={() => (debugPanelCollapsed = !debugPanelCollapsed)}
+		>
+			{debugPanelCollapsed ? '◀' : '▶'}
+		</button>
+
+		<div class="diff-debug-content">
+			<h4>
+				DiffEngine Debug (Compare #{debugCompareCount}, Score: {debugLastScore}%)
+			</h4>
+			<p class="debug-dimensions">
+				Compare size: {compareWidth}×{compareHeight}
+			</p>
+
+			<div class="debug-controls">
+				<label>
+					Mode:
+					<select bind:value={debugMode} onchange={() => triggerCompare()}>
+						<option value="exact">Exact</option>
+						<option value="euclidean">Euclidean</option>
+						<option value="weighted">Weighted</option>
+					</select>
+				</label>
+
+				{#if debugMode === 'euclidean'}
+					<label>
+						Color Tolerance: {debugColorTolerance}
+						<input
+							type="range"
+							min="0"
+							max="200"
+							bind:value={debugColorTolerance}
+							onchange={() => triggerCompare()}
+						/>
+					</label>
 				{/if}
+
+				<label>
+					<input
+						type="checkbox"
+						bind:checked={debugIgnoreTransparent}
+						onchange={() => triggerCompare()}
+					/>
+					Ignore Transparent
+				</label>
 			</div>
-			<div>
-				<p>Target</p>
-				{#if debugTargetSrc}
-					<img src={debugTargetSrc} alt="Target" />
-				{:else}
-					<p>Not loaded yet</p>
-				{/if}
+
+			<div class="debug-images">
+				<div>
+					<p>Contestant</p>
+					{#if debugContestantSrc}
+						<img src={debugContestantSrc} alt="Captured contestant" />
+					{:else}
+						<p>Not captured yet</p>
+					{/if}
+				</div>
+				<div>
+					<p>Target</p>
+					{#if debugTargetSrc}
+						<img src={debugTargetSrc} alt="Target" />
+					{:else}
+						<p>Not loaded yet</p>
+					{/if}
+				</div>
+				<div>
+					<p>Diff heatmap</p>
+					{#if debugDiffSrc}
+						<img src={debugDiffSrc} alt="Diff heatmap" />
+					{:else}
+						<p>Not generated yet</p>
+					{/if}
+				</div>
 			</div>
-			<div>
-				<p>Diff heatmap</p>
-				{#if debugDiffSrc}
-					<img src={debugDiffSrc} alt="Diff heatmap" />
-				{:else}
-					<p>Not generated yet</p>
-				{/if}
-			</div>
+			<button onclick={() => triggerCompare()}>Force Compare</button>
 		</div>
-		<button onclick={() => triggerCompare()}>Force Compare</button>
 	</div>
 {/if}
 
@@ -256,6 +309,33 @@
 		font-size: 12px;
 		z-index: 9999;
 		max-width: 600px;
+		transition: transform 0.3s ease;
+	}
+	.diff-debug.collapsed {
+		transform: translateX(calc(100% - 30px));
+	}
+	.collapse-toggle {
+		position: absolute;
+		left: -25px;
+		top: 50%;
+		transform: translateY(-50%);
+		width: 25px;
+		height: 50px;
+		background: rgba(0, 0, 0, 0.9);
+		border: none;
+		border-radius: 8px 0 0 8px;
+		color: white;
+		cursor: pointer;
+		font-size: 12px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+	.collapse-toggle:hover {
+		background: rgba(50, 50, 50, 0.9);
+	}
+	.diff-debug-content {
+		overflow: hidden;
 	}
 	.diff-debug h4 {
 		margin: 0 0 5px 0;
@@ -263,6 +343,34 @@
 	.debug-dimensions {
 		margin: 0 0 10px 0;
 		opacity: 0.7;
+	}
+	.debug-controls {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 10px;
+		margin-bottom: 10px;
+		padding: 8px;
+		background: rgba(255, 255, 255, 0.1);
+		border-radius: 4px;
+	}
+	.debug-controls label {
+		display: flex;
+		align-items: center;
+		gap: 5px;
+	}
+	.debug-controls select {
+		background: #333;
+		color: white;
+		border: 1px solid #555;
+		border-radius: 3px;
+		padding: 2px 5px;
+	}
+	.debug-controls input[type='range'] {
+		width: 100px;
+	}
+	.debug-controls input[type='checkbox'] {
+		width: 14px;
+		height: 14px;
 	}
 	.debug-images {
 		display: flex;
@@ -275,6 +383,8 @@
 		max-width: 150px;
 		max-height: 100px;
 		border: 1px solid #444;
+		background: repeating-conic-gradient(#efefef 0 25%, #fff 0 50%) 50% / 10px
+			10px;
 	}
 	.debug-images p {
 		margin: 0 0 5px 0;
