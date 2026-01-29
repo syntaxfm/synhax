@@ -4,6 +4,7 @@
 	import Countdown from '$lib/battle_mode/Countdown.svelte';
 	import InviteUser from '$lib/battle_mode/InviteUser.svelte';
 	import ShareLinks from '$lib/battle_mode/ShareLinks.svelte';
+	import { build_hax_folder_name } from '$lib/state/FileState.svelte';
 	import Modal from '$lib/ui/Modal.svelte';
 	import ToggleButton from '$lib/ui/ToggleButton.svelte';
 	import { mutators, queries, z } from '$lib/zero.svelte';
@@ -45,6 +46,17 @@
 	let active_participants = $derived(
 		battle.data?.participants?.filter((p) => p.status !== 'DROPPED') ?? []
 	);
+
+	let folder_name = $derived.by(() => {
+		if (!battle.data?.id) return null;
+		return build_hax_folder_name({
+			id: battle.data.id,
+			name: battle.data.name ?? battle.data.target?.name ?? null,
+			starts_at: battle.data.starts_at ?? null,
+			date: battle.data.date ?? null,
+			created_at: battle.data.created_at ?? null
+		});
+	});
 
 	$effect(() => {
 		if (!battle.data) return;
@@ -139,12 +151,12 @@
 			})
 		);
 	}
-  
+
 	/**
 	 * Lock in the battle - transitions from PENDING to READY
 	 * Players will be redirected to the code screen to prepare
 	 */
-  async function lock_in() {
+	async function lock_in() {
 		if (!battle.data || !is_referee) return;
 		z.mutate(
 			mutators.battles.update({
@@ -230,13 +242,17 @@
 </script>
 
 <svelte:head>
-	<title>{battle.data?.name || battle.data?.target?.name || 'Battle'} Lobby - Synhax</title>
+	<title
+		>{battle.data?.name || battle.data?.target?.name || 'Battle'} Lobby - Synhax</title
+	>
 </svelte:head>
 
 {#if battle.data}
 	{@const battleData = battle.data}
 	<div class="layout-readable stack battle-surface">
-		<h1 class="game-title">{battle.data.name || `${battle.data.target?.name} Battle`}</h1>
+		<h1 class="game-title">
+			{battle.data.name || `${battle.data.target?.name} Battle`}
+		</h1>
 
 		<!-- Show countdown when battle is active -->
 		{#if battle.data.status === 'ACTIVE' && battle.data.type === 'TIMED_MATCH'}
@@ -257,6 +273,13 @@
 					{battle.data.status}
 				</span>
 			</p>
+		{/if}
+
+		{#if folder_name}
+			<div class="stack" style="align-items: center; --gap: 0.35rem;">
+				<span class="muted">Battle folder name</span>
+				<code>{folder_name}</code>
+			</div>
 		{/if}
 
 		<!-- Settings only shown when PENDING -->

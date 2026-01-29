@@ -40,7 +40,7 @@ const format_timestamp = (timestamp: number) => {
 export const build_hax_folder_name = (input: HaxFolderInput) => {
 	const slug = input.name ? slugify_name(input.name) : '';
 	const timestamp_value =
-		input.starts_at ?? input.date ?? input.created_at ?? null;
+		input.created_at ?? input.date ?? input.starts_at ?? null;
 	const timestamp =
 		timestamp_value != null ? format_timestamp(timestamp_value) : '';
 
