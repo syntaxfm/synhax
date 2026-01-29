@@ -205,10 +205,10 @@
 	.recap-layout {
 		min-height: 100%;
 		max-width: 1920px;
+		width: 100%;
 		margin: 0 auto;
 		display: flex;
 		flex-direction: column;
-		box-sizing: border-box;
 	}
 
 	.recap-layout > section {
