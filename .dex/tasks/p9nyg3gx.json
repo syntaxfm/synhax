@@ -1,0 +1,16 @@
+{
+  "id": "p9nyg3gx",
+  "parent_id": "f1q0s2l1",
+  "description": "Update hax mutation to save history snapshots",
+  "context": "Beads description:\nModify the hax update mutator to also write a history entry whenever HTML or CSS changes. Consider debouncing or throttling to avoid excessive writes (e.g., save every 5 seconds or on significant changes).\n\nMetadata:\nbeads_id: battle_mode-hbx.2\nbeads_status: closed\nbeads_type: task\nbeads_priority: 1\nlabels: []\nassignee: null\nnotes: null\ncreated_at: 2025-12-19T10:51:56.609533-07:00\nupdated_at: 2026-01-06T19:24:53.111683-07:00\nclosed_at: 2026-01-06T19:24:53.111683-07:00\n\ndependencies:\n- type=parent-child issue_id=battle_mode-hbx.2 depends_on_id=battle_mode-hbx created_at=2025-12-19T10:51:56.610015-07:00 created_by=daemon",
+  "priority": 1,
+  "completed": true,
+  "result": "Migrated from Beads with closed status preserved. closed_at: 2026-01-06T19:24:53.111683-07:00",
+  "metadata": null,
+  "created_at": "2026-01-26T19:32:03.634Z",
+  "updated_at": "2026-01-26T19:35:14.949Z",
+  "completed_at": "2026-01-26T19:35:14.949Z",
+  "blockedBy": [],
+  "blocks": [],
+  "children": []
+}

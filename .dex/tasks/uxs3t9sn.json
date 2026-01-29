@@ -1,0 +1,19 @@
+{
+  "id": "uxs3t9sn",
+  "parent_id": "9mtg8euq",
+  "description": "Add mystery_challenge boolean field to battles schema",
+  "context": "Beads description:\nAdd a field to mark battles as mystery challenges where the target is hidden until the battle starts\n\nMetadata:\nbeads_id: battle_mode-hty.1\nbeads_status: open\nbeads_type: task\nbeads_priority: 1\nlabels: []\nassignee: null\nnotes: null\ncreated_at: 2025-12-18T10:15:32.693945-07:00\nupdated_at: 2025-12-18T10:15:32.693945-07:00\nclosed_at: None\n\ndependencies:\n- type=parent-child issue_id=battle_mode-hty.1 depends_on_id=battle_mode-hty created_at=2025-12-18T10:15:32.698517-07:00 created_by=daemon",
+  "priority": 1,
+  "completed": false,
+  "result": null,
+  "metadata": null,
+  "created_at": "2026-01-26T19:32:08.410Z",
+  "updated_at": "2026-01-26T19:32:08.410Z",
+  "completed_at": null,
+  "blockedBy": [],
+  "blocks": [
+    "5ebas3py",
+    "vr51zata"
+  ],
+  "children": []
+}

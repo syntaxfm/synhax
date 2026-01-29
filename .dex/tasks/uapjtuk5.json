@@ -1,0 +1,16 @@
+{
+  "id": "uapjtuk5",
+  "parent_id": null,
+  "description": "Improve 2 person referee view with larger code",
+  "context": "Beads description:\n(empty)\n\nMetadata:\nbeads_id: battle_mode-lpt\nbeads_status: open\nbeads_type: feature\nbeads_priority: 2\nlabels: []\nassignee: null\nnotes: null\ncreated_at: 2025-12-11T17:21:20.670372-07:00\nupdated_at: 2025-12-11T17:21:20.670372-07:00\nclosed_at: None\n\ndependencies: []",
+  "priority": 1,
+  "completed": false,
+  "result": null,
+  "metadata": null,
+  "created_at": "2026-01-26T19:31:19.276Z",
+  "updated_at": "2026-01-26T19:31:19.276Z",
+  "completed_at": null,
+  "blockedBy": [],
+  "blocks": [],
+  "children": []
+}

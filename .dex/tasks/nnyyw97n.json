@@ -1,0 +1,20 @@
+{
+  "id": "nnyyw97n",
+  "parent_id": null,
+  "description": "Move to custom mutators for all Zero data mutations",
+  "context": "Beads description:\nMigrate to https://zero.rocicorp.dev/docs/custom-mutators for all data mutations with Zero\n\nMetadata:\nbeads_id: battle_mode-wad\nbeads_status: open\nbeads_type: task\nbeads_priority: 2\nlabels: []\nassignee: null\nnotes: null\ncreated_at: 2025-12-11T17:21:21.212238-07:00\nupdated_at: 2025-12-11T17:21:21.212238-07:00\nclosed_at: None\n\ndependencies:\n- type=blocks issue_id=battle_mode-wad depends_on_id=battle_mode-nri created_at=2025-12-18T11:24:31.900166-07:00 created_by=daemon",
+  "priority": 1,
+  "completed": false,
+  "result": null,
+  "metadata": null,
+  "created_at": "2026-01-26T19:33:21.323Z",
+  "updated_at": "2026-01-26T19:33:21.323Z",
+  "completed_at": null,
+  "blockedBy": [
+    "ucrhr0uk"
+  ],
+  "blocks": [
+    "bu51ic8c"
+  ],
+  "children": []
+}

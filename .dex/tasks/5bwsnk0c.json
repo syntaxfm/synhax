@@ -1,0 +1,18 @@
+{
+  "id": "5bwsnk0c",
+  "parent_id": "k95uuqo8",
+  "description": "Create DiffPreview UI component",
+  "context": "Beads description:\nCreate a component to display the diff visualization and score.\n\n## File: src/lib/battle_mode/DiffPreview.svelte\n\n## IMPORTANT: Graffiti-First CSS\nBefore writing ANY scoped CSS, check https://graffiti-ui.com/llms.txt for:\n- Existing utility classes (flex, grid, spacing, colors)\n- Component patterns that can be reused\n- CSS custom properties already defined\n\nOnly write scoped CSS for truly unique requirements that Graffiti doesn't cover.\n\n## Design\nVisual display showing:\n1. Score badge (0-100%) with color coding\n2. Diff canvas heatmap showing where differences are\n3. Optional: side-by-side preview thumbnails\n\n## Props\n```ts\ninterface Props {\n  score: number | null;\n  diffCanvas: HTMLCanvasElement | null;\n  contestantPreview?: HTMLImageElement;\n  targetPreview?: HTMLImageElement;\n  compact?: boolean;  // For sidebar vs modal view\n}\n```\n\n## Score Display - Use Graffiti Patterns\n- Look for existing badge/pill utilities in Graffiti\n- Use Graffiti color utilities for states:\n  - Score >= 80%: success/green state\n  - Score 50-79%: warning/yellow state  \n  - Score < 50%: error/red state\n- Consider if there's a reusable ScoreBadge pattern needed elsewhere\n\n## Layout - Graffiti Utilities\n- Use flex/grid utilities for layout\n- Use spacing scale (gap, padding) from Graffiti\n- Use responsive utilities if needed\n\n## Reusable Patterns to Consider\nIf these don't exist, consider creating them in Graffiti or a shared location:\n- `.score-badge` - Could be reused in Header, Recap, Leaderboards\n- `.canvas-preview` - For displaying canvas elements consistently\n- `.diff-heatmap` - Specific to diff visualization\n\n## Acceptance Criteria\n- Displays score with appropriate color coding\n- Shows diff canvas heatmap\n- Handles null states gracefully\n- Uses Graffiti utilities wherever possible\n- Any new CSS patterns are reusable, not one-off\n\nMetadata:\nbeads_id: battle_mode-0ep.5\nbeads_status: closed\nbeads_type: task\nbeads_priority: 2\nlabels: []\nassignee: null\nnotes: null\ncreated_at: 2026-01-08T14:11:17.080686-07:00\nupdated_at: 2026-01-08T15:30:16.047674-07:00\nclosed_at: 2026-01-08T15:30:16.047674-07:00\n\ndependencies:\n- type=parent-child issue_id=battle_mode-0ep.5 depends_on_id=battle_mode-0ep created_at=2026-01-08T14:11:17.081165-07:00 created_by=daemon",
+  "priority": 1,
+  "completed": true,
+  "result": "Migrated from Beads with closed status preserved. closed_at: 2026-01-08T15:30:16.047674-07:00",
+  "metadata": null,
+  "created_at": "2026-01-26T19:31:55.159Z",
+  "updated_at": "2026-01-26T19:35:31.571Z",
+  "completed_at": "2026-01-26T19:35:31.571Z",
+  "blockedBy": [],
+  "blocks": [
+    "4hgolz1r"
+  ],
+  "children": []
+}

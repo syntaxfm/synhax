@@ -247,6 +247,11 @@ const battlesTable = {
 			optional: false,
 			customType: null as unknown as string
 		},
+		name: {
+			type: 'string',
+			optional: true,
+			customType: null as unknown as string
+		},
 		date: {
 			type: 'number',
 			optional: true,

@@ -1,0 +1,18 @@
+{
+  "id": "zn5h8qvq",
+  "parent_id": "k95uuqo8",
+  "description": "Performance optimization: throttle and scale for diff comparison",
+  "context": "Beads description:\nEnsure the diff comparison runs efficiently without impacting battle UX.\n\n## Performance Concerns\n\n### 1. Comparison frequency\nReference uses 400ms interval. Need to verify this doesn't:\n- Cause UI jank\n- Slow down code editor responsiveness\n- Drain battery on laptops\n\n### 2. Image size\nLarge target images = more pixels to compare\nConsider scaling down before comparison:\n```ts\nconst scaleDownFactor = 2; // Compare at half resolution\n```\n\n### 3. Memory\nCreating canvases every comparison could leak memory.\nReuse canvas elements where possible.\n\n### 4. Tab visibility\nDon't compare when tab is hidden:\n```ts\ndocument.addEventListener('visibilitychange', () => {\n  if (document.hidden) pauseComparison();\n  else resumeComparison();\n});\n```\n\n## Implementation\n\n### Throttle/Debounce\n```ts\n// Only compare after user stops typing for 200ms\n// Then compare every 500ms while idle\n```\n\n### Scale optimization\n```ts\ninterface DiffOptions {\n  scaleDownFactor?: number; // 1 = full, 2 = half, etc.\n}\n```\n\n### Canvas reuse\n```ts\n// Keep single diff canvas, clear and reuse\nlet diffCanvas: HTMLCanvasElement | null = null;\nfunction getDiffCanvas(width: number, height: number) {\n  if (!diffCanvas) diffCanvas = document.createElement('canvas');\n  diffCanvas.width = width;\n  diffCanvas.height = height;\n  return diffCanvas;\n}\n```\n\n### requestIdleCallback\nConsider using requestIdleCallback for non-urgent comparisons.\n\n## Metrics to track\n- Time per comparison (aim for <50ms)\n- Memory usage over time\n- FPS during active comparison\n\n## Acceptance Criteria\n- Comparison runs smoothly without UI jank\n- Memory stable over long battle sessions\n- CPU usage reasonable\n\nMetadata:\nbeads_id: battle_mode-0ep.8\nbeads_status: closed\nbeads_type: task\nbeads_priority: 2\nlabels: []\nassignee: null\nnotes: null\ncreated_at: 2026-01-08T14:11:56.72478-07:00\nupdated_at: 2026-01-08T15:49:35.647429-07:00\nclosed_at: 2026-01-08T15:49:35.647429-07:00\n\ndependencies:\n- type=parent-child issue_id=battle_mode-0ep.8 depends_on_id=battle_mode-0ep created_at=2026-01-08T14:11:56.725376-07:00 created_by=daemon\n- type=blocks issue_id=battle_mode-0ep.8 depends_on_id=battle_mode-0ep.6 created_at=2026-01-08T14:12:51.692892-07:00 created_by=daemon",
+  "priority": 1,
+  "completed": true,
+  "result": "Migrated from Beads with closed status preserved. closed_at: 2026-01-08T15:49:35.647429-07:00",
+  "metadata": null,
+  "created_at": "2026-01-26T19:34:12.244Z",
+  "updated_at": "2026-01-26T19:35:26.644Z",
+  "completed_at": "2026-01-26T19:35:26.644Z",
+  "blockedBy": [
+    "4hgolz1r"
+  ],
+  "blocks": [],
+  "children": []
+}

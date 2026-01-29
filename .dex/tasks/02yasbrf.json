@@ -1,0 +1,21 @@
+{
+  "id": "02yasbrf",
+  "parent_id": "k95uuqo8",
+  "description": "Create diff utility functions in src/utils/diff.ts",
+  "context": "Beads description:\nCreate the core diffing utility functions extracted from the reference implementation.\n\n## File: src/utils/diff.ts\n\n## Functions to implement\n\n### 1. hslToRgb(h: number, s: number, l: number): [number, number, number]\nConverts HSL color to RGB for diff visualization.\nReference: https://raw.githubusercontent.com/wesbos/diff/refs/heads/main/utils.ts\n\n### 2. imageToCanvas(img: HTMLImageElement): HTMLCanvasElement\nConverts an image element to a canvas for pixel access.\n- Support optional scaleDownFactor for performance\n- Handle naturalWidth/naturalHeight properly\n\n### 3. getImageData(canvas: HTMLCanvasElement): ImageData\nExtracts pixel data from a canvas.\nReturns: { data: Uint8ClampedArray, width: number, height: number }\n\n### 4. compareImages(img1Data: ImageData, img2Data: ImageData): DiffResult\nThe core comparison algorithm:\n- Handles different sized images (use max dimensions)\n- Weighted pixel diff: R*0.299 + G*0.587 + B*0.114 + A*0.1\n- Ignores tiny diffs (<0.005) for anti-aliasing tolerance\n- Generates diff canvas with HSL heatmap\n- Returns { score: number, diffCanvas: HTMLCanvasElement }\n\n### 5. captureElement(element: HTMLElement): Promise<HTMLImageElement>\nUses snapdom to capture a DOM element as an image.\n\n### 6. loadImageAsCanvas(src: string): Promise<HTMLCanvasElement>\nLoads an image URL and converts to canvas (for target images).\n\n## Types to export\n```ts\nexport interface ImageData {\n  data: Uint8ClampedArray;\n  width: number;\n  height: number;\n}\n\nexport interface DiffResult {\n  score: number;\n  diffCanvas: HTMLCanvasElement;\n}\n\nexport interface DiffOptions {\n  scaleDownFactor?: number;\n  threshold?: number; // default 0.005\n}\n```\n\n## Acceptance Criteria\n- All functions exported and typed\n- Unit testable (pure functions where possible)\n- Matches reference algorithm behavior\n\nMetadata:\nbeads_id: battle_mode-0ep.2\nbeads_status: closed\nbeads_type: task\nbeads_priority: 1\nlabels: []\nassignee: null\nnotes: null\ncreated_at: 2026-01-08T14:10:38.860871-07:00\nupdated_at: 2026-01-08T15:29:09.964711-07:00\nclosed_at: 2026-01-08T15:29:09.964711-07:00\n\ndependencies:\n- type=parent-child issue_id=battle_mode-0ep.2 depends_on_id=battle_mode-0ep created_at=2026-01-08T14:10:38.86161-07:00 created_by=daemon\n- type=blocks issue_id=battle_mode-0ep.2 depends_on_id=battle_mode-0ep.1 created_at=2026-01-08T14:12:44.556468-07:00 created_by=daemon",
+  "priority": 1,
+  "completed": true,
+  "result": "Migrated from Beads with closed status preserved. closed_at: 2026-01-08T15:29:09.964711-07:00",
+  "metadata": null,
+  "created_at": "2026-01-26T19:33:23.114Z",
+  "updated_at": "2026-01-26T19:35:36.583Z",
+  "completed_at": "2026-01-26T19:35:36.583Z",
+  "blockedBy": [
+    "arwmy37o"
+  ],
+  "blocks": [
+    "2y8efqma",
+    "o21dfxno"
+  ],
+  "children": []
+}

@@ -1,0 +1,20 @@
+{
+  "id": "ztibg57t",
+  "parent_id": "2ty38olh",
+  "description": "Add allow_time_extension boolean field to battle schema",
+  "context": "Beads description:\nAdd a new boolean field to the battle table in Drizzle schema.\n\n## File: src/db/schema.ts\n\n## Changes\nAdd to battle table:\n```ts\nallow_time_extension: boolean('allow_time_extension').notNull().default(true)\n```\n\n## After schema change\n1. Run `pnpm drizzle-zero generate --format` to regenerate Zero schema\n2. Run `pnpm db:push` to push changes to database\n\n## Acceptance Criteria\n- Field added to battle table\n- Default is true (maintains current behavior)\n- Zero schema regenerated\n- Database migrated\n\nMetadata:\nbeads_id: battle_mode-8f0.1\nbeads_status: closed\nbeads_type: task\nbeads_priority: 1\nlabels: []\nassignee: null\nnotes: null\ncreated_at: 2026-01-08T14:27:12.129679-07:00\nupdated_at: 2026-01-08T15:16:27.124568-07:00\nclosed_at: 2026-01-08T15:16:27.124568-07:00\n\ndependencies:\n- type=parent-child issue_id=battle_mode-8f0.1 depends_on_id=battle_mode-8f0 created_at=2026-01-08T14:27:12.130183-07:00 created_by=daemon",
+  "priority": 1,
+  "completed": true,
+  "result": "Migrated from Beads with closed status preserved. closed_at: 2026-01-08T15:16:27.124568-07:00",
+  "metadata": null,
+  "created_at": "2026-01-26T19:31:57.200Z",
+  "updated_at": "2026-01-26T19:35:23.303Z",
+  "completed_at": "2026-01-26T19:35:23.303Z",
+  "blockedBy": [],
+  "blocks": [
+    "atagwvsp",
+    "m1t36g37",
+    "0om5wnai"
+  ],
+  "children": []
+}

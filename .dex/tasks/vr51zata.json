@@ -1,0 +1,18 @@
+{
+  "id": "vr51zata",
+  "parent_id": "9mtg8euq",
+  "description": "Add mystery challenge toggle to battle creation flow",
+  "context": "Beads description:\nAllow battle creators to mark a battle as a mystery challenge during creation\n\nMetadata:\nbeads_id: battle_mode-hty.6\nbeads_status: open\nbeads_type: task\nbeads_priority: 1\nlabels: []\nassignee: null\nnotes: null\ncreated_at: 2025-12-18T10:15:38.452636-07:00\nupdated_at: 2025-12-18T10:15:38.452636-07:00\nclosed_at: None\n\ndependencies:\n- type=parent-child issue_id=battle_mode-hty.6 depends_on_id=battle_mode-hty created_at=2025-12-18T10:15:38.4532-07:00 created_by=daemon\n- type=blocks issue_id=battle_mode-hty.6 depends_on_id=battle_mode-hty.1 created_at=2025-12-18T10:15:43.807738-07:00 created_by=daemon",
+  "priority": 1,
+  "completed": false,
+  "result": null,
+  "metadata": null,
+  "created_at": "2026-01-26T19:33:39.327Z",
+  "updated_at": "2026-01-26T19:33:39.327Z",
+  "completed_at": null,
+  "blockedBy": [
+    "uxs3t9sn"
+  ],
+  "blocks": [],
+  "children": []
+}

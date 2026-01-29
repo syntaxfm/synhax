@@ -1,0 +1,20 @@
+{
+  "id": "m1t36g37",
+  "parent_id": "2ty38olh",
+  "description": "Add mutation to update battle allow_time_extension setting",
+  "context": "Beads description:\nEnsure there's a mutation to update the allow_time_extension field on battles.\n\n## File: src/lib/mutators.ts\n\n## Check existing mutations\nMay already have a generic updateBattle mutation that can handle this field.\nIf not, add one or extend existing.\n\n## Requirements\n- Only battle creator (referee) can update this setting\n- Validate user has permission via ctx.userId\n- Should work from lobby settings UI\n\n## Acceptance Criteria\n- Mutation available to update allow_time_extension\n- Proper auth check for battle ownership\n- Works with Zero optimistic updates\n\nMetadata:\nbeads_id: battle_mode-8f0.4\nbeads_status: closed\nbeads_type: task\nbeads_priority: 1\nlabels: []\nassignee: null\nnotes: null\ncreated_at: 2026-01-08T14:27:28.751988-07:00\nupdated_at: 2026-01-08T15:16:52.941318-07:00\nclosed_at: 2026-01-08T15:16:52.941318-07:00\n\ndependencies:\n- type=parent-child issue_id=battle_mode-8f0.4 depends_on_id=battle_mode-8f0 created_at=2026-01-08T14:27:28.752505-07:00 created_by=daemon\n- type=blocks issue_id=battle_mode-8f0.4 depends_on_id=battle_mode-8f0.1 created_at=2026-01-08T14:27:53.573566-07:00 created_by=daemon",
+  "priority": 1,
+  "completed": true,
+  "result": "Migrated from Beads with closed status preserved. closed_at: 2026-01-08T15:16:52.941318-07:00",
+  "metadata": null,
+  "created_at": "2026-01-26T19:33:28.773Z",
+  "updated_at": "2026-01-26T19:35:18.374Z",
+  "completed_at": "2026-01-26T19:35:18.374Z",
+  "blockedBy": [
+    "ztibg57t"
+  ],
+  "blocks": [
+    "0om5wnai"
+  ],
+  "children": []
+}

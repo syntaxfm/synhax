@@ -1,0 +1,16 @@
+{
+  "id": "2mbt8a0d",
+  "parent_id": null,
+  "description": "Fix battles.update ownership check",
+  "context": "Beads description:\nMutator battles.update passed args.id to assertBattleOwner, causing invalid condition errors when updating battle type.\n\nMetadata:\nbeads_id: battle_mode-i8n\nbeads_status: closed\nbeads_type: bug\nbeads_priority: 1\nlabels: []\nassignee: null\nnotes: null\ncreated_at: 2026-01-15T14:41:50.311496-07:00\nupdated_at: 2026-01-15T14:41:57.411032-07:00\nclosed_at: 2026-01-15T14:41:57.411032-07:00\n\ndependencies: []",
+  "priority": 1,
+  "completed": true,
+  "result": "Migrated from Beads with closed status preserved. closed_at: 2026-01-15T14:41:57.411032-07:00",
+  "metadata": null,
+  "created_at": "2026-01-26T19:31:09.869Z",
+  "updated_at": "2026-01-26T19:36:04.158Z",
+  "completed_at": "2026-01-26T19:36:04.158Z",
+  "blockedBy": [],
+  "blocks": [],
+  "children": []
+}

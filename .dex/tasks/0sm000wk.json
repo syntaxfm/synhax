@@ -1,0 +1,18 @@
+{
+  "id": "0sm000wk",
+  "parent_id": "nfqaopws",
+  "description": "Add playlist browsing and discovery page",
+  "context": "Beads description:\nPage to browse public playlists, search, and view playlist details\n\nMetadata:\nbeads_id: battle_mode-lfg.4\nbeads_status: open\nbeads_type: task\nbeads_priority: 1\nlabels: []\nassignee: null\nnotes: null\ncreated_at: 2025-12-18T10:16:17.951101-07:00\nupdated_at: 2025-12-18T10:16:17.951101-07:00\nclosed_at: None\n\ndependencies:\n- type=parent-child issue_id=battle_mode-lfg.4 depends_on_id=battle_mode-lfg created_at=2025-12-18T10:16:17.951705-07:00 created_by=daemon\n- type=blocks issue_id=battle_mode-lfg.4 depends_on_id=battle_mode-lfg.2 created_at=2025-12-18T10:16:25.362494-07:00 created_by=daemon",
+  "priority": 1,
+  "completed": false,
+  "result": null,
+  "metadata": null,
+  "created_at": "2026-01-26T19:34:04.671Z",
+  "updated_at": "2026-01-26T19:34:04.671Z",
+  "completed_at": null,
+  "blockedBy": [
+    "xjtvmqdr"
+  ],
+  "blocks": [],
+  "children": []
+}

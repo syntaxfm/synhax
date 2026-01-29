@@ -1,0 +1,18 @@
+{
+  "id": "4wj5ov0j",
+  "parent_id": "r39li3vb",
+  "description": "Add public battles section to dashboard",
+  "context": "Beads description:\nDisplay list/grid of public battles users can join, with filtering and search\n\nMetadata:\nbeads_id: battle_mode-7fu.2\nbeads_status: open\nbeads_type: task\nbeads_priority: 2\nlabels: []\nassignee: null\nnotes: null\ncreated_at: 2025-12-18T10:42:03.629046-07:00\nupdated_at: 2025-12-18T10:42:03.629046-07:00\nclosed_at: None\n\ndependencies:\n- type=parent-child issue_id=battle_mode-7fu.2 depends_on_id=battle_mode-7fu created_at=2025-12-18T10:42:03.629534-07:00 created_by=daemon\n- type=blocks issue_id=battle_mode-7fu.2 depends_on_id=battle_mode-7fu.1 created_at=2025-12-18T10:42:12.238568-07:00 created_by=daemon",
+  "priority": 1,
+  "completed": false,
+  "result": null,
+  "metadata": null,
+  "created_at": "2026-01-26T19:33:55.493Z",
+  "updated_at": "2026-01-26T19:33:55.493Z",
+  "completed_at": null,
+  "blockedBy": [
+    "k3m7suue"
+  ],
+  "blocks": [],
+  "children": []
+}

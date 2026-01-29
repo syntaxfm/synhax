@@ -50,16 +50,13 @@
 	// Fixed dimensions for both panes (TODO: make configurable per target)
 	const FRAME_WIDTH = 600;
 	const FRAME_HEIGHT = 400;
-	const PANEL_SCALE = 0.66;
+	const PANEL_SCALE = 1;
 
-	// Overlay state: 'off', 'app', or 'diff'
-	type OverlayMode = 'off' | 'app' | 'diff';
-	let overlayMode: OverlayMode = $state('off');
+	// Toggle between overlay and diff view
+	type ViewMode = 'overlay' | 'diff';
+	let viewMode: ViewMode = $state('overlay');
 	let overlayOpacity = $state(50);
 
-	const showOverlayControls = $derived(true);
-
-	// Test
 	// Diff canvas for overlay (captured from DiffEngine)
 	let diffCanvasSrc: string | null = $state(null);
 
@@ -118,13 +115,6 @@
 		if (canvas) {
 			diffCanvasSrc = canvas.toDataURL();
 		}
-	}
-
-	/**
-	 * Toggle overlay mode - cycles through modes or sets specific
-	 */
-	function setOverlay(mode: OverlayMode) {
-		overlayMode = mode;
 	}
 </script>
 
@@ -243,69 +233,43 @@
 
 	<!-- Bottom panels section -->
 	<div class="bottom-panels">
-		<!-- Overlay View panel with preview -->
+		<!-- Overlay/Diff View panel with toggle -->
 		<div class="control-panel">
 			<h2 class="battle-header">
 				<div class="battle-header-title">
-					<span class="battle-header-label">Overlay</span>
-				</div>
-				<div class="battle-header-actions">
-					<div class="control-row">
-						<input
-							type="range"
-							class="battle-slider"
-							min="0"
-							max="100"
-							bind:value={overlayOpacity}
-							title="Overlay opacity: {overlayOpacity}%"
-						/>
-						<span class="control-value">{overlayOpacity}%</span>
-					</div>
-				</div>
-			</h2>
-			<div class="panel-preview">
-				<div
-					class="panel-frame-container"
-					style:width="{FRAME_WIDTH * PANEL_SCALE}px"
-					style:height="{FRAME_HEIGHT * PANEL_SCALE}px"
-				>
-					<div
-						class="battle-frame panel-frame"
-						style:width="{FRAME_WIDTH}px"
-						style:height="{FRAME_HEIGHT}px"
-						style:transform="scale({PANEL_SCALE})"
-					>
-						<!-- Target layer -->
-						{#if isCodeTarget}
-							<AppFrame hax={targetFrameData} />
-						{:else}
-							<img
-								src={targetImage}
-								alt="Target"
-								width={FRAME_WIDTH}
-								height={FRAME_HEIGHT}
-							/>
-						{/if}
-						<!-- App overlay -->
-						<div
-							class="overlay app-overlay"
-							style:opacity={overlayOpacity / 100}
+					<div class="button-group">
+						<button
+							class="battle-chip"
+							class:selected={viewMode === 'overlay'}
+							onclick={() => (viewMode = 'overlay')}
 						>
-							<AppFrame {hax} />
-						</div>
+							Overlay
+						</button>
+						<button
+							class="battle-chip"
+							class:selected={viewMode === 'diff'}
+							onclick={() => (viewMode = 'diff')}
+						>
+							Diff
+						</button>
 					</div>
 				</div>
-			</div>
-		</div>
-
-		<!-- Diff View panel with preview -->
-		<div class="control-panel">
-			<h2 class="battle-header">
-				<div class="battle-header-title">
-					<span class="battle-header-label">Diff</span>
-				</div>
 				<div class="battle-header-actions">
-					<SeverityScale />
+					{#if viewMode === 'overlay'}
+						<div class="control-row">
+							<input
+								type="range"
+								class="battle-slider"
+								min="0"
+								max="100"
+								bind:value={overlayOpacity}
+								title="Overlay opacity: {overlayOpacity}%"
+							/>
+							<span class="control-value">{overlayOpacity}%</span>
+						</div>
+					{:else}
+						<SeverityScale />
+					{/if}
 				</div>
 			</h2>
 			<div class="panel-preview">
@@ -320,7 +284,26 @@
 						style:height="{FRAME_HEIGHT}px"
 						style:transform="scale({PANEL_SCALE})"
 					>
-						{#if diffCanvasSrc}
+						{#if viewMode === 'overlay'}
+							<!-- Target layer -->
+							{#if isCodeTarget}
+								<AppFrame hax={targetFrameData} />
+							{:else}
+								<img
+									src={targetImage}
+									alt="Target"
+									width={FRAME_WIDTH}
+									height={FRAME_HEIGHT}
+								/>
+							{/if}
+							<!-- App overlay -->
+							<div
+								class="overlay app-overlay"
+								style:opacity={overlayOpacity / 100}
+							>
+								<AppFrame {hax} />
+							</div>
+						{:else if diffCanvasSrc}
 							<img
 								class="diff-image"
 								src={diffCanvasSrc}
@@ -466,11 +449,6 @@
 		display: flex;
 		align-items: center;
 		gap: var(--pad-s);
-	}
-
-	.control-label {
-		font-size: var(--font-s);
-		color: var(--grey);
 	}
 
 	.control-value {

@@ -105,10 +105,7 @@
 					</div>
 				</div>
 				<div class="code-panel">
-					<CodeFrame
-						html_text={leftParticipant.hax?.html ?? ''}
-						css_text={leftParticipant.hax?.css ?? ''}
-					/>
+					<CodeFrame css_text={leftParticipant.hax?.css ?? ''} />
 				</div>
 			</div>
 		</article>
@@ -174,10 +171,7 @@
 					</div>
 				</div>
 				<div class="code-panel">
-					<CodeFrame
-						html_text={rightParticipant.hax?.html ?? ''}
-						css_text={rightParticipant.hax?.css ?? ''}
-					/>
+					<CodeFrame css_text={rightParticipant.hax?.css ?? ''} />
 				</div>
 			</div>
 		</article>

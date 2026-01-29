@@ -4,12 +4,13 @@
 	import type { ColumnDef } from '@tanstack/svelte-table';
 	import { get_user_avatar_url } from '$lib/user/utils';
 	import { onMount } from 'svelte';
-	import { PUBLIC_APP_URL } from '$env/static/public';
+	import { page } from '$app/state';
 
 	// Type for battle with relations
 	type BattleWithRelations = {
 		id: string;
 		status: 'PENDING' | 'READY' | 'ACTIVE' | 'COMPLETED' | null;
+		name: string | null;
 		visibility: 'PUBLIC' | 'PRIVATE' | null;
 		zero_room_id: string;
 		target_id: string;
@@ -34,6 +35,7 @@
 	};
 
 	let battles = z.createQuery(queries.battles.allWithRelations());
+	const baseUrl = $derived(page.url.origin);
 
 	// Live countdown for active battles
 	let now = $state(Date.now());
@@ -72,6 +74,16 @@
 	}
 
 	const columns: ColumnDef<BattleWithRelations, any>[] = [
+		{
+			id: 'name',
+			header: 'Battle Name',
+			accessorFn: (row) => row.name,
+			cell: (info) => {
+				const name = info.getValue() as string | null;
+				if (!name) return '<span class="muted">—</span>';
+				return `<span>${name}</span>`;
+			}
+		},
 		{
 			id: 'target',
 			header: 'Target',
@@ -150,7 +162,6 @@
 			accessorFn: (row) => row.id,
 			cell: (info) => {
 				const id = info.getValue() as string;
-				const baseUrl = PUBLIC_APP_URL;
 				const copyHandler = (url: string) =>
 					`navigator.clipboard.writeText('${url}').then(() => this.classList.add('copied')).then(() => setTimeout(() => this.classList.remove('copied'), 1000))`;
 

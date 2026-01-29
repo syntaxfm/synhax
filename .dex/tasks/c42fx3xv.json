@@ -1,0 +1,16 @@
+{
+  "id": "c42fx3xv",
+  "parent_id": null,
+  "description": "Add auth context to Zero mutate endpoint",
+  "context": "Beads description:\n(empty)\n\nMetadata:\nbeads_id: battle_mode-9te\nbeads_status: closed\nbeads_type: task\nbeads_priority: 2\nlabels: []\nassignee: null\nnotes: null\ncreated_at: 2025-12-18T14:10:02.254789-07:00\nupdated_at: 2025-12-18T14:16:40.882945-07:00\nclosed_at: 2025-12-18T14:16:40.882945-07:00\n\ndependencies: []",
+  "priority": 1,
+  "completed": true,
+  "result": "Migrated from Beads with closed status preserved. closed_at: 2025-12-18T14:16:40.882945-07:00",
+  "metadata": null,
+  "created_at": "2026-01-26T19:30:45.192Z",
+  "updated_at": "2026-01-26T19:36:15.142Z",
+  "completed_at": "2026-01-26T19:36:15.142Z",
+  "blockedBy": [],
+  "blocks": [],
+  "children": []
+}

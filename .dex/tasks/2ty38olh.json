@@ -1,0 +1,21 @@
+{
+  "id": "2ty38olh",
+  "parent_id": null,
+  "description": "Battle time extension setting - allow referee to extend or auto-end",
+  "context": "Beads description:\nAdd a battle setting that controls whether the referee can extend battle time after it expires.\n\n## Behavior\n- **If checked (allow_time_extension = true)**: Works like current behavior - battle stays in pending mode after time runs out until referee clicks 'End Battle'\n- **If unchecked (allow_time_extension = false)**: Battle immediately transitions to recap screen when time expires\n\n## Why\nCurrently all battles require manual referee intervention to end. This adds flexibility for:\n- Casual battles that should auto-end\n- Streamlined flow when ref is busy\n- Solo practice sessions\n\n## Scope\n- Schema: Add boolean field to battle table\n- UI: Checkbox in battle settings (lobby)\n- Logic: Auto-redirect to recap when timer ends if setting is false\n- Default: true (maintains current behavior)\n\nMetadata:\nbeads_id: battle_mode-8f0\nbeads_status: closed\nbeads_type: epic\nbeads_priority: 1\nlabels: []\nassignee: null\nnotes: null\ncreated_at: 2026-01-08T14:26:55.412372-07:00\nupdated_at: 2026-01-08T15:20:44.71536-07:00\nclosed_at: 2026-01-08T15:20:44.71536-07:00\n\ndependencies: []",
+  "priority": 1,
+  "completed": true,
+  "result": "Migrated from Beads with closed status preserved. closed_at: 2026-01-08T15:20:44.71536-07:00",
+  "metadata": null,
+  "created_at": "2026-01-26T19:30:38.364Z",
+  "updated_at": "2026-01-26T19:36:18.597Z",
+  "completed_at": "2026-01-26T19:36:18.597Z",
+  "blockedBy": [],
+  "blocks": [],
+  "children": [
+    "ztibg57t",
+    "atagwvsp",
+    "m1t36g37",
+    "0om5wnai"
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "id": "k95uuqo8",
+  "parent_id": null,
+  "description": "Visual Diff Engine - Compare user output against target",
+  "context": "Beads description:\nImplement a visual diffing engine that compares user-rendered HTML/CSS output against the target image in real-time during battles.\n\n## Reference Implementation\nhttps://raw.githubusercontent.com/wesbos/diff/refs/heads/main/scripts.ts\n\n## Core Features\n1. Capture user output (from AppFrame iframe) as an image\n2. Compare pixel-by-pixel against target image\n3. Generate visual diff showing where differences are\n4. Calculate similarity score (0-100%)\n5. Update score in real-time (every ~400ms)\n\n## Key Technical Challenges\n\n### Challenge 1: Capturing iframe content\nThe user's code renders in an AppFrame (iframe with srcdoc). We need to capture this as an image.\nOptions:\n- Use @zumer/snapdom to capture the iframe content\n- Use html2canvas on iframe document\n- Consider same-origin requirements\n\n### Challenge 2: Target comparison format\nCurrently targets are static images (`<img>` tags). For pixel comparison:\n- Option A: Compare against the image directly (load into canvas)\n- Option B: If targets have code, render them in a hidden DOM element\n\n### Challenge 3: Cross-origin considerations\nsnapdom/html2canvas may have CORS issues with:\n- External images in user code\n- Fonts loaded from CDNs\n- The iframe sandboxing\n\n### Challenge 4: Performance\nRunning comparison every 400ms requires efficiency:\n- Scale down images before comparison\n- Debounce/throttle appropriately\n- Don't block the main thread\n\n## Diff Algorithm (from reference)\n- Uses weighted pixel differences: R*0.299 + G*0.587 + B*0.114 + A*0.1\n- Weights based on human eye sensitivity (green > red > blue)\n- Ignores very small diffs (<0.005) to handle anti-aliasing\n- Generates heatmap diff canvas using HSL color ramp\n- Returns score = (1 - avgDiff) * 100\n\n## Dependencies\n- @zumer/snapdom - For DOM-to-image capture\n- hslToRgb utility function (needs to be added)\n\nMetadata:\nbeads_id: battle_mode-0ep\nbeads_status: closed\nbeads_type: epic\nbeads_priority: 1\nlabels: []\nassignee: null\nnotes: null\ncreated_at: 2026-01-08T14:10:04.104408-07:00\nupdated_at: 2026-01-08T15:52:05.334895-07:00\nclosed_at: 2026-01-08T15:52:05.334895-07:00\n\ndependencies: []",
+  "priority": 1,
+  "completed": true,
+  "result": "Migrated from Beads with closed status preserved. closed_at: 2026-01-08T15:52:05.334895-07:00",
+  "metadata": null,
+  "created_at": "2026-01-26T19:30:19.609Z",
+  "updated_at": "2026-01-26T19:36:27.487Z",
+  "completed_at": "2026-01-26T19:36:27.487Z",
+  "blockedBy": [],
+  "blocks": [],
+  "children": [
+    "arwmy37o",
+    "is29jo0b",
+    "aan2txh9",
+    "5bwsnk0c",
+    "02yasbrf",
+    "2y8efqma",
+    "o21dfxno",
+    "4hgolz1r",
+    "zn5h8qvq",
+    "ae5vet87"
+  ]
+}

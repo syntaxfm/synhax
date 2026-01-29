@@ -1,0 +1,16 @@
+{
+  "id": "esjhwu4w",
+  "parent_id": null,
+  "description": "Add code output to watch page",
+  "context": "Beads description:\n(empty)\n\nMetadata:\nbeads_id: battle_mode-8np\nbeads_status: open\nbeads_type: feature\nbeads_priority: 2\nlabels: []\nassignee: null\nnotes: null\ncreated_at: 2026-01-05T17:10:38.502435-07:00\nupdated_at: 2026-01-05T17:10:38.502435-07:00\nclosed_at: None\n\ndependencies: []",
+  "priority": 1,
+  "completed": false,
+  "result": null,
+  "metadata": null,
+  "created_at": "2026-01-26T19:30:40.570Z",
+  "updated_at": "2026-01-26T19:30:40.570Z",
+  "completed_at": null,
+  "blockedBy": [],
+  "blocks": [],
+  "children": []
+}

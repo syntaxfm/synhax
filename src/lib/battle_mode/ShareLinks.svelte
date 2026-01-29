@@ -1,7 +1,8 @@
 <script lang="ts">
 	import Copybutton from '$lib/ui/Copybutton.svelte';
 	import type { Battle } from '$sync/schema';
-	import { PUBLIC_APP_URL } from '$env/static/public';
+	import { page } from '$app/state';
+	const baseUrl = $derived(page.url.origin);
 	const {
 		battle,
 		lobby = true,
@@ -24,7 +25,7 @@
 		<Copybutton
 			label="Lobby"
 			disabled={!alwaysEnabled && battle.status !== 'PENDING'}
-			link={`${PUBLIC_APP_URL}/lobby/${battle.id}`}
+			link={`${baseUrl}/lobby/${battle.id}`}
 		/>
 	{/if}
 
@@ -32,7 +33,7 @@
 		<Copybutton
 			label="Battle View"
 			disabled={!alwaysEnabled && battle.status === 'COMPLETED'}
-			link={`${PUBLIC_APP_URL}/battle/${battle.id}/code`}
+			link={`${baseUrl}/battle/${battle.id}/code`}
 		/>
 	{/if}
 
@@ -41,7 +42,7 @@
 			label="Watch"
 			disabled={!alwaysEnabled &&
 				(battle.visibility !== 'PUBLIC' || battle.status === 'COMPLETED')}
-			link={`${PUBLIC_APP_URL}/battle/${battle.zero_room_id}/watch`}
+			link={`${baseUrl}/battle/${battle.zero_room_id}/watch`}
 		/>
 	{/if}
 
@@ -49,7 +50,7 @@
 		<Copybutton
 			label="Referee View"
 			disabled={!alwaysEnabled && battle.status === 'COMPLETED'}
-			link={`${PUBLIC_APP_URL}/ref/${battle.id}`}
+			link={`${baseUrl}/ref/${battle.id}`}
 		/>
 	{/if}
 </div>

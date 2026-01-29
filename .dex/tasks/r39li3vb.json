@@ -1,0 +1,25 @@
+{
+  "id": "r39li3vb",
+  "parent_id": null,
+  "description": "Redesign main dashboard UI",
+  "context": "Beads description:\nRedesign the dashboard to include: public and invite-only battles, playlist views, and a grid of options to select from. Should be a functional dashboard rather than video game aesthetic.\n\nMetadata:\nbeads_id: battle_mode-7fu\nbeads_status: open\nbeads_type: feature\nbeads_priority: 2\nlabels: []\nassignee: null\nnotes: null\ncreated_at: 2025-12-11T17:21:20.431908-07:00\nupdated_at: 2025-12-18T11:13:47.520252-07:00\nclosed_at: None\n\ndependencies:\n- type=blocks issue_id=battle_mode-7fu depends_on_id=battle_mode-hty created_at=2025-12-18T11:13:52.961979-07:00 created_by=daemon\n- type=blocks issue_id=battle_mode-7fu depends_on_id=battle_mode-lfg created_at=2025-12-18T11:13:53.073291-07:00 created_by=daemon",
+  "priority": 1,
+  "completed": false,
+  "result": null,
+  "metadata": null,
+  "created_at": "2026-01-26T19:33:15.841Z",
+  "updated_at": "2026-01-26T19:33:15.841Z",
+  "completed_at": null,
+  "blockedBy": [
+    "9mtg8euq",
+    "nfqaopws"
+  ],
+  "blocks": [],
+  "children": [
+    "k3m7suue",
+    "4wj5ov0j",
+    "sw6eaxg6",
+    "gcxz2aeg",
+    "14kwha7b"
+  ]
+}

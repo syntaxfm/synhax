@@ -134,7 +134,7 @@
 	<!-- Content overlaps bottom of image via negative margin -->
 	<div class="content">
 		<div class="title-row">
-			<h2>{battle.target?.name ?? 'Unknown Target'}</h2>
+			<h2>{battle.name || battle.target?.name || 'Unknown Target'}</h2>
 			<span class="status-badge" style="--status-color: {statusColor}">
 				{battle.status}
 			</span>

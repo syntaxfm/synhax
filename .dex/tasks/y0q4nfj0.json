@@ -1,0 +1,23 @@
+{
+  "id": "y0q4nfj0",
+  "parent_id": null,
+  "description": "Scrubbable hax history playback in battle recaps",
+  "context": "Beads description:\nAdd a timeline scrubber to the referee view during battle recaps that allows rewinding and playing back each participant's coding progress. Viewers can see how the code evolved over time.\n\nMetadata:\nbeads_id: battle_mode-2uh\nbeads_status: open\nbeads_type: epic\nbeads_priority: 2\nlabels: []\nassignee: null\nnotes: null\ncreated_at: 2025-12-19T10:52:04.036264-07:00\nupdated_at: 2025-12-19T10:52:04.036264-07:00\nclosed_at: None\n\ndependencies:\n- type=blocks issue_id=battle_mode-2uh depends_on_id=battle_mode-hbx created_at=2025-12-19T10:52:18.613049-07:00 created_by=daemon",
+  "priority": 1,
+  "completed": false,
+  "result": null,
+  "metadata": null,
+  "created_at": "2026-01-26T19:31:59.639Z",
+  "updated_at": "2026-01-26T19:31:59.639Z",
+  "completed_at": null,
+  "blockedBy": [
+    "f1q0s2l1"
+  ],
+  "blocks": [],
+  "children": [
+    "d7chk1ex",
+    "3rzju6l6",
+    "9clx7ay6",
+    "qwxsyrct"
+  ]
+}

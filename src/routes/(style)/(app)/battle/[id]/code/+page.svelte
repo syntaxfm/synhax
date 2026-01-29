@@ -169,7 +169,7 @@
 		/* height: 100vh; */
 		display: flex;
 		flex-direction: column;
-		overflow-y: auto;
+		overflow: visible;
 		background: var(--black);
 	}
 

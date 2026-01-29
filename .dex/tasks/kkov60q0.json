@@ -1,0 +1,18 @@
+{
+  "id": "kkov60q0",
+  "parent_id": "9mtg8euq",
+  "description": "Implement invite code validation and join flow",
+  "context": "Beads description:\nRoute and logic to validate invite codes and allow users to join mystery battles\n\nMetadata:\nbeads_id: battle_mode-hty.4\nbeads_status: open\nbeads_type: task\nbeads_priority: 1\nlabels: []\nassignee: null\nnotes: null\ncreated_at: 2025-12-18T10:15:36.305961-07:00\nupdated_at: 2025-12-18T10:15:36.305961-07:00\nclosed_at: None\n\ndependencies:\n- type=parent-child issue_id=battle_mode-hty.4 depends_on_id=battle_mode-hty created_at=2025-12-18T10:15:36.306425-07:00 created_by=daemon\n- type=blocks issue_id=battle_mode-hty.4 depends_on_id=battle_mode-hty.2 created_at=2025-12-18T10:15:43.580959-07:00 created_by=daemon",
+  "priority": 1,
+  "completed": false,
+  "result": null,
+  "metadata": null,
+  "created_at": "2026-01-26T19:33:42.959Z",
+  "updated_at": "2026-01-26T19:33:42.959Z",
+  "completed_at": null,
+  "blockedBy": [
+    "425swfhh"
+  ],
+  "blocks": [],
+  "children": []
+}

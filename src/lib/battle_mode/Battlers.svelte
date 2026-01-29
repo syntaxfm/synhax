@@ -51,7 +51,7 @@
 
 	import { copyToClipboard } from '$utils/clipboard';
 	import { z } from '$lib/zero.svelte';
-	import { PUBLIC_APP_URL } from '$env/static/public';
+	import { page } from '$app/state';
 
 	const {
 		battle,
@@ -77,6 +77,7 @@
 	const getExpression = (place?: number) =>
 		EXPRESSIONS[place ?? 0] ?? defaultExpression;
 	let copied = $state(false);
+	const baseUrl = $derived(page.url.origin);
 
 	/**
 	 * Copies text to clipboard and updates the copied state after 1 second
@@ -158,7 +159,7 @@
 		{/each}
 		<div
 			class="battler empty-seat"
-			onclick={() => handleCopy(`${PUBLIC_APP_URL}/lobby/${battle.id}`)}
+			onclick={() => handleCopy(`${baseUrl}/lobby/${battle.id}`)}
 		>
 			{#if battle.status === 'PENDING'}
 				<div class="image-frame">

@@ -1,105 +1,41 @@
-## Issue Tracking with bd (beads)
+## Issue Tracking with Dex
 
-**IMPORTANT**: This project uses **bd (beads)** for ALL issue tracking. Do NOT
-use markdown TODOs, task lists, or other tracking methods.
-
-### Why bd?
-
-- Dependency-aware: Track blockers and relationships between issues
-- Git-friendly: Auto-syncs to JSONL for version control
-- Agent-optimized: JSON output, ready work detection, discovered-from links
-- Prevents duplicate tracking systems and confusion
+**IMPORTANT**: This project uses **Dex** for ALL issue tracking. Do NOT use
+markdown TODOs, task lists, or other tracking methods.
 
 ### Quick Start
 
-**Check for ready work:**
-
 ```bash
-bd ready --json
+npx -y @zeeg/dex list
+npx -y @zeeg/dex list --all
+npx -y @zeeg/dex create -d "Title" --context "Full context..."
+npx -y @zeeg/dex create -d "Subtask" --context "Details" --parent <task-id>
+npx -y @zeeg/dex complete <task-id> --result "What changed + verification"
 ```
-
-**Create new issues:**
-
-```bash
-bd create "Issue title" -t bug|feature|task -p 0-4 --json
-bd create "Issue title" -p 1 --deps discovered-from:bd-123 --json
-bd create "Subtask" --parent <epic-id> --json  # Hierarchical subtask (gets ID like epic-id.1)
-```
-
-**Claim and update:**
-
-```bash
-bd update bd-42 --status in_progress --json
-bd update bd-42 --priority 1 --json
-```
-
-**Complete work:**
-
-```bash
-bd close bd-42 --reason "Completed" --json
-```
-
-### Issue Types
-
-- `bug` - Something broken
-- `feature` - New functionality
-- `task` - Work item (tests, docs, refactoring)
-- `epic` - Large feature with subtasks
-- `chore` - Maintenance (dependencies, tooling)
-
-### Priorities
-
-- `0` - Critical (security, data loss, broken builds)
-- `1` - High (major features, important bugs)
-- `2` - Medium (default, nice-to-have)
-- `3` - Low (polish, optimization)
-- `4` - Backlog (future ideas)
 
 ### Workflow for AI Agents
 
-1. **Check ready work**: `bd ready` shows unblocked issues
-2. **Claim your task**: `bd update <id> --status in_progress`
-3. **Work on it**: Implement, test, document
-4. **Discover new work?** Create linked issue:
-   - `bd create "Found bug" -p 1 --deps discovered-from:<parent-id>`
-5. **Complete**: `bd close <id> --reason "Done"`
-6. **Commit together**: Always commit the `.beads/issues.jsonl` file together
-   with the code changes so issue state stays in sync with code state
+1. **List open work**: `npx -y @zeeg/dex list`
+2. **List all work**: `npx -y @zeeg/dex list --all`
+3. **Create tasks** with rich context so work is self-contained
+4. **Complete work** with clear results and verification
 
-### Auto-Sync
+### Key Rules
 
-bd automatically syncs with git:
-
-- Exports to `.beads/issues.jsonl` after changes (5s debounce)
-- Imports from JSONL when newer (e.g., after `git pull`)
-- No manual export/import needed!
+- Dex tasks live in `.dex/` and are committed
+- No git hooks required
+- Dex IDs are ephemeral; do not put them in commits or PRs
+- Always use rich `--context` on create and rich `--result` on complete
+- Do not create markdown TODO lists or alternate trackers
 
 ### GitHub Copilot Integration
 
-If using GitHub Copilot, also create `.github/copilot-instructions.md` for
-automatic instruction loading. Run `bd onboard` to get the content, or see step
-2 of the onboard instructions.
+If using GitHub Copilot, keep `.github/copilot-instructions.md` aligned with Dex
+usage.
 
-### MCP Server (Recommended)
+### CLI Help
 
-If using Claude or MCP-compatible clients, install the beads MCP server:
-
-```bash
-pip install beads-mcp
-```
-
-Add to MCP config (e.g., `~/.config/claude/config.json`):
-
-```json
-{
-	"beads": {
-		"command": "beads-mcp",
-		"args": []
-	}
-}
-```
-
-Then use `mcp__beads__*` functions instead of CLI commands.
+Run `npx -y @zeeg/dex --help` to see all available flags.
 
 ### Managing AI-Generated Planning Documents
 

@@ -1,0 +1,26 @@
+{
+  "id": "nfqaopws",
+  "parent_id": null,
+  "description": "Playlists of challenges",
+  "context": "Beads description:\nAllow users to create and share curated playlists of challenges/targets that can be played in sequence\n\nMetadata:\nbeads_id: battle_mode-lfg\nbeads_status: closed\nbeads_type: epic\nbeads_priority: 1\nlabels: []\nassignee: null\nnotes: null\ncreated_at: 2025-12-18T10:16:10.757898-07:00\nupdated_at: 2025-12-18T17:57:44.044541-07:00\nclosed_at: 2025-12-18T17:57:44.044541-07:00\n\ndependencies: []",
+  "priority": 1,
+  "completed": false,
+  "result": null,
+  "metadata": null,
+  "created_at": "2026-01-26T19:31:17.265Z",
+  "updated_at": "2026-01-26T19:31:17.265Z",
+  "completed_at": null,
+  "blockedBy": [],
+  "blocks": [
+    "r39li3vb",
+    "gcxz2aeg"
+  ],
+  "children": [
+    "rj6lo3un",
+    "xjtvmqdr",
+    "rirl99kc",
+    "0sm000wk",
+    "6t0o8qpd",
+    "icqchuz3"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "id": "c8knv8r4",
+  "parent_id": null,
+  "description": "Fix drizzle-zero build warnings",
+  "context": "Beads description:\n(empty)\n\nMetadata:\nbeads_id: battle_mode-z76\nbeads_status: closed\nbeads_type: task\nbeads_priority: 2\nlabels: []\nassignee: null\nnotes: null\ncreated_at: 2026-01-20T13:25:39.350801-07:00\nupdated_at: 2026-01-20T14:18:14.854518-07:00\nclosed_at: 2026-01-20T14:18:14.854518-07:00\n\ndependencies: []",
+  "priority": 1,
+  "completed": true,
+  "result": "Migrated from Beads with closed status preserved. closed_at: 2026-01-20T14:18:14.854518-07:00",
+  "metadata": null,
+  "created_at": "2026-01-26T19:31:42.772Z",
+  "updated_at": "2026-01-26T19:35:44.834Z",
+  "completed_at": "2026-01-26T19:35:44.834Z",
+  "blockedBy": [],
+  "blocks": [],
+  "children": []
+}

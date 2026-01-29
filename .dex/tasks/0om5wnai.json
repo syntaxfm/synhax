@@ -1,0 +1,19 @@
+{
+  "id": "0om5wnai",
+  "parent_id": "2ty38olh",
+  "description": "Add allow_time_extension to battle settings UI in lobby",
+  "context": "Beads description:\nAdd a checkbox in the battle settings section of the lobby page.\n\n## File: src/routes/(style)/(menu)/lobby/[id]/+page.svelte\n\n## UI Requirements\n- Checkbox labeled 'Allow time extension' or 'Referee can extend time'\n- Tooltip/help text explaining behavior\n- Only visible to battle creator (ref bd-5s2 for visibility logic)\n- Default checked (matches schema default)\n\n## Implementation\n- Use existing battle settings pattern in lobby\n- Update battle via Zero mutation when toggled\n- Bind to battle.allow_time_extension field\n\n## Acceptance Criteria\n- Checkbox appears in battle settings\n- Toggling updates the battle record\n- State persists on page reload\n- Good UX with clear labeling\n\nMetadata:\nbeads_id: battle_mode-8f0.2\nbeads_status: closed\nbeads_type: task\nbeads_priority: 1\nlabels: []\nassignee: null\nnotes: null\ncreated_at: 2026-01-08T14:27:17.410746-07:00\nupdated_at: 2026-01-08T15:17:32.851138-07:00\nclosed_at: 2026-01-08T15:17:32.851138-07:00\n\ndependencies:\n- type=parent-child issue_id=battle_mode-8f0.2 depends_on_id=battle_mode-8f0 created_at=2026-01-08T14:27:17.411315-07:00 created_by=daemon\n- type=blocks issue_id=battle_mode-8f0.2 depends_on_id=battle_mode-8f0.1 created_at=2026-01-08T14:27:54.287298-07:00 created_by=daemon\n- type=blocks issue_id=battle_mode-8f0.2 depends_on_id=battle_mode-8f0.4 created_at=2026-01-08T14:27:54.845394-07:00 created_by=daemon",
+  "priority": 1,
+  "completed": true,
+  "result": "Migrated from Beads with closed status preserved. closed_at: 2026-01-08T15:17:32.851138-07:00",
+  "metadata": null,
+  "created_at": "2026-01-26T19:33:53.686Z",
+  "updated_at": "2026-01-26T19:35:21.688Z",
+  "completed_at": "2026-01-26T19:35:21.688Z",
+  "blockedBy": [
+    "ztibg57t",
+    "m1t36g37"
+  ],
+  "blocks": [],
+  "children": []
+}

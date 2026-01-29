@@ -1,0 +1,16 @@
+{
+  "id": "lp4l2d2i",
+  "parent_id": null,
+  "description": "Time trial not showing ready unless time limit changed",
+  "context": "Beads description:\n(empty)\n\nMetadata:\nbeads_id: battle_mode-yh6\nbeads_status: open\nbeads_type: bug\nbeads_priority: 2\nlabels: []\nassignee: null\nnotes: null\ncreated_at: 2026-01-05T17:10:39.791916-07:00\nupdated_at: 2026-01-05T17:10:39.791916-07:00\nclosed_at: None\n\ndependencies: []",
+  "priority": 1,
+  "completed": false,
+  "result": null,
+  "metadata": null,
+  "created_at": "2026-01-26T19:31:35.960Z",
+  "updated_at": "2026-01-26T19:31:35.960Z",
+  "completed_at": null,
+  "blockedBy": [],
+  "blocks": [],
+  "children": []
+}
