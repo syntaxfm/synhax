@@ -27,6 +27,7 @@ export const target_type_enum = pgEnum('target_type', [
 ]);
 export const battle_status_enum = pgEnum('battle_status', [
 	'PENDING',
+	'READY',
 	'ACTIVE',
 	'COMPLETED'
 ]);

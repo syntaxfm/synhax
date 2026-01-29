@@ -60,9 +60,11 @@
 	// Diff canvas for overlay (captured from DiffEngine)
 	let diffCanvasSrc: string | null = $state(null);
 
-	// Run diff for active and completed battles (so users can see their score)
+	// Run diff for ready, active, and completed battles (so users can see their score)
 	const diffEnabled = $derived(
-		battle.status === 'ACTIVE' || battle.status === 'COMPLETED'
+		battle.status === 'READY' ||
+			battle.status === 'ACTIVE' ||
+			battle.status === 'COMPLETED'
 	);
 
 	/**

@@ -152,8 +152,8 @@ const battleParticipantsTable = {
 			optional: true,
 			customType: null as unknown as
 				| 'PENDING'
-				| 'ACTIVE'
 				| 'READY'
+				| 'ACTIVE'
 				| 'DROPPED'
 				| 'FINISHED'
 		},
@@ -270,7 +270,11 @@ const battlesTable = {
 		status: {
 			type: 'string',
 			optional: true,
-			customType: null as unknown as 'PENDING' | 'ACTIVE' | 'COMPLETED'
+			customType: null as unknown as
+				| 'PENDING'
+				| 'READY'
+				| 'ACTIVE'
+				| 'COMPLETED'
 		},
 		visibility: {
 			type: 'string',

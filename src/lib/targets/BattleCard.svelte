@@ -49,6 +49,8 @@
 		switch (battle.status) {
 			case 'PENDING':
 				return `/lobby/${battle.id}`;
+			case 'READY':
+				return `/battle/${battle.id}/code`;
 			case 'ACTIVE':
 				return `/battle/${battle.id}/code`;
 			case 'COMPLETED':
@@ -63,6 +65,8 @@
 		switch (battle.status) {
 			case 'PENDING':
 				return 'var(--yellow)';
+			case 'READY':
+				return 'var(--blue)';
 			case 'ACTIVE':
 				return 'var(--green)';
 			case 'COMPLETED':
@@ -228,6 +232,8 @@
 		<a href={battleLink} class="button">
 			{#if battle.status === 'PENDING'}
 				Join Lobby
+			{:else if battle.status === 'READY'}
+				Prepare for Battle
 			{:else if battle.status === 'ACTIVE'}
 				Continue Battle
 			{:else}
