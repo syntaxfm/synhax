@@ -254,7 +254,7 @@ export function compareImages(
 		threshold = 0.005,
 		colorTolerance = 30,
 		mode = 'euclidean',
-		ignoreTransparent = true
+		ignoreTransparent = false
 	} = options;
 
 	console.log('[diff] Comparing images:', {
