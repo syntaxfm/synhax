@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { CSS_TEMPLATE, HTML_TEMPLATE } from '$lib/constants';
-	import { files } from '$lib/state/FileState.svelte';
+	import { build_hax_folder_name, files } from '$lib/state/FileState.svelte';
 	import { mutators, z } from '$lib/zero.svelte';
 	import { parseTargetCode } from '$utils/code';
 	import PlayerCard from './PlayerCard.svelte';
@@ -31,6 +31,10 @@
 
 	type BattleWithParticipants = {
 		id: string;
+		name?: string | null;
+		starts_at?: number | null;
+		date?: number | null;
+		created_at?: number | null;
 		target_id: string | null;
 		target?: {
 			name?: string | null;
@@ -86,12 +90,20 @@
 		const targetCode = parseTargetCode(battle.target?.inspo ?? '');
 		const starterHtml = targetCode.starter_html || HTML_TEMPLATE;
 		const starterCss = targetCode.starter_css || CSS_TEMPLATE;
+		const folder_name = build_hax_folder_name({
+			id: battle.id,
+			name: battle.name ?? battle.target?.name ?? null,
+			starts_at: battle.starts_at ?? null,
+			date: battle.date ?? null,
+			created_at: battle.created_at ?? null
+		});
 
 		try {
 			await files.create_hax_directory(
-				battle.id,
+				folder_name,
 				targetCode.starter_html || undefined,
-				targetCode.starter_css || undefined
+				targetCode.starter_css || undefined,
+				battle.id
 			);
 		} catch (error) {
 			console.error('Failed to create battle folder:', error);
@@ -137,12 +149,20 @@
 		const targetCode = parseTargetCode(battle.target?.inspo ?? '');
 		const starterHtml = targetCode.starter_html || HTML_TEMPLATE;
 		const starterCss = targetCode.starter_css || CSS_TEMPLATE;
+		const folder_name = build_hax_folder_name({
+			id: battle.id,
+			name: battle.name ?? battle.target?.name ?? null,
+			starts_at: battle.starts_at ?? null,
+			date: battle.date ?? null,
+			created_at: battle.created_at ?? null
+		});
 
 		try {
 			await files.create_hax_directory(
-				battle.id,
+				folder_name,
 				targetCode.starter_html || undefined,
-				targetCode.starter_css || undefined
+				targetCode.starter_css || undefined,
+				battle.id
 			);
 		} catch (error) {
 			console.error('Failed to create battle folder:', error);

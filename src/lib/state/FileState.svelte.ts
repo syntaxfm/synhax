@@ -8,6 +8,49 @@ type HaxHistoryContext = {
 	current_css: string;
 };
 
+type HaxFolderInput = {
+	id?: string | null;
+	name?: string | null;
+	starts_at?: number | null;
+	date?: number | null;
+	created_at?: number | null;
+};
+
+const pad_time = (value: number) => String(value).padStart(2, '0');
+
+const slugify_name = (name: string) => {
+	return name
+		.normalize('NFKD')
+		.replace(/[\u0300-\u036f]/g, '')
+		.toLowerCase()
+		.replace(/[^a-z0-9]+/g, '-')
+		.replace(/^-+|-+$/g, '');
+};
+
+const format_timestamp = (timestamp: number) => {
+	const date = new Date(timestamp);
+	const year = date.getFullYear();
+	const month = pad_time(date.getMonth() + 1);
+	const day = pad_time(date.getDate());
+	const hours = pad_time(date.getHours());
+	const minutes = pad_time(date.getMinutes());
+	return `${year}${month}${day}-${hours}${minutes}`;
+};
+
+export const build_hax_folder_name = (input: HaxFolderInput) => {
+	const slug = input.name ? slugify_name(input.name) : '';
+	const timestamp_value =
+		input.starts_at ?? input.date ?? input.created_at ?? null;
+	const timestamp =
+		timestamp_value != null ? format_timestamp(timestamp_value) : '';
+
+	if (!slug || !timestamp) {
+		return input.id ?? 'battle';
+	}
+
+	return `${slug}-${timestamp}`;
+};
+
 export class FileState {
 	status: 'INITIAL' | 'NO_ACCESS' | 'ACCESS' | 'ERROR' = $state('INITIAL');
 	error = $state('');
@@ -28,6 +71,44 @@ export class FileState {
 	private set_error(error: string) {
 		this.error = error;
 		this.status = 'ERROR';
+	}
+
+	private async resolve_project_directory_handle(
+		preferred_name: string,
+		legacy_name?: string | null,
+		create = false
+	): Promise<{ handle: FileSystemDirectoryHandle; name: string } | null> {
+		if (!this.synhax_directory_handle) return null;
+
+		try {
+			const preferred =
+				await this.synhax_directory_handle.getDirectoryHandle(preferred_name);
+			return { handle: preferred, name: preferred_name };
+		} catch (error) {
+			if (legacy_name) {
+				try {
+					const legacy =
+						await this.synhax_directory_handle.getDirectoryHandle(legacy_name);
+					return { handle: legacy, name: legacy_name };
+				} catch (legacy_error) {
+					// fall through
+				}
+			}
+		}
+
+		if (!create) return null;
+
+		try {
+			const preferred = await this.synhax_directory_handle.getDirectoryHandle(
+				preferred_name,
+				{
+					create: true
+				}
+			);
+			return { handle: preferred, name: preferred_name };
+		} catch (error) {
+			return null;
+		}
 	}
 
 	// Access ~/.synhax directory
@@ -186,7 +267,8 @@ export class FileState {
 	async create_hax_directory(
 		target_name: string,
 		starter_html?: string,
-		starter_css?: string
+		starter_css?: string,
+		legacy_name?: string
 	) {
 		// Create new directory
 		if (!this.synhax_directory_handle) {
@@ -194,10 +276,17 @@ export class FileState {
 			return;
 		}
 
-		const project_handle =
-			await this.synhax_directory_handle.getDirectoryHandle(target_name, {
-				create: true
-			});
+		const resolved = await this.resolve_project_directory_handle(
+			target_name,
+			legacy_name,
+			true
+		);
+		if (!resolved) {
+			this.set_error('Project folder unavailable.');
+			return;
+		}
+
+		const project_handle = resolved.handle;
 		// HTML - use starter code if provided, otherwise fall back to default template
 		const html_file_handle = await project_handle.getFileHandle('index.html', {
 			create: true
@@ -215,27 +304,33 @@ export class FileState {
 
 		const validation = await validate_and_load_project_files(
 			project_handle,
-			target_name
+			resolved.name
 		);
 
 		if (!validation.success) {
-			throw new Error(`Project validation failed: ${target_name}`);
+			throw new Error(`Project validation failed: ${resolved.name}`);
 		}
 		this.project_directory_handle = project_handle;
 	}
 
 	// Load current files from target into file state
-	async load_hax_directory(target_name: string) {
+	async load_hax_directory(target_name: string, legacy_name?: string) {
 		if (!this.synhax_directory_handle) {
 			this.set_error('No project directory handle available.');
 			return;
 		}
 		try {
-			const project_dir =
-				await this.synhax_directory_handle.getDirectoryHandle(target_name);
+			const resolved = await this.resolve_project_directory_handle(
+				target_name,
+				legacy_name
+			);
+			if (!resolved) {
+				this.set_error('Project folder unavailable.');
+				return;
+			}
 
 			// Load Project handle
-			this.project_directory_handle = project_dir;
+			this.project_directory_handle = resolved.handle;
 
 			// Take current project directory handle and load files
 			const check = await this.check_project_files();

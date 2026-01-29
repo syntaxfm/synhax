@@ -21,7 +21,7 @@
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 	import Countdown from '$lib/battle_mode/Countdown.svelte';
-	import { files } from '$lib/state/FileState.svelte';
+	import { build_hax_folder_name, files } from '$lib/state/FileState.svelte';
 	import { play_sound } from '$lib/ui/sounds';
 
 	import Header from '$lib/battle_mode/Header.svelte';
@@ -61,11 +61,22 @@
 	});
 
 	// Modern Svelte 5 approach with runes
+	let folder_name = $derived.by(() => {
+		if (!battle.data?.id) return null;
+		return build_hax_folder_name({
+			id: battle.data.id,
+			name: battle.data.name ?? battle.data.target?.name ?? null,
+			starts_at: battle.data.starts_at ?? null,
+			date: battle.data.date ?? null,
+			created_at: battle.data.created_at ?? null
+		});
+	});
+
 	let poll_timer: NodeJS.Timeout | null = $state(null);
 
 	$effect(() => {
-		if (battle.data?.id) {
-			files.load_hax_directory(battle.data.id);
+		if (battle.data?.id && folder_name) {
+			files.load_hax_directory(folder_name, battle.data.id);
 		}
 	});
 
