@@ -16,14 +16,14 @@ export const queries = defineQueries({
 	targets: {
 		/** Get all targets with their ratings */
 		withRatings: defineQuery(type({ 'limit?': 'number' }), ({ args }) => {
-			const q = zql.targets.related('ratings');
+			const q = zql.targets.related('ratings').orderBy('created_at', 'desc');
 			return args.limit ? q.limit(args.limit) : q;
 		}),
 
 		/** Get all targets (admin) */
 		all: defineQuery(({ ctx }) =>
 			ctx.userRole === 'syntax'
-				? zql.targets
+				? zql.targets.orderBy('created_at', 'desc')
 				: zql.targets.where('id', '__admin_only__')
 		),
 
