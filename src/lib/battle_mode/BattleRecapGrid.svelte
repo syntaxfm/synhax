@@ -196,7 +196,7 @@
 	}
 
 	.battler-card.left .battler-panels {
-		justify-items: end;
+		/* justify-items: end; */
 	}
 
 	.battler-card.left .result-frame {
@@ -220,6 +220,7 @@
 	}
 
 	.battler-card {
+		container: battle-card / inline-size;
 		padding: 1.5rem;
 		border-radius: var(--br-l);
 		background: hsl(from var(--black) h s 4%);
@@ -235,10 +236,10 @@
 			hsl(from var(--yellow) h 50% 10%),
 			hsl(from var(--black) h s 3%)
 		);
-		border-color: rgb(250 191 71 / 0.35);
+		border-color: green;
 		box-shadow:
 			0 18px 40px rgb(0 0 0 / 0.45),
-			0 1px 0 rgb(255 255 255 / 0.08) inset;
+			0 0px 4px green inset;
 	}
 
 	.battler-card.loss {
@@ -297,12 +298,13 @@
 	.recap-grid {
 		display: grid;
 		gap: var(--pad-l);
-		grid-template-columns: minmax(0, 1fr) var(--target-col-width) minmax(0, 1fr);
+		grid-template-columns: auto auto auto;
 		align-items: start;
 	}
 
 	.target-card {
-		width: var(--target-col-width);
+		container: target-card / inline-size;
+		width: 100%;
 		align-items: center;
 	}
 
@@ -323,16 +325,17 @@
 		width: calc(var(--frame-width) * 1px);
 		height: calc(var(--frame-height) * 1px);
 		background: var(--black);
+		width: 100%;
+		height: auto;
+		aspect-ratio: var(--frame-width) / var(--frame-height);
 	}
 
-	.result-frame img,
 	.result-frame :global(iframe),
-	.target-frame img,
 	.target-frame :global(iframe) {
-		display: block;
-		width: 100%;
-		height: 100%;
-		object-fit: contain;
+		width: var(--frame-width);
+		height: var(--frame-height);
+		transform-origin: top left;
+		scale: calc(100cqi / var(--frame-width));
 	}
 
 	.code-panel {
