@@ -24,6 +24,12 @@ export interface DiffImageData {
 export interface DiffResult {
 	score: number; // 0-100 similarity percentage
 	diffCanvas: HTMLCanvasElement;
+	/** Detected background color from target (if ignoreBackgroundColor enabled) */
+	detectedBackgroundColor?: { r: number; g: number; b: number };
+	/** Contestant image with background/transparent pixels masked (alpha=0) */
+	maskedContestantCanvas?: HTMLCanvasElement;
+	/** Target image with background/transparent pixels masked (alpha=0) */
+	maskedTargetCanvas?: HTMLCanvasElement;
 }
 
 /**
@@ -77,6 +83,25 @@ export interface DiffOptions {
 	 * Default: false
 	 */
 	ignoreTransparent?: boolean;
+	/**
+	 * Detect and ignore background color from target's top-left pixel.
+	 * Pixels matching this color (within tolerance) are treated as transparent.
+	 *
+	 * When enabled:
+	 * - Samples the top-left pixel of the target image
+	 * - Sets alpha=0 for pixels matching that color in both images
+	 * - Works with ignoreTransparent to skip background pixels
+	 *
+	 * Note: Requires ignoreTransparent=true to have any effect.
+	 * Default: false
+	 */
+	ignoreBackgroundColor?: boolean;
+	/**
+	 * Tolerance for background color matching (RGB Euclidean distance).
+	 * Only used when ignoreBackgroundColor is true.
+	 * Default: 10 (very close matches only)
+	 */
+	backgroundColorTolerance?: number;
 }
 
 // ============================================================================
@@ -246,22 +271,46 @@ export function getImageData(canvas: HTMLCanvasElement): DiffImageData {
 const SKIPPED_PIXEL = -1;
 
 export function compareImages(
-	img1Data: DiffImageData,
-	img2Data: DiffImageData,
+	img1Data: DiffImageData, // contestant
+	img2Data: DiffImageData, // target
 	options: DiffOptions = {}
 ): DiffResult {
 	const {
 		threshold = 0.005,
 		colorTolerance = 30,
 		mode = 'euclidean',
-		ignoreTransparent = false
+		ignoreTransparent = false,
+		ignoreBackgroundColor = true,
+		backgroundColorTolerance = 10
 	} = options;
+
+	// Detect background color from target's top-left pixel
+	let bgR = 0,
+		bgG = 0,
+		bgB = 0;
+	if (ignoreBackgroundColor && img2Data.width > 0 && img2Data.height > 0) {
+		bgR = img2Data.data[0];
+		bgG = img2Data.data[1];
+		bgB = img2Data.data[2];
+		console.log('[diff] Detected background color:', { bgR, bgG, bgB });
+	}
+
+	// Helper to check if a pixel matches background color
+	const isBackgroundColor = (r: number, g: number, b: number): boolean => {
+		if (!ignoreBackgroundColor) return false;
+		const dist = Math.sqrt(
+			(r - bgR) ** 2 + (g - bgG) ** 2 + (b - bgB) ** 2
+		);
+		return dist <= backgroundColorTolerance;
+	};
 
 	console.log('[diff] Comparing images:', {
 		img1: { width: img1Data.width, height: img1Data.height },
 		img2: { width: img2Data.width, height: img2Data.height },
 		mode,
 		ignoreTransparent,
+		ignoreBackgroundColor,
+		...(ignoreBackgroundColor && { bgColor: `rgb(${bgR},${bgG},${bgB})` }),
 		...(mode === 'euclidean' && { colorTolerance })
 	});
 
@@ -307,8 +356,17 @@ export function compareImages(
 				a2 = img2Data.data[i2 + 3];
 			}
 
-			// Skip pixels where BOTH images are transparent
-			if (ignoreTransparent && a1 === 0 && a2 === 0) {
+			// Treat background-colored pixels as transparent
+			// (set effective alpha to 0 if color matches background)
+			let effectiveA1 = a1;
+			let effectiveA2 = a2;
+			if (ignoreBackgroundColor) {
+				if (isBackgroundColor(r1, g1, b1)) effectiveA1 = 0;
+				if (isBackgroundColor(r2, g2, b2)) effectiveA2 = 0;
+			}
+
+			// Skip pixels where BOTH images are transparent (or background-colored)
+			if (ignoreTransparent && effectiveA1 === 0 && effectiveA2 === 0) {
 				pixelDiffs[idx] = SKIPPED_PIXEL;
 				skippedCount++;
 				continue;
@@ -316,7 +374,9 @@ export function compareImages(
 
 			// If one is transparent and the other is opaque, treat as maximum mismatch
 			// (transparent pixel RGB values are meaningless)
-			const oneTransparentOneOpaque = (a1 === 0 && a2 > 0) || (a1 > 0 && a2 === 0);
+			const oneTransparentOneOpaque =
+				(effectiveA1 === 0 && effectiveA2 > 0) ||
+				(effectiveA1 > 0 && effectiveA2 === 0);
 			if (oneTransparentOneOpaque) {
 				pixelDiffs[idx] = 1; // Maximum difference
 				continue;
@@ -480,11 +540,88 @@ export function compareImages(
 
 	diffCtx.putImageData(diffImageData, 0, 0);
 
+	// Create masked versions of contestant and target images
+	// (background/transparent pixels set to alpha=0 for debug visualization)
+	let maskedContestantCanvas: HTMLCanvasElement | undefined;
+	let maskedTargetCanvas: HTMLCanvasElement | undefined;
+
+	if (ignoreTransparent || ignoreBackgroundColor) {
+		// Masked contestant
+		maskedContestantCanvas = document.createElement('canvas');
+		maskedContestantCanvas.width = img1Data.width;
+		maskedContestantCanvas.height = img1Data.height;
+		const masked1Ctx = maskedContestantCanvas.getContext('2d')!;
+		const masked1Data = masked1Ctx.createImageData(
+			img1Data.width,
+			img1Data.height
+		);
+
+		for (let y = 0; y < img1Data.height; y++) {
+			for (let x = 0; x < img1Data.width; x++) {
+				const i = (y * img1Data.width + x) * 4;
+				const r = img1Data.data[i];
+				const g = img1Data.data[i + 1];
+				const b = img1Data.data[i + 2];
+				const a = img1Data.data[i + 3];
+
+				// Check if this pixel should be masked
+				const isBg = ignoreBackgroundColor && isBackgroundColor(r, g, b);
+				const isTransparent = a === 0;
+
+				masked1Data.data[i] = r;
+				masked1Data.data[i + 1] = g;
+				masked1Data.data[i + 2] = b;
+				masked1Data.data[i + 3] = isBg || isTransparent ? 0 : a;
+			}
+		}
+		masked1Ctx.putImageData(masked1Data, 0, 0);
+
+		// Masked target
+		maskedTargetCanvas = document.createElement('canvas');
+		maskedTargetCanvas.width = img2Data.width;
+		maskedTargetCanvas.height = img2Data.height;
+		const masked2Ctx = maskedTargetCanvas.getContext('2d')!;
+		const masked2Data = masked2Ctx.createImageData(
+			img2Data.width,
+			img2Data.height
+		);
+
+		for (let y = 0; y < img2Data.height; y++) {
+			for (let x = 0; x < img2Data.width; x++) {
+				const i = (y * img2Data.width + x) * 4;
+				const r = img2Data.data[i];
+				const g = img2Data.data[i + 1];
+				const b = img2Data.data[i + 2];
+				const a = img2Data.data[i + 3];
+
+				// Check if this pixel should be masked
+				const isBg = ignoreBackgroundColor && isBackgroundColor(r, g, b);
+				const isTransparent = a === 0;
+
+				masked2Data.data[i] = r;
+				masked2Data.data[i + 1] = g;
+				masked2Data.data[i + 2] = b;
+				masked2Data.data[i + 3] = isBg || isTransparent ? 0 : a;
+			}
+		}
+		masked2Ctx.putImageData(masked2Data, 0, 0);
+	}
+
 	// Calculate similarity score (0-100%)
 	// Use effectivePixels (excludes skipped transparent pixels)
+	const detectedBackgroundColor = ignoreBackgroundColor
+		? { r: bgR, g: bgG, b: bgB }
+		: undefined;
+
 	if (effectivePixels === 0) {
 		// All pixels were skipped (entirely transparent contestant)
-		return { score: 0, diffCanvas };
+		return {
+			score: 0,
+			diffCanvas,
+			detectedBackgroundColor,
+			maskedContestantCanvas,
+			maskedTargetCanvas
+		};
 	}
 
 	let score: number;
@@ -504,7 +641,13 @@ export function compareImages(
 
 	console.log('[diff] Final result:', { totalDiff, effectivePixels, score, mode });
 
-	return { score, diffCanvas };
+	return {
+		score,
+		diffCanvas,
+		detectedBackgroundColor,
+		maskedContestantCanvas,
+		maskedTargetCanvas
+	};
 }
 
 // ============================================================================
