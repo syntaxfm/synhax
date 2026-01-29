@@ -1,5 +1,5 @@
 // Base styles to ensure iframe body fills container and is capturable
-const BASE_STYLES = /*css*/`
+const BASE_STYLES = /*css*/ `
 	*, *::before, *::after { box-sizing: border-box; }
 	html, body {
 		margin: 0;
@@ -14,6 +14,10 @@ const BASE_STYLES = /*css*/`
   /* This is the most cursed CSS ever. This fixes a big where global styles are applied to the snapdom container. */
   foreignObject div:has(> html) {
     all: unset;
+  }
+  /* Set the body BG color to transparent so its not counted in the diff */
+  foreignObject body {
+    background: transparent !important;
   }
 `;
 
@@ -38,7 +42,6 @@ export function combine_html_and_css(html = '', css = ''): string {
   ${tailwindScript}
   <style>
   ${BASE_STYLES}
-
   ${css}
   </style>
 

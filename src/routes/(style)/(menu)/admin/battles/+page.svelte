@@ -4,7 +4,7 @@
 	import type { ColumnDef } from '@tanstack/svelte-table';
 	import { get_user_avatar_url } from '$lib/user/utils';
 	import { onMount } from 'svelte';
-	import { PUBLIC_APP_URL } from '$env/static/public';
+	import { page } from '$app/state';
 
 	// Type for battle with relations
 	type BattleWithRelations = {
@@ -35,6 +35,7 @@
 	};
 
 	let battles = z.createQuery(queries.battles.allWithRelations());
+	const baseUrl = $derived(page.url.origin);
 
 	// Live countdown for active battles
 	let now = $state(Date.now());
@@ -161,7 +162,6 @@
 			accessorFn: (row) => row.id,
 			cell: (info) => {
 				const id = info.getValue() as string;
-				const baseUrl = PUBLIC_APP_URL;
 				const copyHandler = (url: string) =>
 					`navigator.clipboard.writeText('${url}').then(() => this.classList.add('copied')).then(() => setTimeout(() => this.classList.remove('copied'), 1000))`;
 

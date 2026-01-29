@@ -26,13 +26,57 @@ export interface DiffResult {
 	diffCanvas: HTMLCanvasElement;
 }
 
+/**
+ * Comparison mode for diffing:
+ * - 'exact': Binary comparison, any pixel difference = mismatch
+ * - 'euclidean': RGB Euclidean distance with colorTolerance threshold
+ * - 'weighted': Human eye sensitivity weights (default)
+ */
+export type DiffMode = 'exact' | 'euclidean' | 'weighted';
+
 export interface DiffOptions {
 	scaleDownFactor?: number; // 1 = full, 2 = half resolution, etc.
-	threshold?: number; // Minimum diff to count (default 0.005)
+	threshold?: number; // Minimum diff to count for weighted mode (default 0.005)
 	/** Fixed width for comparison (both images scaled to this) */
 	compareWidth?: number;
 	/** Fixed height for comparison (both images scaled to this) */
 	compareHeight?: number;
+	/**
+	 * Comparison mode:
+	 * - 'exact': Any pixel difference (even 1 value) = mismatch. Score = % of exact matches.
+	 * - 'euclidean': Uses RGB distance with colorTolerance. Pixels within tolerance = match.
+	 * - 'weighted': Human eye sensitivity (green > red > blue). Default mode.
+	 */
+	mode?: DiffMode;
+	/**
+	 * Color tolerance for 'euclidean' mode.
+	 * Uses RGB Euclidean distance: sqrt(rDiff² + gDiff² + bDiff²)
+	 *
+	 * Scoring:
+	 * - Within tolerance = full match (100% for that pixel)
+	 * - Beyond tolerance = scaled penalty based on how far beyond
+	 *
+	 * Typical values:
+	 * - 10-15: Very strict, catches subtle anti-aliasing
+	 * - 30-50: Forgiving, allows minor rendering differences
+	 * - 100+: Very loose, only catches obviously different colors
+	 *
+	 * Max possible distance is ~442 (black to white).
+	 * Default: 30
+	 */
+	colorTolerance?: number;
+	/**
+	 * Skip pixels where BOTH images have alpha = 0 (both transparent).
+	 * Useful when both images have transparent backgrounds.
+	 *
+	 * When enabled:
+	 * - Pixels transparent in BOTH images are excluded from scoring
+	 * - If only one image has content at a pixel, it still counts
+	 * - Prevents empty background areas from affecting scores
+	 *
+	 * Default: false
+	 */
+	ignoreTransparent?: boolean;
 }
 
 // ============================================================================
@@ -96,7 +140,7 @@ export async function captureElement(
 	element.getBoundingClientRect();
 
 	const snap = await snapdom(element);
-	const img = await snap.toPng();
+	const img = await snap.toSvg();
 
 	console.log('[diff] Captured image:', {
 		width: img.width,
@@ -198,16 +242,27 @@ export function getImageData(canvas: HTMLCanvasElement): DiffImageData {
  * - Generates a heatmap showing where differences occur
  * - Returns a similarity score from 0-100%
  */
+// Special marker for skipped pixels (transparent contestant)
+const SKIPPED_PIXEL = -1;
+
 export function compareImages(
 	img1Data: DiffImageData,
 	img2Data: DiffImageData,
 	options: DiffOptions = {}
 ): DiffResult {
-	const { threshold = 0.005 } = options;
+	const {
+		threshold = 0.005,
+		colorTolerance = 30,
+		mode = 'euclidean',
+		ignoreTransparent = true
+	} = options;
 
 	console.log('[diff] Comparing images:', {
 		img1: { width: img1Data.width, height: img1Data.height },
-		img2: { width: img2Data.width, height: img2Data.height }
+		img2: { width: img2Data.width, height: img2Data.height },
+		mode,
+		ignoreTransparent,
+		...(mode === 'euclidean' && { colorTolerance })
 	});
 
 	// Use the max dimensions to handle different sized images
@@ -217,14 +272,16 @@ export function compareImages(
 
 	console.log('[diff] Comparison dimensions:', { width, height, totalPixels });
 
-	// First pass: calculate all pixel differences
+	// Track pixel differences (meaning varies by mode)
+	// SKIPPED_PIXEL (-1) marks pixels excluded from scoring
 	const pixelDiffs = new Float32Array(totalPixels);
+	let skippedCount = 0;
 
 	for (let y = 0; y < height; y++) {
 		for (let x = 0; x < width; x++) {
 			const idx = y * width + x;
 
-			// Get pixel from image 1 (or transparent if out of bounds)
+			// Get pixel from image 1 / contestant (or transparent if out of bounds)
 			let r1 = 0,
 				g1 = 0,
 				b1 = 0,
@@ -237,7 +294,7 @@ export function compareImages(
 				a1 = img1Data.data[i1 + 3];
 			}
 
-			// Get pixel from image 2 (or transparent if out of bounds)
+			// Get pixel from image 2 / target (or transparent if out of bounds)
 			let r2 = 0,
 				g2 = 0,
 				b2 = 0,
@@ -250,33 +307,96 @@ export function compareImages(
 				a2 = img2Data.data[i2 + 3];
 			}
 
-			// Calculate weighted difference
-			// Human eye sensitivity: green > red > blue
-			// Weights: 0.299 + 0.587 + 0.114 + 0.1 = 1.1
-			const rDiff = Math.abs(r1 - r2);
-			const gDiff = Math.abs(g1 - g2);
-			const bDiff = Math.abs(b1 - b2);
-			const aDiff = Math.abs(a1 - a2);
+			// Skip pixels where BOTH images are transparent
+			if (ignoreTransparent && a1 === 0 && a2 === 0) {
+				pixelDiffs[idx] = SKIPPED_PIXEL;
+				skippedCount++;
+				continue;
+			}
 
-			// Weight alpha low so shadows/transparency differences are less impactful
-      const redWeight = 0.299;
-      const greenWeight = 0.587;
-      const blueWeight = 0.114;
-      const alphaWeight = 0.1;
-			const pixelDiff =
-				(rDiff * redWeight + gDiff * greenWeight + bDiff * blueWeight + aDiff * alphaWeight) /
-				(255 * (redWeight + greenWeight + blueWeight + alphaWeight));
+			// If one is transparent and the other is opaque, treat as maximum mismatch
+			// (transparent pixel RGB values are meaningless)
+			const oneTransparentOneOpaque = (a1 === 0 && a2 > 0) || (a1 > 0 && a2 === 0);
+			if (oneTransparentOneOpaque) {
+				pixelDiffs[idx] = 1; // Maximum difference
+				continue;
+			}
 
-			pixelDiffs[idx] = pixelDiff;
+			const rDiff = r1 - r2;
+			const gDiff = g1 - g2;
+			const bDiff = b1 - b2;
+			const aDiff = a1 - a2;
+
+			if (mode === 'exact') {
+				// Exact match: binary comparison - any difference = full mismatch
+				const isExactMatch = rDiff === 0 && gDiff === 0 && bDiff === 0 && aDiff === 0;
+				pixelDiffs[idx] = isExactMatch ? 0 : 1;
+			} else if (mode === 'euclidean') {
+				// Euclidean distance mode: store distance for scoring and visualization
+				// sqrt(r² + g² + b²) - alpha not included in distance calculation
+				const rgbDistance = Math.sqrt(rDiff * rDiff + gDiff * gDiff + bDiff * bDiff);
+				// Store normalized distance (0-1) for visualization
+				// Max RGB distance is ~441.67 (black to white)
+				const maxDistance = 441.67;
+				pixelDiffs[idx] = rgbDistance / maxDistance;
+			} else {
+				// Weighted mode: human eye sensitivity weights
+				const redWeight = 0.299;
+				const greenWeight = 0.587;
+				const blueWeight = 0.114;
+				const alphaWeight = 0.3;
+				const pixelDiff =
+					(Math.abs(rDiff) * redWeight +
+						Math.abs(gDiff) * greenWeight +
+						Math.abs(bDiff) * blueWeight +
+						Math.abs(aDiff) * alphaWeight) /
+					(255 * (redWeight + greenWeight + blueWeight + alphaWeight));
+
+				pixelDiffs[idx] = pixelDiff;
+			}
 		}
 	}
 
-	// Calculate total difference (ignoring tiny diffs for anti-aliasing tolerance)
+	// Effective pixel count excludes skipped pixels
+	const effectivePixels = totalPixels - skippedCount;
+	console.log('[diff] Effective pixels:', { totalPixels, skippedCount, effectivePixels });
+
+	// Calculate total difference (skipping SKIPPED_PIXEL values)
 	let totalDiff = 0;
-	for (let i = 0; i < totalPixels; i++) {
-		const diff = pixelDiffs[i];
-		if (diff && diff >= threshold) {
-			totalDiff += diff;
+	if (mode === 'exact') {
+		// Exact match: count mismatched pixels
+		for (let i = 0; i < totalPixels; i++) {
+			const diff = pixelDiffs[i];
+			if (diff !== SKIPPED_PIXEL) {
+				totalDiff += diff;
+			}
+		}
+	} else if (mode === 'euclidean') {
+		// Euclidean: gradient scoring based on distance beyond tolerance
+		// pixelDiffs stores normalized distance (0-1), convert tolerance to same scale
+		const normalizedTolerance = colorTolerance / 441.67;
+		for (let i = 0; i < totalPixels; i++) {
+			const diff = pixelDiffs[i];
+			if (diff !== SKIPPED_PIXEL) {
+				if (diff <= normalizedTolerance) {
+					// Within tolerance = full match (0 penalty)
+					totalDiff += 0;
+				} else {
+					// Beyond tolerance = scaled penalty based on how far beyond
+					// Normalize the excess: 0 (just over) to 1 (max distance)
+					const excess = diff - normalizedTolerance;
+					const maxExcess = 1 - normalizedTolerance;
+					totalDiff += excess / maxExcess;
+				}
+			}
+		}
+	} else {
+		// Weighted mode: sum weighted diffs (ignoring tiny diffs for anti-aliasing tolerance)
+		for (let i = 0; i < totalPixels; i++) {
+			const diff = pixelDiffs[i];
+			if (diff !== SKIPPED_PIXEL && diff >= threshold) {
+				totalDiff += diff;
+			}
 		}
 	}
 
@@ -291,8 +411,8 @@ export function compareImages(
 		const pixelDiff = pixelDiffs[i];
 		const rgbaIdx = i * 4;
 
-		if (pixelDiff < 0.01) {
-			// Nearly identical - leave transparent
+		// Skipped pixels (transparent contestant) - leave fully transparent
+		if (pixelDiff === SKIPPED_PIXEL) {
 			diffImageData.data[rgbaIdx] = 0;
 			diffImageData.data[rgbaIdx + 1] = 0;
 			diffImageData.data[rgbaIdx + 2] = 0;
@@ -300,27 +420,89 @@ export function compareImages(
 			continue;
 		}
 
-		// Color from blue (low diff) to red (high diff) using HSL
-		// Hue: 0.67 (blue, 240°) down to 0 (red) based on diff
-		const hue = (1 - pixelDiff) * 0.67;
-		const hsl = hslToRgb(hue, 1, 0.5);
-		diffImageData.data[rgbaIdx] = hsl[0];
-		diffImageData.data[rgbaIdx + 1] = hsl[1];
-		diffImageData.data[rgbaIdx + 2] = hsl[2];
-		diffImageData.data[rgbaIdx + 3] = 255;
+		if (mode === 'exact') {
+			// Exact match visualization: red for any mismatch, transparent for match
+			if (pixelDiff === 0) {
+				diffImageData.data[rgbaIdx] = 0;
+				diffImageData.data[rgbaIdx + 1] = 0;
+				diffImageData.data[rgbaIdx + 2] = 0;
+				diffImageData.data[rgbaIdx + 3] = 0;
+			} else {
+				// Solid red for any mismatch
+				diffImageData.data[rgbaIdx] = 255;
+				diffImageData.data[rgbaIdx + 1] = 0;
+				diffImageData.data[rgbaIdx + 2] = 0;
+				diffImageData.data[rgbaIdx + 3] = 255;
+			}
+		} else if (mode === 'euclidean') {
+			// Euclidean visualization: heatmap showing how different colors are
+			// pixelDiff is normalized distance (0-1)
+			const normalizedTolerance = colorTolerance / 441.67;
+
+			if (pixelDiff <= normalizedTolerance) {
+				// Within tolerance - leave transparent (counts as match for scoring)
+				diffImageData.data[rgbaIdx] = 0;
+				diffImageData.data[rgbaIdx + 1] = 0;
+				diffImageData.data[rgbaIdx + 2] = 0;
+				diffImageData.data[rgbaIdx + 3] = 0;
+			} else {
+				// Beyond tolerance - show heatmap based on distance
+				// Color from blue (just over tolerance) to red (max difference)
+				// Hue: 0.67 (blue, 240°) down to 0 (red) based on diff
+				const hue = (1 - pixelDiff) * 0.67;
+				const hsl = hslToRgb(hue, 1, 0.5);
+				diffImageData.data[rgbaIdx] = hsl[0];
+				diffImageData.data[rgbaIdx + 1] = hsl[1];
+				diffImageData.data[rgbaIdx + 2] = hsl[2];
+				diffImageData.data[rgbaIdx + 3] = 255;
+			}
+		} else {
+			// Weighted mode: heatmap visualization
+			if (pixelDiff < 0.01) {
+				// Nearly identical - leave transparent
+				diffImageData.data[rgbaIdx] = 0;
+				diffImageData.data[rgbaIdx + 1] = 0;
+				diffImageData.data[rgbaIdx + 2] = 0;
+				diffImageData.data[rgbaIdx + 3] = 0;
+				continue;
+			}
+
+			// Color from blue (low diff) to red (high diff) using HSL
+			// Hue: 0.67 (blue, 240°) down to 0 (red) based on diff
+			const hue = (1 - pixelDiff) * 0.67;
+			const hsl = hslToRgb(hue, 1, 0.5);
+			diffImageData.data[rgbaIdx] = hsl[0];
+			diffImageData.data[rgbaIdx + 1] = hsl[1];
+			diffImageData.data[rgbaIdx + 2] = hsl[2];
+			diffImageData.data[rgbaIdx + 3] = 255;
+		}
 	}
 
 	diffCtx.putImageData(diffImageData, 0, 0);
 
 	// Calculate similarity score (0-100%)
-	if (totalPixels === 0) {
+	// Use effectivePixels (excludes skipped transparent pixels)
+	if (effectivePixels === 0) {
+		// All pixels were skipped (entirely transparent contestant)
 		return { score: 0, diffCanvas };
 	}
 
-	const avgDiff = totalDiff / totalPixels;
-	const score = Math.max(0, Math.min(100, (1 - avgDiff) * 100));
+	let score: number;
+	if (mode === 'exact') {
+		// Exact match: percentage of pixels that match exactly
+		const matchingPixels = effectivePixels - totalDiff;
+		score = (matchingPixels / effectivePixels) * 100;
+	} else if (mode === 'euclidean') {
+		// Euclidean: gradient scoring - within tolerance = 100%, scaled penalty beyond
+		const avgDiff = totalDiff / effectivePixels;
+		score = Math.max(0, Math.min(100, (1 - avgDiff) * 100));
+	} else {
+		// Weighted mode: weighted average difference
+		const avgDiff = totalDiff / effectivePixels;
+		score = Math.max(0, Math.min(100, (1 - avgDiff) * 100));
+	}
 
-	console.log('[diff] Final result:', { totalDiff, avgDiff, score });
+	console.log('[diff] Final result:', { totalDiff, effectivePixels, score, mode });
 
 	return { score, diffCanvas };
 }
