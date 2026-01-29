@@ -73,7 +73,12 @@
 	let debugMode = $state<DiffMode>('euclidean');
 	let debugColorTolerance = $state(30);
 	let debugIgnoreTransparent = $state(true);
+	let debugIgnoreBackgroundColor = $state(true);
+	let debugBackgroundColorTolerance = $state(10);
 	let debugPanelCollapsed = $state(false);
+	let debugDetectedBgColor = $state<{ r: number; g: number; b: number } | null>(
+		null
+	);
 
 	/**
 	 * Get the capturable element from the iframe.
@@ -134,7 +139,9 @@
 				threshold: 0.005,
 				mode: debugMode,
 				colorTolerance: debugColorTolerance,
-				ignoreTransparent: debugIgnoreTransparent
+				ignoreTransparent: debugIgnoreTransparent,
+				ignoreBackgroundColor: debugIgnoreBackgroundColor,
+				backgroundColorTolerance: debugBackgroundColorTolerance
 			};
 
 			const result = targetElement
@@ -145,17 +152,26 @@
 				Math.floor(Math.max(0, Math.min(100, result.score)) * 100) / 100;
 
 			debugLastScore = normalizedScore;
+			debugDetectedBgColor = result.detectedBackgroundColor ?? null;
 
 			// Notify parent of diff canvas update (for overlay display)
 			onDiffCanvasUpdate?.(result.diffCanvas);
 
-			// Capture debug images
+			// Capture debug images (use masked versions to show transparency)
 			if (debug) {
 				try {
-					const contestantImg = await captureElement(element);
-					debugContestantSrc = contestantImg.src;
+					// Use masked contestant canvas if available, otherwise capture raw
+					if (result.maskedContestantCanvas) {
+						debugContestantSrc = result.maskedContestantCanvas.toDataURL();
+					} else {
+						const contestantImg = await captureElement(element);
+						debugContestantSrc = contestantImg.src;
+					}
 
-					if (targetElement) {
+					// Use masked target canvas if available, otherwise capture raw
+					if (result.maskedTargetCanvas) {
+						debugTargetSrc = result.maskedTargetCanvas.toDataURL();
+					} else if (targetElement) {
 						const targetImg = await captureElement(targetElement);
 						debugTargetSrc = targetImg.src;
 					} else if (targetImageSrc) {
@@ -264,6 +280,38 @@
 					/>
 					Ignore Transparent
 				</label>
+
+				<label>
+					<input
+						type="checkbox"
+						bind:checked={debugIgnoreBackgroundColor}
+						onchange={() => triggerCompare()}
+					/>
+					Ignore BG Color
+				</label>
+
+				{#if debugIgnoreBackgroundColor}
+					<label>
+						BG Tolerance: {debugBackgroundColorTolerance}
+						<input
+							type="range"
+							min="0"
+							max="50"
+							bind:value={debugBackgroundColorTolerance}
+							onchange={() => triggerCompare()}
+						/>
+					</label>
+
+					{#if debugDetectedBgColor}
+						<span class="detected-bg-color">
+							<span
+								class="color-swatch"
+								style="background: rgb({debugDetectedBgColor.r},{debugDetectedBgColor.g},{debugDetectedBgColor.b})"
+							></span>
+							rgb({debugDetectedBgColor.r},{debugDetectedBgColor.g},{debugDetectedBgColor.b})
+						</span>
+					{/if}
+				{/if}
 			</div>
 
 			<div class="debug-images">
@@ -357,6 +405,20 @@
 		display: flex;
 		align-items: center;
 		gap: 5px;
+	}
+	.detected-bg-color {
+		display: flex;
+		align-items: center;
+		gap: 5px;
+		font-family: monospace;
+		font-size: 11px;
+		opacity: 0.8;
+	}
+	.color-swatch {
+		width: 16px;
+		height: 16px;
+		border: 1px solid #666;
+		border-radius: 2px;
 	}
 	.debug-controls select {
 		background: #333;
