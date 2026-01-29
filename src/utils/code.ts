@@ -16,9 +16,9 @@ const BASE_STYLES = /*css*/ `
     all: unset;
   }
   /* Set the body BG color to transparent so its not counted in the diff */
-  foreignObject body {
+  /* foreignObject body {
     background: transparent !important;
-  }
+  } */
 `;
 
 // Tailwind CSS CDN for client-side JIT compilation
