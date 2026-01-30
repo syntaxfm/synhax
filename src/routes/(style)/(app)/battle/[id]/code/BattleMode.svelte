@@ -5,6 +5,11 @@
 	import type { Battle, Hax, Target, User, Participants } from '$sync/schema';
 	import { z, mutators } from '$lib/zero.svelte';
 	import { parseTargetCode } from '$utils/code';
+	import { queries } from '$lib/queries';
+
+	// Check if current user is admin
+	const user = z.createQuery(queries.user.current());
+	const isAdmin = $derived(user.data?.role === 'syntax');
 
 	type ParticipantWithRelations = Participants & {
 		user?: User | null;
@@ -283,7 +288,7 @@
 		enabled={diffEnabled}
 		onPerfectScore={handlePerfectScore}
 		onDiffCanvasUpdate={handleDiffCanvasUpdate}
-		debug={true}
+		debug={isAdmin}
 	/>
 
 	<!-- Bottom panels section -->
