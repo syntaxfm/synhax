@@ -2,7 +2,7 @@
 	import AppFrame from '$lib/battle_mode/AppFrame.svelte';
 	import CodeFrame from '$lib/battle_mode/CodeFrame.svelte';
 	import { FRAME_HEIGHT, FRAME_WIDTH } from '$lib/constants';
-	import { parseTargetCode } from '$utils/code';
+	import { parseTargetCode, usesTailwind } from '$utils/code';
 	import sentinel from '../../routes/(style)/(app)/battle/sentinel-dark.css?raw';
 
 	type RecapTone = 'win' | 'loss' | 'neutral';
@@ -105,7 +105,12 @@
 					</div>
 				</div>
 				<div class="code-panel">
-					<CodeFrame css_text={leftParticipant.hax?.css ?? ''} />
+					<CodeFrame
+						css_text={leftParticipant.hax?.css ?? ''}
+						html_text={usesTailwind(leftParticipant.hax?.css ?? '')
+							? (leftParticipant.hax?.html ?? '')
+							: ''}
+					/>
 				</div>
 			</div>
 		</article>
@@ -171,7 +176,12 @@
 					</div>
 				</div>
 				<div class="code-panel">
-					<CodeFrame css_text={rightParticipant.hax?.css ?? ''} />
+					<CodeFrame
+						css_text={rightParticipant.hax?.css ?? ''}
+						html_text={usesTailwind(rightParticipant.hax?.css)
+							? (rightParticipant.hax?.html ?? '')
+							: ''}
+					/>
 				</div>
 			</div>
 		</article>
