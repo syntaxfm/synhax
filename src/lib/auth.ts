@@ -28,5 +28,12 @@ export const auth = betterAuth({
 			}
 		}
 	},
-	plugins: [admin(), jwt()]
+	plugins: [
+		admin(),
+		jwt({
+			jwt: {
+				expirationTime: '7d'
+			}
+		})
+	]
 });
