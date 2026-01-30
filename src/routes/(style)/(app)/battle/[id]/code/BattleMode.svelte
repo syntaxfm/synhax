@@ -62,7 +62,8 @@
 	type ViewMode = 'overlay' | 'diff';
 	let viewMode: ViewMode = $state('overlay');
 	let overlayOpacity = $state(50);
-	let overlayMask = $state(100); // 100 = full overlay visible, 0 = full target visible
+	let overlayMask = $state(100); // 100 = full overlay visible, 0 = full target visible (horizontal)
+	let overlayMaskY = $state(100); // 100 = full overlay visible, 0 = full target visible (vertical)
 
 	// Diff canvas for overlay (captured from DiffEngine)
 	let diffCanvasSrc: string | null = $state(null);
@@ -125,15 +126,48 @@
 	}
 
 	/**
+	 * Track if pointer is down for mask dragging
+	 */
+	let isPointerDown = $state(false);
+
+	/**
+	 * Handle pointer down on overlay panel
+	 */
+	function handleOverlayPointerDown(event: PointerEvent) {
+		if (viewMode !== 'overlay') return;
+		isPointerDown = true;
+		(event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
+		updateMaskFromPointer(event);
+	}
+
+	/**
+	 * Handle pointer up on overlay panel
+	 */
+	function handleOverlayPointerUp(event: PointerEvent) {
+		isPointerDown = false;
+		(event.currentTarget as HTMLElement).releasePointerCapture(event.pointerId);
+	}
+
+	/**
 	 * Handle pointer move over overlay panel to control mask
 	 */
 	function handleOverlayPointerMove(event: PointerEvent) {
-		if (viewMode !== 'overlay') return;
+		if (!isPointerDown || viewMode !== 'overlay') return;
+		updateMaskFromPointer(event);
+	}
+
+	/**
+	 * Update mask percentage from pointer position
+	 */
+	function updateMaskFromPointer(event: PointerEvent) {
 		const target = event.currentTarget as HTMLElement;
 		const rect = target.getBoundingClientRect();
 		const x = event.clientX - rect.left;
-		const percentage = Math.round((x / rect.width) * 100);
-		overlayMask = Math.max(0, Math.min(100, percentage));
+		const y = event.clientY - rect.top;
+		const percentageX = Math.round((x / rect.width) * 100);
+		const percentageY = Math.round((y / rect.height) * 100);
+		overlayMask = Math.max(0, Math.min(100, percentageX));
+		overlayMaskY = Math.max(0, Math.min(100, percentageY));
 	}
 </script>
 
@@ -334,14 +368,24 @@
 							<div
 								class="overlay app-overlay"
 								style:opacity={overlayOpacity / 100}
-								style:clip-path="inset(0 {100 - overlayMask}% 0 0)"
+								style:clip-path="inset(0 {100 - overlayMask}% {100 -
+									overlayMaskY}% 0)"
 							>
 								<AppFrame {hax} />
 							</div>
+							<!-- Mask edge indicator -->
+							<div
+								class="mask-edge-indicator"
+								style:width="{overlayMask}%"
+								style:height="{overlayMaskY}%"
+							></div>
 							<!-- Invisible interaction layer for mask control -->
 							<div
 								class="overlay-interaction-layer"
+								onpointerdown={handleOverlayPointerDown}
 								onpointermove={handleOverlayPointerMove}
+								onpointerup={handleOverlayPointerUp}
+								onpointercancel={handleOverlayPointerUp}
 								role="slider"
 								aria-label="Mask slider"
 								aria-valuenow={overlayMask}
@@ -525,11 +569,23 @@
 		border-radius: var(--radius-s);
 	}
 
+	.mask-edge-indicator {
+		position: absolute;
+		top: 0;
+		left: 0;
+		--color: rgba(255, 255, 255, 0.2);
+		border-right: 1px solid var(--color);
+		border-bottom: 1px solid var(--color);
+		pointer-events: none;
+		z-index: 5;
+		box-shadow: 0 0 10px 1px rgba(0, 0, 0, 0.2);
+	}
+
 	.overlay-interaction-layer {
 		position: absolute;
 		inset: 0;
 		z-index: 10;
-		cursor: ew-resize;
+		cursor: move;
 	}
 
 	.panel-frame {
