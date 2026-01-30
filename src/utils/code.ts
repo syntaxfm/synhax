@@ -7,7 +7,14 @@ const BASE_STYLES = /*css*/ `
 		width: 100%;
 		height: 100%;
 		overflow: hidden;
+    font-family: sans-serif;
+    -webkit-font-smoothing: antialiased;
 	}
+
+  input, button, textarea, select {
+    font: inherit;
+  }
+
 	body {
 		background: #1a1a1a;
 	}

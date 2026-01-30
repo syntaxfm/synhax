@@ -457,6 +457,13 @@
 			</div>
 		</Modal>
 	{/if}
+{:else}
+	<div class="layout-readable stack battle-surface">
+		<h2 class="game-title">Battle Not Found!</h2>
+		<p>The battle you are looking for does not exist.</p>
+		<p>If you believe this is an error, please contact support.</p>
+		<code>Battle ID: {page.params.id}</code>
+	</div>
 {/if}
 
 <style>
