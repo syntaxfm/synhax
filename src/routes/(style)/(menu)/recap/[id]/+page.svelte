@@ -178,7 +178,7 @@
 {#if battle.data && canView}
 	{@const battleData = battle.data}
 	<div class="stack battle-surface recap-layout" style="--gap: 2rem;">
-		<Header battle={battleData} target={false} diffScore={null} {battlers}>
+		<Header battle={battleData} target={false} diffScore={null} {battlers} currentUserId={z.userID}>
 			{#snippet detail()}{/snippet}
 			{#snippet countdown()}
 				<Countdown battle={battleData} view="REF" />
@@ -218,6 +218,10 @@
 
 	.recap-layout > section {
 		display: flex;
+	}
+	.recap-layout :global(.battler-progress) {
+		--battler-avatar-size: 72px;
+		--min-display-width: 100px;
 	}
 
 	/*

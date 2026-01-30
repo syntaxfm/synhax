@@ -176,7 +176,7 @@
 					const outcomeLabel = winner
 						? isWinner
 							? 'Winner'
-							: 'Runner up'
+							: 'LOSER'
 						: 'No Winner';
 					const tone = winner ? (isWinner ? 'win' : 'loss') : 'neutral';
 					return {
