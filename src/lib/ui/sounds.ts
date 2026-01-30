@@ -1,5 +1,6 @@
 export function play_sound(sound: HTMLAudioElement) {
 	sound.currentTime = 0;
+  sound.volume = 0.5;
 	sound.play();
 }
 
