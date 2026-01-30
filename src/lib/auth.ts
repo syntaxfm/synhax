@@ -1,3 +1,11 @@
+// THIS FILE ISN'T BEING USED.
+// I WOULD DELETE IT, BUT TBH I'm AFRAID TO AT THIS LATE IN THE GAME.
+// HOWEVER
+// THIS FILE IS
+// MARKED
+// FOR
+// DEATH
+
 import { betterAuth } from 'better-auth';
 import { admin, jwt } from 'better-auth/plugins';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
