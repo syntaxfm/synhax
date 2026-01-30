@@ -146,9 +146,9 @@ async function assertBattleAllowsSaves(tx: RunTx, haxId: string) {
 	const battle = (await getBattle(tx, hax.battle_id)) as {
 		status?: string | null;
 	} | null;
-	if (battle?.status === 'READY') {
+	if (battle?.status !== 'ACTIVE') {
 		throw new Error(
-			'Cannot save changes while battle is in READY status. Wait for the battle to start.'
+			'Cannot save changes unless battle is in ACTIVE status. Wait for the battle to start.'
 		);
 	}
 }
