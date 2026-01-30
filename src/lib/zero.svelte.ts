@@ -29,6 +29,8 @@ async function get_z_options() {
 		const decoded = decodeJWT(jwt);
 		userID = decoded?.sub || 'anon';
 		userRole = decoded?.role;
+	} else {
+		console.log('JWT not found', jwt);
 	}
 
 	const context = {
