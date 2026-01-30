@@ -60,6 +60,18 @@
 
 	$effect(() => {
 		if (!battle.data) return;
+		if (
+			is_referee &&
+			battle.data.type === 'TIME_TRIAL' &&
+			['PENDING', 'READY'].includes(battle.data.status)
+		) {
+			z.mutate(
+				mutators.battles.update({
+					id: battle.data.id,
+					type: 'TIMED_MATCH'
+				})
+			);
+		}
 		// ACTIVE state: redirect everyone to their respective views
 		if (battle.data.status === 'ACTIVE') {
 			if (is_referee) {
@@ -87,18 +99,6 @@
 			mutators.battles.update({
 				id: battle.data.id,
 				visibility: new_visibility
-			})
-		);
-	}
-
-	async function toggle_type() {
-		if (!battle.data || !is_referee) return;
-		const new_type =
-			battle.data.type === 'TIME_TRIAL' ? 'TIMED_MATCH' : 'TIME_TRIAL';
-		z.mutate(
-			mutators.battles.update({
-				id: battle.data.id,
-				type: new_type
 			})
 		);
 	}
@@ -178,18 +178,14 @@
 		const updates: any = {
 			id: page.params.id,
 			status: 'ACTIVE' as const,
-			starts_at: now
+			starts_at: now,
+			type: 'TIMED_MATCH' as const
 		};
 
-		// Set ends_at based on battle type
-		if (battle.data.type === 'TIME_TRIAL') {
-			updates.ends_at = null;
-		} else if (battle.data.type === 'TIMED_MATCH') {
-			// Default to 10 minutes (600 seconds) if total_time_seconds not set
-			const time_seconds = battle.data.total_time_seconds || 600;
-			updates.total_time_seconds = time_seconds;
-			updates.ends_at = now + time_seconds * 1000;
-		}
+		// Default to 10 minutes (600 seconds) if total_time_seconds not set
+		const time_seconds = battle.data.total_time_seconds || 600;
+		updates.total_time_seconds = time_seconds;
+		updates.ends_at = now + time_seconds * 1000;
 
 		z.mutate(mutators.battles.update(updates));
 
@@ -302,16 +298,6 @@
 						ontoggle={toggle_privacy}
 						on_text="Public"
 						off_text="Private"
-					/>
-
-					<ToggleButton
-						disabled={['ACTIVE', 'COMPLETED'].includes(
-							battle.data?.status ?? ''
-						)}
-						toggle={battle.data.type === 'TIME_TRIAL'}
-						ontoggle={toggle_type}
-						on_text="Time Trial"
-						off_text="Timed Match"
 					/>
 				</div>
 

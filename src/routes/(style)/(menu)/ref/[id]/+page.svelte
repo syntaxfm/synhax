@@ -104,17 +104,15 @@
 		<Header battle={battleData} target={false} diffScore={null} {battlers}>
 			{#snippet detail()}{/snippet}
 			{#snippet countdown()}
-				{#if battleData.status === 'ACTIVE'}
-					<Countdown
-						battle={battleData}
-						view="REF"
-						bind:status={over_status}
-						onautoend={finish_battle}
-					/>
-				{/if}
+				<Countdown
+					battle={battleData}
+					view="REF"
+					bind:status={over_status}
+					onautoend={finish_battle}
+				/>
 			{/snippet}
 		</Header>
-		<header class="stack" style="--gap: 0.75rem;">
+		<!-- <header class="stack" style="--gap: 0.75rem;">
 			<div class="stack" style="--gap: 0.35rem; text-align: center;">
 				<h1 class="game-title">{battleData.target?.name ?? 'Battle'}</h1>
 				<div class="cluster recap-tags" style="justify-content: center;">
@@ -126,7 +124,7 @@
 					</span>
 				</div>
 			</div>
-		</header>
+		</header> -->
 
 		<section class="stack" style="--gap: 1rem;">
 			<BattleRecapGrid
@@ -176,6 +174,10 @@
 		--gap: 0.5rem;
 	}
 
+	.muted {
+		color: var(--fg-muted);
+	}
+
 	.ref-layout {
 		min-height: 100%;
 		max-width: 1920px;
@@ -197,9 +199,5 @@
 
 	.ref-layout :global(.battler-progress .avatar) {
 		--size: 72px;
-	}
-
-	.muted {
-		color: var(--fg-muted);
 	}
 </style>

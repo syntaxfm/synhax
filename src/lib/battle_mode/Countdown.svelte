@@ -16,31 +16,61 @@
 		view?: 'WATCH' | 'CODE' | 'REF';
 	} = $props();
 
-	let countdown = $state(battle.total_time_seconds ?? 600);
+	let countdown = $state(600);
 	let timer: ReturnType<typeof setInterval> | null = null;
+
+	function update_countdown() {
+		if (battle.status === 'COMPLETED') {
+			make_over();
+			return;
+		}
+		const hasTimer = !!battle.ends_at || !!battle.total_time_seconds;
+		if (!hasTimer || !['ACTIVE', 'COMPLETED'].includes(battle.status ?? '')) {
+			return;
+		}
+		const derivedEndsAt =
+			battle.ends_at ??
+			(battle.starts_at && battle.total_time_seconds
+				? battle.starts_at + battle.total_time_seconds * 1000
+				: null);
+
+		const now = Date.now();
+		if (derivedEndsAt && derivedEndsAt > now) {
+			status = 'ACTIVE';
+			countdown = (derivedEndsAt - now) / 1000;
+		} else if (derivedEndsAt && derivedEndsAt <= now) {
+			make_over();
+		} else if (battle.total_time_seconds) {
+			countdown = battle.total_time_seconds;
+		}
+		// If ends_at is not set yet, keep showing initial countdown value
+	}
 
 	$effect(() => {
 		if (timer) {
 			clearInterval(timer);
 			timer = null;
 		}
+		const hasTimer = !!battle.ends_at || !!battle.total_time_seconds;
+		countdown = battle.total_time_seconds ?? 600;
 		if (
 			battle &&
-			battle.type === 'TIMED_MATCH' &&
+			hasTimer &&
 			['ACTIVE', 'COMPLETED'].includes(battle.status ?? '')
 		) {
-			timer = setInterval(() => {
-				const now = Date.now();
-				if (battle.ends_at && battle.ends_at > now) {
-					status = 'ACTIVE';
-					countdown = (battle.ends_at - now) / 1000;
-				} else if (battle.ends_at && battle.ends_at <= now) {
-					make_over();
-				}
-				// If ends_at is not set yet, keep showing initial countdown value
-			}, 100);
+			update_countdown();
+			const derivedEndsAt =
+				battle.ends_at ??
+				(battle.starts_at && battle.total_time_seconds
+					? battle.starts_at + battle.total_time_seconds * 1000
+					: null);
+			if (
+				battle.status === 'ACTIVE' &&
+				(!derivedEndsAt || derivedEndsAt > Date.now())
+			) {
+				timer = setInterval(update_countdown, 100);
+			}
 		}
-
 		return () => {
 			if (timer) {
 				clearInterval(timer);
@@ -50,13 +80,21 @@
 	});
 
 	function make_over() {
+		if (timer) {
+			clearInterval(timer);
+			timer = null;
+		}
+		if (status === 'OVER') {
+			countdown = 0;
+			return;
+		}
 		countdown = 0;
 		status = 'OVER';
 		onover();
-		// If auto-end is enabled (allow_time_extension is false), trigger the callback
 		if (
 			(battle as Battle & { allow_time_extension?: boolean })
 				.allow_time_extension === false &&
+			battle.status === 'ACTIVE' &&
 			onautoend
 		) {
 			onautoend();
@@ -77,7 +115,7 @@
 
 <div class="clock" data-view={view}>
 	<div class="time-display">
-		{#each getTimeChars(countdown) as char, index}
+		{#each getTimeChars(countdown) as char, index (index)}
 			<span class="char" class:colon={char === ':'}>{char}</span>
 		{/each}
 	</div>
