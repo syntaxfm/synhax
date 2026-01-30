@@ -69,16 +69,19 @@
 				})
 			);
 		}
-		// ACTIVE state: redirect everyone to their respective views
-		if (battle.data.status === 'ACTIVE') {
-			if (is_referee) {
-				goto(`/ref/${battle.data.id}`);
-				return;
-			}
-			if (is_participant) {
-				goto(`/battle/${battle.data.id}/code`);
-				return;
-			}
+		// ACTIVE state: redirect Referee to referee view
+		if (battle.data.status === 'ACTIVE' && is_referee) {
+			goto(`/ref/${battle.data.id}`);
+			return;
+		}
+
+		// ACTIVE or READY state: redirect Participants to battle view
+		if (
+			['ACTIVE', 'READY'].includes(battle.data.status ?? '') &&
+			is_participant
+		) {
+			goto(`/battle/${battle.data.id}/code`);
+			return;
 		}
 		if (
 			battle.data.status === 'COMPLETED' &&
