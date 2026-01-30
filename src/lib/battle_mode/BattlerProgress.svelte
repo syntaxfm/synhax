@@ -30,18 +30,18 @@
 	const avatarSrc = $derived(get_user_avatar_url(user, '/unknown.png'));
 </script>
 
-<div class="battler-progress" class:right={position === 'right'}>
+<div
+	class="battler-progress"
+	class:right={position === 'right'}
+	style:--score-num={score}
+>
 	<div class="progress-track">
 		<!-- Colored fill bar -->
-		<div
-			class="progress-fill"
-			style:width="{score}%"
-			style:background-color={barColor}
-		>
+		<div class="progress-fill" style:background-color={barColor}>
 			<span class="score">{score}%</span>
 		</div>
 		<!-- Avatar positioned at progress point -->
-		<div class="avatar-wrapper" style:--progress="{score}%">
+		<div class="avatar-wrapper">
 			<img src={avatarSrc} alt="{user.name}'s avatar" class="avatar" />
 		</div>
 	</div>
@@ -49,6 +49,10 @@
 
 <style>
 	.battler-progress {
+		--score-num: 1 !important;
+		--battler-avatar-size: 36px;
+		--score: calc(var(--score-num) * 1%);
+		--min-display-width: 80px;
 		display: flex;
 		align-items: center;
 		flex: 1;
@@ -59,24 +63,32 @@
 
 	.score {
 		font-size: 14px;
+		display: inline-block;
 		padding-inline: 8px;
 		font-weight: bold;
 	}
 
 	.progress-track {
 		position: relative;
+		display: flex;
 		flex: 1;
-		height: 20px;
+		height: 100%;
 		background: var(--fg-2);
 		--radius: 500px;
 		border-radius: var(--radius);
 		box-shadow: var(--shadow-2);
+		justify-content: start;
+		.right & {
+			justify-content: end;
+		}
 	}
 
 	.progress-fill {
-		position: absolute;
+		/* position: absolute; */
 		top: 0;
 		bottom: 0;
+		width: var(--score);
+		min-width: var(--min-display-width);
 		border-radius: var(--radius);
 		display: flex;
 		align-items: center;
@@ -101,8 +113,8 @@
 		top: 50%;
 		z-index: 1;
 		/* Fixed size to prevent shrinking */
-		width: 36px;
-		height: 36px;
+		width: var(--battler-avatar-size);
+		height: var(--battler-avatar-size);
 		flex-shrink: 0;
 		transition:
 			left 0.3s ease-out,
@@ -111,23 +123,28 @@
 
 	/* Left: avatar moves left-to-right based on progress */
 	.battler-progress:not(.right) .avatar-wrapper {
-		left: var(--progress);
-		transform: translateX(-50%) translateY(-50%);
+		left: max(var(--min-display-width), var(--score));
+		/* Step function: -50% when score < 22, -150% when score >= 22 */
+		transform: translateY(-50%)
+			translateX(calc(-50% - clamp(0%, (var(--score-num) - 22) * 100%, 100%)));
 	}
 
 	/* Right: avatar moves right-to-left based on progress */
 	.right .avatar-wrapper {
-		right: var(--progress);
+		right: max(var(--min-display-width), var(--score));
 		left: auto;
-		transform: translateX(50%) translateY(-50%);
+		/* Step function: 50% when score < 22, 150% when score >= 22 */
+		transform: translateX(
+				calc(50% + clamp(0%, (var(--score-num) - 22) * 100%, 100%))
+			)
+			translateY(-50%);
 	}
 
 	.avatar {
-		--size: 36px;
-		width: var(--size);
-		height: var(--size);
-		min-width: var(--size);
-		min-height: var(--size);
+		width: var(--battler-avatar-size);
+		height: var(--battler-avatar-size);
+		min-width: var(--battler-avatar-size);
+		min-height: var(--battler-avatar-size);
 		border-radius: 50%;
 		border: 2px solid var(--black);
 		box-shadow: var(--shadow-2);
