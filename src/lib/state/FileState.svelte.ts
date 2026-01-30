@@ -11,12 +11,7 @@ type HaxHistoryContext = {
 type HaxFolderInput = {
 	id?: string | null;
 	name?: string | null;
-	starts_at?: number | null;
-	date?: number | null;
-	created_at?: number | null;
 };
-
-const pad_time = (value: number) => String(value).padStart(2, '0');
 
 const slugify_name = (name: string) => {
 	return name
@@ -27,28 +22,20 @@ const slugify_name = (name: string) => {
 		.replace(/^-+|-+$/g, '');
 };
 
-const format_timestamp = (timestamp: number) => {
-	const date = new Date(timestamp);
-	const year = date.getFullYear();
-	const month = pad_time(date.getMonth() + 1);
-	const day = pad_time(date.getDate());
-	const hours = pad_time(date.getHours());
-	const minutes = pad_time(date.getMinutes());
-	return `${year}${month}${day}-${hours}${minutes}`;
+// Keep only alphanumeric, hyphens, and underscores (safe for all OS folder names)
+const sanitize_id = (id: string) => {
+	return id.replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase();
 };
 
 export const build_hax_folder_name = (input: HaxFolderInput) => {
 	const slug = input.name ? slugify_name(input.name) : '';
-	const timestamp_value =
-		input.created_at ?? input.date ?? input.starts_at ?? null;
-	const timestamp =
-		timestamp_value != null ? format_timestamp(timestamp_value) : '';
+	const id_prefix = input.id ? sanitize_id(input.id.slice(0, 6)) : '';
 
-	if (!slug || !timestamp) {
-		return input.id ?? 'battle';
+	if (!slug || !id_prefix) {
+		return input.id ? sanitize_id(input.id) || 'battle' : 'battle';
 	}
 
-	return `${slug}-${timestamp}`;
+	return `${slug}-${id_prefix}`;
 };
 
 export class FileState {
