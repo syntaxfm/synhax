@@ -39,6 +39,9 @@
 	const rightScore = $derived(rightBattler?.hax?.diff_score ?? 0);
 	const leftIsWinning = $derived(leftScore > rightScore && leftScore > 0);
 	const rightIsWinning = $derived(rightScore > leftScore && rightScore > 0);
+	const WINNING_TEXT = $derived(
+		battle.status === 'COMPLETED' ? 'WINNER' : 'WINNING'
+	);
 </script>
 
 <header class:has-battlers={battlers.length > 0}>
@@ -48,7 +51,7 @@
 			{#if leftBattler?.user}
 				<h3>
 					{leftBattler.user.name}
-					{#if leftIsWinning}<span class="winning">WINNING</span>{/if}
+					{#if leftIsWinning}<span class="winning">{WINNING_TEXT}</span>{/if}
 					{#if currentUserId && leftBattler.user_id === currentUserId}
 						<span class="you">You!</span>
 					{/if}
@@ -73,7 +76,7 @@
 					{#if currentUserId && rightBattler.user_id === currentUserId}
 						<span class="you">You!</span>
 					{/if}
-					{#if rightIsWinning}<span class="winning">WINNING</span>{/if}
+					{#if rightIsWinning}<span class="winning">{WINNING_TEXT}</span>{/if}
 					{rightBattler.user.name}
 				</h3>
 				<BattlerProgress
