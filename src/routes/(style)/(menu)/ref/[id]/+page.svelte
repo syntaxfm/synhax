@@ -56,7 +56,7 @@
 	const battlers = $derived.by(() => {
 		const participants = battle.data?.participants ?? [];
 		const sorted = [...participants]
-			.sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0))
+			// .sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0))
 			.slice(0, 2);
 
 		return sorted.map((participant, index) => {
