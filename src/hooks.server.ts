@@ -78,7 +78,15 @@ export const handle: Handle = async ({ event, resolve }) => {
 				}
 			}
 		},
-		plugins: [admin(), jwt(), bearer()]
+		plugins: [
+			admin(),
+			jwt({
+				jwt: {
+					expirationTime: '7d'
+				}
+			}),
+			bearer()
+		]
 	});
 
 	const authHandle: Handle = async ({ event, resolve }) => {
