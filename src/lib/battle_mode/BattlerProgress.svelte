@@ -49,10 +49,11 @@
 
 <style>
 	.battler-progress {
-		--score-num: 1 !important;
+		/* --score-num: 92 !important; override for testing */
 		--battler-avatar-size: 36px;
 		--score: calc(var(--score-num) * 1%);
 		--min-display-width: 80px;
+		--tack-limit: 69; /* At what % does the avatar go from overlapping the edge to being inset? */
 		display: flex;
 		align-items: center;
 		flex: 1;
@@ -126,7 +127,11 @@
 		left: max(var(--min-display-width), var(--score));
 		/* Step function: -50% when score < 22, -150% when score >= 22 */
 		transform: translateY(-50%)
-			translateX(calc(-50% - clamp(0%, (var(--score-num) - 22) * 100%, 100%)));
+			translateX(
+				calc(
+					-50% - clamp(0%, (var(--score-num) - var(--tack-limit)) * 100%, 100%)
+				)
+			);
 	}
 
 	/* Right: avatar moves right-to-left based on progress */
@@ -135,7 +140,9 @@
 		left: auto;
 		/* Step function: 50% when score < 22, 150% when score >= 22 */
 		transform: translateX(
-				calc(50% + clamp(0%, (var(--score-num) - 22) * 100%, 100%))
+				calc(
+					50% + clamp(0%, (var(--score-num) - var(--tack-limit)) * 100%, 100%)
+				)
 			)
 			translateY(-50%);
 	}
