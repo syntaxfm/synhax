@@ -51,10 +51,7 @@
 		if (!battle.data?.id) return null;
 		return build_hax_folder_name({
 			id: battle.data.id,
-			name: battle.data.name ?? battle.data.target?.name ?? null,
-			starts_at: battle.data.starts_at ?? null,
-			date: battle.data.date ?? null,
-			created_at: battle.data.created_at ?? null
+			name: battle.data.name ?? battle.data.target?.name ?? null
 		});
 	});
 

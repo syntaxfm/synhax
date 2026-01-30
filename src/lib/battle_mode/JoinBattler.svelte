@@ -80,10 +80,7 @@
 		const starterCss = targetCode.starter_css || CSS_TEMPLATE;
 		const folder_name = build_hax_folder_name({
 			id: battle.id,
-			name: battle.name ?? battle.target?.name ?? null,
-			starts_at: battle.starts_at ?? null,
-			date: battle.date ?? null,
-			created_at: battle.created_at ?? null
+			name: battle.name ?? battle.target?.name ?? null
 		});
 
 		try {
