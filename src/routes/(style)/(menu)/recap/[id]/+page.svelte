@@ -2,8 +2,9 @@
 	import '@awesome.me/webawesome/dist/components/rating/rating.js';
 	import { page } from '$app/state';
 	import BattleRecapGrid from '$lib/battle_mode/BattleRecapGrid.svelte';
+	import Countdown from '$lib/battle_mode/Countdown.svelte';
+	import Header from '$lib/battle_mode/Header.svelte';
 	import { z, queries, mutators } from '$lib/zero.svelte';
-	import { remove_screaming } from '$utils/formatting';
 	import { BATTLE_RATINGS } from '$lib/constants';
 
 	type WinnerParticipant = {
@@ -64,6 +65,26 @@
 			(participant) => participant.user_id === z.userID
 		) ?? false
 	);
+
+	const battlers = $derived.by(() => {
+		const participants = battle.data?.participants ?? [];
+		const sorted = [...participants]
+			.sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0))
+			.slice(0, 2);
+
+		return sorted.map((participant, index) => {
+			const displayOrder = participant.display_order ?? index;
+			const color = displayOrder === 0 ? 'var(--blue)' : 'var(--red)';
+			return {
+				id: participant.id,
+				user_id: participant.user_id,
+				display_order: participant.display_order ?? null,
+				color,
+				user: participant.user,
+				hax: participant.hax
+			};
+		});
+	});
 	const isReferee = $derived(
 		battle.data?.referee?.id === z.userID ||
 			battle.data?.referee_id === z.userID
@@ -157,19 +178,12 @@
 {#if battle.data && canView}
 	{@const battleData = battle.data}
 	<div class="stack battle-surface recap-layout" style="--gap: 2rem;">
-		<header class="stack" style="--gap: 0.75rem;">
-			<div class="stack" style="--gap: 0.35rem; text-align: center;">
-				<h1 class="game-title">{battleData.target?.name ?? 'Battle'} Recap</h1>
-				<div class="cluster recap-tags" style="justify-content: center;">
-					<span class="tag muted" style="--tag-color: var(--slate);">
-						{remove_screaming(battleData.win_condition ?? '')}
-					</span>
-					<span class="tag muted" style="--tag-color: var(--gray);">
-						{remove_screaming(battleData.type ?? '')}
-					</span>
-				</div>
-			</div>
-		</header>
+		<Header battle={battleData} target={false} diffScore={null} {battlers}>
+			{#snippet detail()}{/snippet}
+			{#snippet countdown()}
+				<Countdown battle={battleData} view="REF" />
+			{/snippet}
+		</Header>
 
 		<section class="stack" style="--gap: 1rem;">
 			<BattleRecapGrid
@@ -193,15 +207,6 @@
 {/if}
 
 <style>
-	h1,
-	h2 {
-		margin: 0;
-	}
-
-	.recap-tags {
-		--gap: 0.5rem;
-	}
-
 	.recap-layout {
 		min-height: 100%;
 		max-width: 1920px;

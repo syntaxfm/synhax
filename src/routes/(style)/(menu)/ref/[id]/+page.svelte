@@ -5,7 +5,49 @@
 	import BattleRecapGrid from '$lib/battle_mode/BattleRecapGrid.svelte';
 	import Modal from '$lib/ui/Modal.svelte';
 	import { mutators, queries, z } from '$lib/zero.svelte';
-	import { remove_screaming } from '$utils/formatting';
+
+	type WinnerParticipant = {
+		id: string;
+		user_id: string;
+		display_order?: number | null;
+		user?: { name?: string | null } | null;
+		hax?: {
+			id?: string | null;
+			diff_score?: number | null;
+			html?: string | null;
+			css?: string | null;
+		} | null;
+	};
+
+	function findWinner(
+		participants: readonly WinnerParticipant[],
+		winnerHaxId?: string | null
+	) {
+		if (winnerHaxId) {
+			const winnerById = participants.find(
+				(participant) => participant.hax?.id === winnerHaxId
+			);
+			if (winnerById) {
+				return winnerById;
+			}
+		}
+
+		let best: WinnerParticipant | null = null;
+		let bestScore = -1;
+
+		for (const participant of participants) {
+			const score = participant.hax?.diff_score;
+			if (score === undefined || score === null) {
+				continue;
+			}
+			if (score > bestScore) {
+				bestScore = score;
+				best = participant;
+			}
+		}
+
+		return best;
+	}
 
 	let battle = $derived(
 		z.createQuery(queries.battles.byId({ id: page?.params?.id || '' }))
@@ -36,6 +78,14 @@
 			(participant) => participant.hax && participant.user
 		)
 	);
+
+	const winner = $derived(
+		findWinner(battle.data?.participants ?? [], battle.data?.winner_hax_id)
+	);
+
+	function isWinnerParticipant(participant: WinnerParticipant) {
+		return Boolean(winner && participant.id === winner.id);
+	}
 
 	let over_status: 'ACTIVE' | 'OVER' = $state('ACTIVE');
 
@@ -112,31 +162,27 @@
 				/>
 			{/snippet}
 		</Header>
-		<!-- <header class="stack" style="--gap: 0.75rem;">
-			<div class="stack" style="--gap: 0.35rem; text-align: center;">
-				<h1 class="game-title">{battleData.target?.name ?? 'Battle'}</h1>
-				<div class="cluster recap-tags" style="justify-content: center;">
-					<span class="tag muted" style="--tag-color: var(--slate);">
-						{remove_screaming(battleData.type ?? '')}
-					</span>
-					<span class="tag muted" style="--tag-color: var(--gray);">
-						{remove_screaming(battleData.status ?? '')}
-					</span>
-				</div>
-			</div>
-		</header> -->
 
 		<section class="stack" style="--gap: 1rem;">
 			<BattleRecapGrid
-				participants={recapBattlers.map((participant) => ({
-					id: participant.id,
-					user: participant.user,
-					hax: participant.hax,
-					outcomeLabel: 'Battler',
-					tone: 'neutral'
-				}))}
+				participants={recapBattlers.map((participant) => {
+					const isWinner = isWinnerParticipant(participant);
+					const outcomeLabel = winner
+						? isWinner
+							? 'Winner'
+							: 'Runner up'
+						: 'No Winner';
+					const tone = winner ? (isWinner ? 'win' : 'loss') : 'neutral';
+					return {
+						id: participant.id,
+						user: participant.user,
+						hax: participant.hax,
+						outcomeLabel,
+						tone
+					};
+				})}
 				target={battleData.target}
-				showOutcomeLabel={false}
+				showOutcomeLabel={true}
 			/>
 		</section>
 	</div>
@@ -166,18 +212,6 @@
 {/if}
 
 <style>
-	h1 {
-		margin: 0;
-	}
-
-	.recap-tags {
-		--gap: 0.5rem;
-	}
-
-	.muted {
-		color: var(--fg-muted);
-	}
-
 	.ref-layout {
 		min-height: 100%;
 		max-width: 1920px;
