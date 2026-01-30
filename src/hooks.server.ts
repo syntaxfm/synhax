@@ -114,7 +114,13 @@ export const handle: Handle = async ({ event, resolve }) => {
 							id: payload.sub ?? payload.id ?? 'anon',
 							role: payload.role || undefined
 						};
+					} else {
+						console.log('PAYLOAD UNDEFINED SESSION MIDDLEWEAR ~!!!!!');
+						console.error({ payload, result });
 					}
+				} else {
+					console.log('TOKEN UNDEFINED SESSION MIDDLEWEAR ~(((((((');
+					console.error({ token, authHeader, headers: event.request.headers });
 				}
 			}
 		} catch (e) {
