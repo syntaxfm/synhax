@@ -18,6 +18,12 @@
 
 	let { battle, hax }: { battle: BattleWithParticipants; hax: Hax } = $props();
 
+	// Get current participant (to access user info)
+	const currentParticipant = $derived.by(() => {
+		const participants = battle.participants ?? [];
+		return participants.find((p) => p.hax?.id === hax.id);
+	});
+
 	// Get competitors (other participants, not the current user)
 	const competitors = $derived.by(() => {
 		const participants = battle.participants ?? [];
@@ -56,6 +62,7 @@
 	type ViewMode = 'overlay' | 'diff';
 	let viewMode: ViewMode = $state('overlay');
 	let overlayOpacity = $state(50);
+	let overlayMask = $state(100); // 100 = full overlay visible, 0 = full target visible
 
 	// Diff canvas for overlay (captured from DiffEngine)
 	let diffCanvasSrc: string | null = $state(null);
@@ -116,13 +123,27 @@
 			diffCanvasSrc = canvas.toDataURL();
 		}
 	}
+
+	/**
+	 * Handle pointer move over overlay panel to control mask
+	 */
+	function handleOverlayPointerMove(event: PointerEvent) {
+		if (viewMode !== 'overlay') return;
+		const target = event.currentTarget as HTMLElement;
+		const rect = target.getBoundingClientRect();
+		const x = event.clientX - rect.left;
+		const percentage = Math.round((x / rect.width) * 100);
+		overlayMask = Math.max(0, Math.min(100, percentage));
+	}
 </script>
 
 <section class="battle-mode">
 	<div class="output code-output">
 		<h2 class="battle-header">
 			<div class="battle-header-title">
-				<span class="battle-header-label">Your App</span>
+				<span class="battle-header-label"
+					>You: {currentParticipant?.user?.name ?? 'Your App'}</span
+				>
 				<span class="battle-header-meta">{FRAME_WIDTH} × {FRAME_HEIGHT}</span>
 			</div>
 			<div class="battle-header-actions">
@@ -257,6 +278,7 @@
 				<div class="battle-header-actions">
 					{#if viewMode === 'overlay'}
 						<div class="control-row">
+							<span class="control-label">Opacity</span>
 							<input
 								type="range"
 								class="battle-slider"
@@ -266,6 +288,18 @@
 								title="Overlay opacity: {overlayOpacity}%"
 							/>
 							<span class="control-value">{overlayOpacity}%</span>
+						</div>
+						<div class="control-row" style:display="none">
+							<span class="control-label">Mask</span>
+							<input
+								type="range"
+								class="battle-slider"
+								min="0"
+								max="100"
+								bind:value={overlayMask}
+								title="Overlay visible: {overlayMask}%"
+							/>
+							<span class="control-value">{overlayMask}%</span>
 						</div>
 					{:else}
 						<SeverityScale />
@@ -300,9 +334,19 @@
 							<div
 								class="overlay app-overlay"
 								style:opacity={overlayOpacity / 100}
+								style:clip-path="inset(0 {100 - overlayMask}% 0 0)"
 							>
 								<AppFrame {hax} />
 							</div>
+							<!-- Invisible interaction layer for mask control -->
+							<div
+								class="overlay-interaction-layer"
+								onpointermove={handleOverlayPointerMove}
+								role="slider"
+								aria-label="Mask slider"
+								aria-valuenow={overlayMask}
+								tabindex="-1"
+							></div>
 						{:else if diffCanvasSrc}
 							<img
 								class="diff-image"
@@ -323,7 +367,7 @@
 				<div class="battle-header-title">
 					<span class="battle-header-label">
 						{#if competitors.length === 1}
-							{competitors[0].user?.name ?? 'Competitor'}
+							Competitor: {competitors[0].user?.name ?? 'Competitor'}
 						{:else}
 							Competitors
 						{/if}
@@ -451,6 +495,12 @@
 		gap: var(--pad-s);
 	}
 
+	.control-label {
+		font-size: var(--font-s);
+		color: var(--grey);
+		min-width: 50px;
+	}
+
 	.control-value {
 		font-size: var(--font-s);
 		color: var(--fg);
@@ -473,6 +523,13 @@
 		overflow: hidden;
 		border: 1px solid var(--grey-dark);
 		border-radius: var(--radius-s);
+	}
+
+	.overlay-interaction-layer {
+		position: absolute;
+		inset: 0;
+		z-index: 10;
+		cursor: ew-resize;
 	}
 
 	.panel-frame {

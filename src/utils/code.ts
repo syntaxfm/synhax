@@ -32,13 +32,17 @@ const BASE_STYLES = /*css*/ `
 // Note: SRI not used as CDN content changes frequently with JIT compilation
 const TAILWIND_CDN = 'https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4';
 
-export function combine_html_and_css(html = '', css = ''): string {
-	const usesTailwind = /^\s*@import\s+["']tailwindcss["']/m.test(css);
+export function usesTailwind(css = ''): boolean {
+	return /^\s*@import\s+["']tailwindcss["']/m.test(css);
+}
 
-	const csp = usesTailwind
+export function combine_html_and_css(html = '', css = ''): string {
+	const hasTailwind = usesTailwind(css);
+
+	const csp = hasTailwind
 		? `<meta http-equiv="Content-Security-Policy" content="script-src ${TAILWIND_CDN}">`
 		: '';
-	const tailwindScript = usesTailwind
+	const tailwindScript = hasTailwind
 		? `<script async src="${TAILWIND_CDN}"></script>`
 		: '';
 
