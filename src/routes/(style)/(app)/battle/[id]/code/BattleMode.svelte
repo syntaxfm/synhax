@@ -18,6 +18,12 @@
 
 	let { battle, hax }: { battle: BattleWithParticipants; hax: Hax } = $props();
 
+	// Get current participant (to access user info)
+	const currentParticipant = $derived.by(() => {
+		const participants = battle.participants ?? [];
+		return participants.find((p) => p.hax?.id === hax.id);
+	});
+
 	// Get competitors (other participants, not the current user)
 	const competitors = $derived.by(() => {
 		const participants = battle.participants ?? [];
@@ -122,7 +128,9 @@
 	<div class="output code-output">
 		<h2 class="battle-header">
 			<div class="battle-header-title">
-				<span class="battle-header-label">Your App</span>
+				<span class="battle-header-label"
+					>You: {currentParticipant?.user?.name ?? 'Your App'}</span
+				>
 				<span class="battle-header-meta">{FRAME_WIDTH} × {FRAME_HEIGHT}</span>
 			</div>
 			<div class="battle-header-actions">
@@ -323,7 +331,7 @@
 				<div class="battle-header-title">
 					<span class="battle-header-label">
 						{#if competitors.length === 1}
-							{competitors[0].user?.name ?? 'Competitor'}
+							Competitor: {competitors[0].user?.name ?? 'Competitor'}
 						{:else}
 							Competitors
 						{/if}

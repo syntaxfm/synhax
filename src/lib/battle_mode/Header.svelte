@@ -18,7 +18,8 @@
 		countdown,
 		target = true,
 		diffScore = null,
-		battlers = []
+		battlers = [],
+		currentUserId = null
 	}: {
 		battle: Battle & { target?: Target | null };
 		detail: Snippet;
@@ -26,6 +27,7 @@
 		target?: boolean;
 		diffScore?: number | null;
 		battlers?: Participant[];
+		currentUserId?: string | null;
 	} = $props();
 
 	// Get the two battlers (for now, assuming 2 participants)
@@ -47,6 +49,9 @@
 				<h3>
 					{leftBattler.user.name}
 					{#if leftIsWinning}<span class="winning">WINNING</span>{/if}
+					{#if currentUserId && leftBattler.user_id === currentUserId}
+						<span class="you">You!</span>
+					{/if}
 				</h3>
 				<BattlerProgress
 					user={leftBattler.user}
@@ -65,6 +70,9 @@
 		<div class="battler-side right">
 			{#if rightBattler?.user}
 				<h3>
+					{#if currentUserId && rightBattler.user_id === currentUserId}
+						<span class="you">You!</span>
+					{/if}
 					{#if rightIsWinning}<span class="winning">WINNING</span>{/if}
 					{rightBattler.user.name}
 				</h3>
@@ -164,7 +172,11 @@
 			gap: 10px;
 		}
 		.winning {
-			color: var(--green);
+			color: #00ff00;
+			font-size: 15px;
+		}
+		.you {
+			color: var(--yellow);
 			font-size: 15px;
 		}
 	}

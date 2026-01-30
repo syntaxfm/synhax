@@ -145,6 +145,7 @@
 			target={false}
 			diffScore={hax.data?.diff_score ?? null}
 			{battlers}
+			currentUserId={z.userID}
 		>
 			{#snippet detail()}{/snippet}
 			{#snippet countdown()}
