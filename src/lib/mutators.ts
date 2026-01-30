@@ -133,6 +133,26 @@ async function assertHaxOwner(tx: RunTx, ctx: ZeroContext, haxId: string) {
 	}
 }
 
+/**
+ * Check if the battle associated with a hax allows saves.
+ * Throws an error if the battle is in READY status (locked but not started).
+ */
+async function assertBattleAllowsSaves(tx: RunTx, haxId: string) {
+	const hax = (await getHax(tx, haxId)) as { battle_id?: string | null } | null;
+	if (!hax?.battle_id) {
+		// No battle associated, allow the save
+		return;
+	}
+	const battle = (await getBattle(tx, hax.battle_id)) as {
+		status?: string | null;
+	} | null;
+	if (battle?.status === 'READY') {
+		throw new Error(
+			'Cannot save changes while battle is in READY status. Wait for the battle to start.'
+		);
+	}
+}
+
 async function assertVoteOwner(tx: RunTx, ctx: ZeroContext, voteId: string) {
 	const vote = (await getVote(tx, voteId)) as { voter_id?: string } | null;
 	if (!vote?.voter_id) {
@@ -555,6 +575,8 @@ export const mutators = defineMutators({
 			async ({ tx, args, ctx }) => {
 				assertAuthenticated(ctx);
 				await assertHaxOwner(tx, ctx, args.id);
+				// Reject saves when battle is in READY status (locked but not started)
+				await assertBattleAllowsSaves(tx, args.id);
 				await tx.mutate.hax.update({
 					id: args.id,
 					html: args.html,
@@ -590,6 +612,8 @@ export const mutators = defineMutators({
 			async ({ tx, args, ctx }) => {
 				assertAuthenticated(ctx);
 				await assertHaxOwner(tx, ctx, args.hax_id);
+				// Reject saves when battle is in READY status (locked but not started)
+				await assertBattleAllowsSaves(tx, args.hax_id);
 				// Note: Ownership check happens via the hax FK constraint -
 				// only valid hax_ids can be inserted, and the client only
 				// calls this for the user's own hax

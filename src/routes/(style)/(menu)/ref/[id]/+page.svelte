@@ -192,12 +192,8 @@
 		display: flex;
 	}
 
-	.ref-layout :global(.battler-progress .avatar-wrapper) {
-		width: 72px;
-		height: 72px;
-	}
-
-	.ref-layout :global(.battler-progress .avatar) {
-		--size: 72px;
+	.ref-layout :global(.battler-progress) {
+		--battler-avatar-size: 72px;
+		--min-display-width: 100px;
 	}
 </style>
