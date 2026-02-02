@@ -270,6 +270,7 @@
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
+		filter: blur(30px);
 	}
 
 	.no-image {
@@ -333,6 +334,7 @@
 			max-width: 100%;
 			max-height: 85vh;
 			border-radius: var(--br-s);
+			filter: blur(30px);
 			object-fit: contain;
 		}
 	}
