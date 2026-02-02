@@ -68,11 +68,11 @@
 
 	const battlers = $derived.by(() => {
 		const participants = battle.data?.participants ?? [];
-		const sorted = [...participants]
-			// .sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0))
+		const ordered = [...participants]
+			.sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0))
 			.slice(0, 2);
 
-		return sorted.map((participant, index) => {
+		return ordered.map((participant, index) => {
 			const displayOrder = participant.display_order ?? index;
 			const color = displayOrder === 0 ? 'var(--blue)' : 'var(--red)';
 			return {
@@ -99,37 +99,11 @@
 	const winner = $derived(
 		findWinner(battle.data?.participants ?? [], battle.data?.winner_hax_id)
 	);
-	const viewerParticipant = $derived(
-		battle.data?.participants?.find(
-			(participant) => participant.user_id === z.userID
-		) ?? null
-	);
 	const recapBattlers = $derived.by(() => {
-		const participants = (battle.data?.participants ?? []).filter(
-			(participant) => participant.hax && participant.user
-		);
-
-		if (participants.length <= 1) {
-			return participants;
-		}
-
-		const ordered = [...participants]
+		return (battle.data?.participants ?? [])
+			.filter((participant) => participant.hax && participant.user)
 			.sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0))
 			.slice(0, 2);
-
-		if (viewerParticipant) {
-			const meIndex = ordered.findIndex(
-				(participant) => participant.user_id === viewerParticipant.user_id
-			);
-			if (meIndex === -1) {
-				return ordered;
-			}
-			const me = ordered[meIndex];
-			const opponent = ordered.find((_, index) => index !== meIndex);
-			return opponent ? [me, opponent] : [me];
-		}
-
-		return ordered;
 	});
 	function isWinnerParticipant(participant: WinnerParticipant) {
 		return Boolean(winner && participant.id === winner.id);
@@ -178,7 +152,13 @@
 {#if battle.data && canView}
 	{@const battleData = battle.data}
 	<div class="stack battle-surface recap-layout" style="--gap: 2rem;">
-		<Header battle={battleData} target={false} diffScore={null} {battlers} currentUserId={z.userID}>
+		<Header
+			battle={battleData}
+			target={false}
+			diffScore={null}
+			{battlers}
+			currentUserId={z.userID}
+		>
 			{#snippet detail()}{/snippet}
 			{#snippet countdown()}
 				<Countdown battle={battleData} view="REF" />

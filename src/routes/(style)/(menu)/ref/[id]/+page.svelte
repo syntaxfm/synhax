@@ -55,11 +55,11 @@
 
 	const battlers = $derived.by(() => {
 		const participants = battle.data?.participants ?? [];
-		const sorted = [...participants]
-			// .sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0))
+		const ordered = [...participants]
+			.sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0))
 			.slice(0, 2);
 
-		return sorted.map((participant, index) => {
+		return ordered.map((participant, index) => {
 			const displayOrder = participant.display_order ?? index;
 			const color = displayOrder === 0 ? 'var(--blue)' : 'var(--red)';
 			return {
@@ -74,9 +74,10 @@
 	});
 
 	const recapBattlers = $derived.by(() =>
-		(battle.data?.participants ?? []).filter(
-			(participant) => participant.hax && participant.user
-		)
+		(battle.data?.participants ?? [])
+			.filter((participant) => participant.hax && participant.user)
+			.sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0))
+			.slice(0, 2)
 	);
 
 	const winner = $derived(
