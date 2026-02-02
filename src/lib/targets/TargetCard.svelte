@@ -171,7 +171,7 @@
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
-		filter: blur(6px);
+		filter: blur(30px);
 		transform: scale(1.04);
 	}
 
@@ -226,7 +226,7 @@
 			max-height: 85vh;
 			border-radius: var(--br-s);
 			object-fit: contain;
-			filter: blur(6px);
+			filter: blur(30px);
 			transform: scale(1.04);
 		}
 	}
