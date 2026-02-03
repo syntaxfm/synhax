@@ -89,6 +89,12 @@
 	}
 
 	let over_status: 'ACTIVE' | 'OVER' = $state('ACTIVE');
+	let custom_overtime_minutes = $state(5);
+
+	const custom_overtime_valid = $derived.by(
+		() =>
+			Number.isInteger(custom_overtime_minutes) && custom_overtime_minutes >= 1
+	);
 
 	const is_referee = $derived(
 		battle.data?.referee_id === z.userID ||
@@ -113,6 +119,11 @@
 			})
 		);
 		over_status = 'ACTIVE';
+	}
+
+	function start_custom_overtime() {
+		if (!custom_overtime_valid) return;
+		add_overtime(custom_overtime_minutes);
 	}
 
 	function finish_battle() {
@@ -205,11 +216,31 @@
 
 				<div class="stack" style="align-items: center;">
 					<p>Need more time?</p>
-					<div class="cluster">
+					<div class="cluster" style="--gap: 0.5rem;">
 						<button onclick={() => add_overtime(5)}>+5 min</button>
 						<button onclick={() => add_overtime(10)}>+10 min</button>
 						<button onclick={() => add_overtime(15)}>+15 min</button>
 					</div>
+					<form
+						class="cluster"
+						style="--gap: 0.5rem;"
+						onsubmit={(event) => {
+							event.preventDefault();
+							start_custom_overtime();
+						}}
+					>
+						<input
+							type="number"
+							min="1"
+							step="1"
+							inputmode="numeric"
+							aria-label="Custom overtime minutes"
+							bind:value={custom_overtime_minutes}
+						/>
+						<button type="submit" disabled={!custom_overtime_valid}>
+							+ Custom
+						</button>
+					</form>
 				</div>
 			</div>
 		</Modal>
