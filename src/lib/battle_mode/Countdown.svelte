@@ -17,8 +17,11 @@
 		view?: 'WATCH' | 'CODE' | 'REF';
 	} = $props();
 
+	type BattleWithPause = Battle & { paused_at?: number | null };
 	let countdown = $state(600);
 	let timer: ReturnType<typeof setInterval> | null = null;
+	const pausedAt = $derived((battle as BattleWithPause).paused_at ?? null);
+	const isPaused = $derived(Boolean(pausedAt));
 
 	// Preload sounds when component mounts
 	$effect(() => {
@@ -27,17 +30,21 @@
 	});
 
 	// Sound state tracking
-	let isTickingPlaying = $state(false);
-	let lastBeepSecond = $state(-1);
+	let isTickingPlaying = false;
+	let lastBeepSecond = -1;
 
 	// Handle countdown sounds
 	$effect(() => {
 		const seconds = Math.floor(countdown);
-		console.log(`[Countdown] seconds: ${seconds}, status: ${status}, isTickingPlaying: ${isTickingPlaying}`);
+		console.log(
+			`[Countdown] seconds: ${seconds}, status: ${status}, isTickingPlaying: ${isTickingPlaying}`
+		);
 
 		// Clock tick: loop from 60s down to 10s
-		if (seconds <= 60 && seconds > 10 && status === 'ACTIVE') {
-			console.log(`[Countdown] In tick range (60-10s), isTickingPlaying: ${isTickingPlaying}`);
+		if (seconds <= 60 && seconds > 10 && status === 'ACTIVE' && !isPaused) {
+			console.log(
+				`[Countdown] In tick range (60-10s), isTickingPlaying: ${isTickingPlaying}`
+			);
 			if (!isTickingPlaying) {
 				console.log(`[Countdown] Starting clock tick NOW`);
 				isTickingPlaying = true;
@@ -52,7 +59,7 @@
 		}
 
 		// Countdown beep: play once per second from 10s down to 1s
-		if (seconds <= 10 && seconds >= 1 && status === 'ACTIVE') {
+		if (seconds <= 10 && seconds >= 1 && status === 'ACTIVE' && !isPaused) {
 			if (seconds !== lastBeepSecond) {
 				console.log(`[Countdown] Playing beep for second ${seconds}`);
 				lastBeepSecond = seconds;
@@ -91,7 +98,7 @@
 				? battle.starts_at + battle.total_time_seconds * 1000
 				: null);
 
-		const now = Date.now();
+		const now = pausedAt ?? Date.now();
 		if (derivedEndsAt && derivedEndsAt > now) {
 			status = 'ACTIVE';
 			countdown = (derivedEndsAt - now) / 1000;
@@ -123,6 +130,7 @@
 					: null);
 			if (
 				battle.status === 'ACTIVE' &&
+				!pausedAt &&
 				(!derivedEndsAt || derivedEndsAt > Date.now())
 			) {
 				timer = setInterval(update_countdown, 100);

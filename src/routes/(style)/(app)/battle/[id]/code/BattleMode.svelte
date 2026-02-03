@@ -22,6 +22,12 @@
 	};
 
 	let { battle, hax }: { battle: BattleWithParticipants; hax: Hax } = $props();
+	const isPaused = $derived(
+		Boolean(
+			(battle as BattleWithParticipants & { paused_at?: number | null })
+				.paused_at
+		)
+	);
 
 	// Get current participant (to access user info)
 	const currentParticipant = $derived.by(() => {
@@ -75,9 +81,10 @@
 
 	// Run diff for ready, active, and completed battles (so users can see their score)
 	const diffEnabled = $derived(
-		battle.status === 'READY' ||
-			battle.status === 'ACTIVE' ||
-			battle.status === 'COMPLETED'
+		!isPaused &&
+			(battle.status === 'READY' ||
+				battle.status === 'ACTIVE' ||
+				battle.status === 'COMPLETED')
 	);
 
 	/**

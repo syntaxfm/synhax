@@ -214,6 +214,7 @@ export const battles = pgTable(
 		overtime_seconds: integer(),
 		starts_at: timestamp({ withTimezone: true }),
 		ends_at: timestamp({ withTimezone: true }),
+		paused_at: timestamp({ withTimezone: true }),
 		allow_time_extension: boolean().notNull().default(true),
 		revealed_at: timestamp({ withTimezone: true }),
 		// Winner tracking (for FIRST_TO_PERFECT mode) - stores the hax.id of the winner

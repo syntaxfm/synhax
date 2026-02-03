@@ -145,7 +145,11 @@ async function assertBattleAllowsSaves(tx: RunTx, haxId: string) {
 	}
 	const battle = (await getBattle(tx, hax.battle_id)) as {
 		status?: string | null;
+		paused_at?: number | null;
 	} | null;
+	if (battle?.paused_at) {
+		throw new Error('Battle is paused. Updates are temporarily disabled.');
+	}
 	if (battle?.status !== 'ACTIVE') {
 		throw new Error(
 			'Cannot save changes unless battle is in ACTIVE status. Wait for the battle to start.'
@@ -241,6 +245,7 @@ export const mutators = defineMutators({
 				'overtime_seconds?': 'number',
 				'starts_at?': 'number | null',
 				'ends_at?': 'number | null',
+				'paused_at?': 'number | null',
 				'allow_time_extension?': 'boolean',
 				'revealed_at?': 'number | null',
 				'winner_hax_id?': 'string | null'
@@ -284,6 +289,7 @@ export const mutators = defineMutators({
 					overtime_seconds: args.overtime_seconds,
 					starts_at: args.starts_at,
 					ends_at: args.ends_at,
+					paused_at: args.paused_at,
 					allow_time_extension: args.allow_time_extension,
 					revealed_at: args.revealed_at,
 					winner_hax_id: args.winner_hax_id,

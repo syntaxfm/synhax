@@ -101,6 +101,8 @@
 			battle.data?.referee?.id === z.userID
 	);
 
+	const isPaused = $derived(Boolean(battle.data?.paused_at));
+
 	const hasPerfect = $derived(
 		battle.data?.winner_hax_id ||
 			(battle.data?.participants ?? []).some(
@@ -154,6 +156,42 @@
 			})
 		);
 	}
+
+	function toggle_pause() {
+		if (!battle.data || !is_referee) return;
+
+		if (!isPaused) {
+			z.mutate(
+				mutators.battles.update({
+					id: battle.data.id,
+					paused_at: Date.now()
+				})
+			);
+			return;
+		}
+
+		const pausedAt = battle.data.paused_at ?? null;
+		const derivedEndsAt =
+			battle.data.ends_at ??
+			(battle.data.starts_at && battle.data.total_time_seconds
+				? battle.data.starts_at + battle.data.total_time_seconds * 1000
+				: null);
+
+		const updates: { paused_at: number | null; ends_at?: number | null } = {
+			paused_at: null
+		};
+
+		if (pausedAt && derivedEndsAt) {
+			updates.ends_at = derivedEndsAt + (Date.now() - pausedAt);
+		}
+
+		z.mutate(
+			mutators.battles.update({
+				id: battle.data.id,
+				...updates
+			})
+		);
+	}
 </script>
 
 <svelte:head>
@@ -181,6 +219,14 @@
 			{/snippet}
 		</Header>
 
+		{#if battleData.status === 'ACTIVE'}
+			<div class="cluster battle-controls" style="--gap: 0.75rem;">
+				<button class="go_button" onclick={toggle_pause} disabled={!is_referee}>
+					{isPaused ? 'Resume Battle' : 'Pause Battle'}
+				</button>
+			</div>
+		{/if}
+
 		<section class="stack" style="--gap: 1rem;">
 			<BattleRecapGrid
 				participants={recapBattlers.map((participant) => {
@@ -204,6 +250,20 @@
 			/>
 		</section>
 	</div>
+
+	{#if battleData.paused_at}
+		<div class="paused-overlay">
+			<div class="layout-card stack paused-card" style="--gap: 0.75rem;">
+				<h2>Battle Paused</h2>
+				<p>The referee has paused the battle.</p>
+				{#if is_referee}
+					<button class="go_button" onclick={toggle_pause}>
+						Resume Battle
+					</button>
+				{/if}
+			</div>
+		</div>
+	{/if}
 
 	{#if battleData.type === 'TIMED_MATCH' && battleData.status === 'ACTIVE' && over_status === 'OVER' && is_referee && !hasPerfect}
 		<Modal title="Time's Up!" open={true}>
@@ -267,5 +327,20 @@
 	.ref-layout :global(.battler-progress) {
 		--battler-avatar-size: 72px;
 		--min-display-width: 100px;
+	}
+
+	.paused-overlay {
+		position: fixed;
+		inset: 0;
+		background: rgb(0 0 0 / 0.65);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 50;
+	}
+
+	.paused-card {
+		width: min(90vw, 480px);
+		text-align: center;
 	}
 </style>
