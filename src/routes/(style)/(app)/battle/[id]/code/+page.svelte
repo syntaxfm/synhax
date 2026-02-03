@@ -22,13 +22,16 @@
 	import { goto } from '$app/navigation';
 	import Countdown from '$lib/battle_mode/Countdown.svelte';
 	import { build_hax_folder_name, files } from '$lib/state/FileState.svelte';
-	import { play_sound } from '$lib/ui/sounds';
+	import { jukebox } from '$lib/media/jukebox';
 
 	import Header from '$lib/battle_mode/Header.svelte';
 	import Modal from '$lib/ui/Modal.svelte';
 
-	// Air horn sound for battle start
-	let airHorn: HTMLAudioElement;
+	// Preload sounds on mount
+	$effect(() => {
+		jukebox.preload();
+	});
+
 	let previousStatus: string | null = $state(null);
 
 	let battle = $derived(
@@ -81,9 +84,7 @@
 	$effect(() => {
 		const currentStatus = battle.data?.status;
 		if (previousStatus === 'READY' && currentStatus === 'ACTIVE') {
-			if (airHorn) {
-				play_sound(airHorn);
-			}
+			jukebox.play('air-horn');
 		}
 		previousStatus = currentStatus ?? null;
 	});
@@ -135,8 +136,6 @@
 	<title>{battle.data?.target?.name ?? 'Battle'} - Synhax</title>
 </svelte:head>
 
-<!-- Air horn for battle start -->
-<audio bind:this={airHorn} src="/air-horn.mp3" preload="auto"></audio>
 
 {#if battle.data}
 	<main class="stack battle-code-page" style="--stack-gap: 0;">
