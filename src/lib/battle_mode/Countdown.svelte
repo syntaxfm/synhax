@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Modal from '$lib/ui/Modal.svelte';
 	import type { Battle } from '$sync/schema';
+	import { jukebox } from '$lib/media/jukebox';
 
 	let {
 		battle,
@@ -18,6 +19,62 @@
 
 	let countdown = $state(600);
 	let timer: ReturnType<typeof setInterval> | null = null;
+
+	// Preload sounds when component mounts
+	$effect(() => {
+		console.log('[Countdown] Preloading jukebox sounds');
+		jukebox.preload();
+	});
+
+	// Sound state tracking
+	let isTickingPlaying = $state(false);
+	let lastBeepSecond = $state(-1);
+
+	// Handle countdown sounds
+	$effect(() => {
+		const seconds = Math.floor(countdown);
+		console.log(`[Countdown] seconds: ${seconds}, status: ${status}, isTickingPlaying: ${isTickingPlaying}`);
+
+		// Clock tick: loop from 60s down to 10s
+		if (seconds <= 60 && seconds > 10 && status === 'ACTIVE') {
+			console.log(`[Countdown] In tick range (60-10s), isTickingPlaying: ${isTickingPlaying}`);
+			if (!isTickingPlaying) {
+				console.log(`[Countdown] Starting clock tick NOW`);
+				isTickingPlaying = true;
+				jukebox.loop('clock-tick', true);
+			}
+		} else {
+			if (isTickingPlaying) {
+				console.log(`[Countdown] Stopping clock tick`);
+				isTickingPlaying = false;
+				jukebox.loop('clock-tick', false);
+			}
+		}
+
+		// Countdown beep: play once per second from 10s down to 1s
+		if (seconds <= 10 && seconds >= 1 && status === 'ACTIVE') {
+			if (seconds !== lastBeepSecond) {
+				console.log(`[Countdown] Playing beep for second ${seconds}`);
+				lastBeepSecond = seconds;
+				jukebox.play('countdown-beep');
+			}
+		}
+
+		// Air horn at zero
+		if (seconds === 0 && lastBeepSecond !== 0) {
+			console.log(`[Countdown] Playing air horn at zero`);
+			lastBeepSecond = 0;
+			jukebox.play('air-horn');
+		}
+	});
+
+	// Cleanup sounds on unmount only
+	$effect(() => {
+		return () => {
+			console.log(`[Countdown] Unmounting, stopping sounds`);
+			jukebox.stop('clock-tick');
+		};
+	});
 
 	function update_countdown() {
 		if (battle.status === 'COMPLETED') {
