@@ -78,7 +78,8 @@
 		// ACTIVE or READY state: redirect Participants to battle view
 		if (
 			['ACTIVE', 'READY'].includes(battle.data.status ?? '') &&
-			is_participant
+			is_participant &&
+			!is_referee
 		) {
 			goto(`/battle/${battle.data.id}/code`);
 			return;
