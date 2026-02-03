@@ -172,7 +172,8 @@
 <style>
 	.battle-code-page {
 		/* min-height: 100vh; */
-		width: 1200px;
+		--inline-gap: 1px;
+		width: calc(1200px + var(--inline-gap));
 		max-height: 960px;
 		margin: 0 auto;
 		/* height: 100vh; */
@@ -185,5 +186,6 @@
 	.battle-code-page :global(.battle-mode) {
 		flex: 1;
 		min-height: 0;
+		gap: 0 var(--inline-gap);
 	}
 </style>
