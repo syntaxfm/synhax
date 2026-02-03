@@ -146,7 +146,11 @@
 
 			const result = targetElement
 				? await compareElementToElement(element, targetElement, diffOptions)
-				: await compareElementToImage(element, targetImageSrc ?? '', diffOptions);
+				: await compareElementToImage(
+						element,
+						targetImageSrc ?? '',
+						diffOptions
+					);
 
 			const normalizedScore =
 				Math.floor(Math.max(0, Math.min(100, result.score)) * 100) / 100;
@@ -360,7 +364,8 @@
 		transition: transform 0.3s ease;
 	}
 	.diff-debug.collapsed {
-		transform: translateX(calc(100% - 30px));
+		transform: translateX(calc(100% + 10px));
+		opacity: 0.2;
 	}
 	.collapse-toggle {
 		position: absolute;
