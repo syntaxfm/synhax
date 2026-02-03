@@ -1,6 +1,8 @@
 <script lang="ts">
 	import AppFrame from '$lib/battle_mode/AppFrame.svelte';
 	import DiffEngine from '$lib/battle_mode/DiffEngine.svelte';
+	import DiffView from '$lib/battle_mode/DiffView.svelte';
+	import OverlayCompare from '$lib/battle_mode/OverlayCompare.svelte';
 	import SeverityScale from '$lib/battle_mode/SeverityScale.svelte';
 	import type { Battle, Hax, Target, User, Participants } from '$sync/schema';
 	import { z, mutators } from '$lib/zero.svelte';
@@ -51,6 +53,13 @@
 		css: targetCode.css
 	});
 
+	// Target data for OverlayCompare component
+	const overlayTargetData = $derived({
+		image: targetImage,
+		type: battle.target?.type,
+		frameData: targetFrameData
+	});
+
 	// Iframe reference for DiffEngine
 	let iframeElement: HTMLIFrameElement | null = $state(null);
 	let targetIframeElement: HTMLIFrameElement | null = $state(null);
@@ -67,8 +76,8 @@
 	type ViewMode = 'overlay' | 'diff';
 	let viewMode: ViewMode = $state('overlay');
 	let overlayOpacity = $state(50);
-	let overlayMask = $state(100); // 100 = full overlay visible, 0 = full target visible (horizontal)
-	let overlayMaskY = $state(100); // 100 = full overlay visible, 0 = full target visible (vertical)
+	let overlayMaskX = $state(100);
+	let overlayMaskY = $state(100);
 
 	// Diff canvas for overlay (captured from DiffEngine)
 	let diffCanvasSrc: string | null = $state(null);
@@ -128,51 +137,6 @@
 		if (canvas) {
 			diffCanvasSrc = canvas.toDataURL();
 		}
-	}
-
-	/**
-	 * Track if pointer is down for mask dragging
-	 */
-	let isPointerDown = $state(false);
-
-	/**
-	 * Handle pointer down on overlay panel
-	 */
-	function handleOverlayPointerDown(event: PointerEvent) {
-		if (viewMode !== 'overlay') return;
-		isPointerDown = true;
-		(event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
-		updateMaskFromPointer(event);
-	}
-
-	/**
-	 * Handle pointer up on overlay panel
-	 */
-	function handleOverlayPointerUp(event: PointerEvent) {
-		isPointerDown = false;
-		(event.currentTarget as HTMLElement).releasePointerCapture(event.pointerId);
-	}
-
-	/**
-	 * Handle pointer move over overlay panel to control mask
-	 */
-	function handleOverlayPointerMove(event: PointerEvent) {
-		if (!isPointerDown || viewMode !== 'overlay') return;
-		updateMaskFromPointer(event);
-	}
-
-	/**
-	 * Update mask percentage from pointer position
-	 */
-	function updateMaskFromPointer(event: PointerEvent) {
-		const target = event.currentTarget as HTMLElement;
-		const rect = target.getBoundingClientRect();
-		const x = event.clientX - rect.left;
-		const y = event.clientY - rect.top;
-		const percentageX = Math.round((x / rect.width) * 100);
-		const percentageY = Math.round((y / rect.height) * 100);
-		overlayMask = Math.max(10, Math.min(100, percentageX));
-		overlayMaskY = Math.max(10, Math.min(100, percentageY));
 	}
 </script>
 
@@ -328,18 +292,6 @@
 							/>
 							<span class="control-value">{overlayOpacity}%</span>
 						</div>
-						<div class="control-row" style:display="none">
-							<span class="control-label">Mask</span>
-							<input
-								type="range"
-								class="battle-slider"
-								min="0"
-								max="100"
-								bind:value={overlayMask}
-								title="Overlay visible: {overlayMask}%"
-							/>
-							<span class="control-value">{overlayMask}%</span>
-						</div>
 					{:else}
 						<SeverityScale />
 					{/if}
@@ -351,61 +303,18 @@
 					style:width="{FRAME_WIDTH * PANEL_SCALE}px"
 					style:height="{FRAME_HEIGHT * PANEL_SCALE}px"
 				>
-					<div
-						class="battle-frame panel-frame"
-						style:width="{FRAME_WIDTH}px"
-						style:height="{FRAME_HEIGHT}px"
-						style:transform="scale({PANEL_SCALE})"
-					>
-						{#if viewMode === 'overlay'}
-							<!-- Target layer -->
-							{#if isCodeTarget}
-								<AppFrame hax={targetFrameData} />
-							{:else}
-								<img
-									src={targetImage}
-									alt="Target"
-									width={FRAME_WIDTH}
-									height={FRAME_HEIGHT}
-								/>
-							{/if}
-							<!-- App overlay -->
-							<div
-								class="overlay app-overlay"
-								style:opacity={overlayOpacity / 100}
-								style:clip-path="inset(0 {100 - overlayMask}% {100 -
-									overlayMaskY}% 0)"
-							>
-								<AppFrame {hax} />
-							</div>
-							<!-- Mask edge indicator -->
-							<div
-								class="mask-edge-indicator"
-								style:width="{overlayMask}%"
-								style:height="{overlayMaskY}%"
-							></div>
-							<!-- Invisible interaction layer for mask control -->
-							<div
-								class="overlay-interaction-layer"
-								onpointerdown={handleOverlayPointerDown}
-								onpointermove={handleOverlayPointerMove}
-								onpointerup={handleOverlayPointerUp}
-								onpointercancel={handleOverlayPointerUp}
-								role="slider"
-								aria-label="Mask slider"
-								aria-valuenow={overlayMask}
-								tabindex="-1"
-							></div>
-						{:else if diffCanvasSrc}
-							<img
-								class="diff-image"
-								src={diffCanvasSrc}
-								alt="Diff visualization"
-							/>
-						{:else}
-							<div class="diff-placeholder">Computing diff...</div>
-						{/if}
-					</div>
+					{#if viewMode === 'overlay'}
+						<OverlayCompare
+							{hax}
+							target={overlayTargetData}
+							showControls={false}
+							bind:opacity={overlayOpacity}
+							bind:maskX={overlayMaskX}
+							bind:maskY={overlayMaskY}
+						/>
+					{:else}
+						<DiffView {diffCanvasSrc} showScale={false} />
+					{/if}
 				</div>
 			</div>
 		</div>
@@ -500,19 +409,6 @@
 		margin-bottom: 0;
 	}
 
-	/* Overlay styles */
-	.overlay {
-		position: absolute;
-		inset: 0;
-		pointer-events: none;
-	}
-
-	.app-overlay :global(iframe) {
-		width: 100%;
-		height: 100%;
-		border: none;
-	}
-
 	/* Bottom panels section */
 	.bottom-panels {
 		grid-column: 1 / -1;
@@ -574,49 +470,11 @@
 		border-radius: var(--radius-s);
 	}
 
-	.mask-edge-indicator {
-		position: absolute;
-		top: 0;
-		left: 0;
-		--color: rgba(255, 255, 255, 0.2);
-		border-right: 1px solid var(--color);
-		border-bottom: 1px solid var(--color);
-		pointer-events: none;
-		z-index: 5;
-		box-shadow: 0 0 10px 1px rgba(0, 0, 0, 0.2);
-	}
-
-	.overlay-interaction-layer {
-		position: absolute;
-		inset: 0;
-		z-index: 10;
-		cursor: move;
-	}
-
 	.panel-frame {
 		flex-shrink: 0;
 		overflow: hidden;
 		position: relative;
 		transform-origin: top left;
-	}
-
-	/* Diff panel styles */
-	.diff-image {
-		width: 100%;
-		height: 100%;
-		object-fit: contain;
-		display: block;
-	}
-
-	.diff-placeholder {
-		width: 100%;
-		height: 100%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		background: var(--bg-1);
-		color: var(--grey);
-		font-size: var(--font-s);
 	}
 
 	/* Panel empty state */

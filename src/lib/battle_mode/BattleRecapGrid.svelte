@@ -1,6 +1,9 @@
 <script lang="ts">
 	import AppFrame from '$lib/battle_mode/AppFrame.svelte';
 	import CodeFrame from '$lib/battle_mode/CodeFrame.svelte';
+	import DiffEngine from '$lib/battle_mode/DiffEngine.svelte';
+	import DiffView from '$lib/battle_mode/DiffView.svelte';
+	import OverlayCompare from '$lib/battle_mode/OverlayCompare.svelte';
 	import { FRAME_HEIGHT, FRAME_WIDTH } from '$lib/constants';
 	import { parseTargetCode, usesTailwind } from '$utils/code';
 	import sentinel from '../../routes/(style)/(app)/battle/sentinel-dark.css?raw';
@@ -29,11 +32,13 @@
 	const {
 		participants = [],
 		target = null,
-		showOutcomeLabel = true
+		showOutcomeLabel = true,
+		showDiff = false
 	}: {
 		participants?: RecapParticipant[];
 		target?: BattleTarget | null;
 		showOutcomeLabel?: boolean;
+		showDiff?: boolean;
 	} = $props();
 
 	const formatScore = (score: number) =>
@@ -48,6 +53,57 @@
 	});
 	const leftParticipant = $derived(participants[0] ?? null);
 	const rightParticipant = $derived(participants[1] ?? null);
+
+	// Target data for OverlayCompare component
+	const overlayTargetData = $derived({
+		image: targetImage,
+		type: target?.type,
+		frameData: targetFrameData
+	});
+
+	// Iframe references for diff computation
+	let leftIframeElement: HTMLIFrameElement | null = $state(null);
+	let rightIframeElement: HTMLIFrameElement | null = $state(null);
+	let targetIframeElement: HTMLIFrameElement | null = $state(null);
+
+	// DiffEngine references
+	let leftDiffEngine: DiffEngine | null = $state(null);
+	let rightDiffEngine: DiffEngine | null = $state(null);
+
+	// Diff canvas data URLs
+	let leftDiffCanvasSrc: string | null = $state(null);
+	let rightDiffCanvasSrc: string | null = $state(null);
+
+	function handleLeftDiffCanvasUpdate(canvas: HTMLCanvasElement | null) {
+		if (canvas) {
+			leftDiffCanvasSrc = canvas.toDataURL();
+		}
+	}
+
+	function handleRightDiffCanvasUpdate(canvas: HTMLCanvasElement | null) {
+		if (canvas) {
+			rightDiffCanvasSrc = canvas.toDataURL();
+		}
+	}
+
+	function handleLeftLoad() {
+		if (showDiff) {
+			leftDiffEngine?.triggerCompare();
+		}
+	}
+
+	function handleRightLoad() {
+		if (showDiff) {
+			rightDiffEngine?.triggerCompare();
+		}
+	}
+
+	function handleTargetLoad() {
+		if (showDiff) {
+			leftDiffEngine?.triggerCompare();
+			rightDiffEngine?.triggerCompare();
+		}
+	}
 </script>
 
 <svelte:head>
@@ -101,9 +157,27 @@
 								html: leftParticipant.hax?.html ?? '',
 								css: leftParticipant.hax?.css ?? ''
 							}}
+							bind:iframeElement={leftIframeElement}
+							onload={handleLeftLoad}
 						/>
 					</div>
 				</div>
+				{#if showDiff}
+					<details class="compare-details">
+						<summary class="status-badge">Diff</summary>
+						<DiffView diffCanvasSrc={leftDiffCanvasSrc} showScale={true} label="" />
+					</details>
+					<details class="compare-details">
+						<summary class="status-badge">Overlay</summary>
+						<OverlayCompare
+							hax={{
+								html: leftParticipant.hax?.html,
+								css: leftParticipant.hax?.css
+							}}
+							target={overlayTargetData}
+						/>
+					</details>
+				{/if}
 				<div class="code-panel">
 					<CodeFrame
 						css_text={leftParticipant.hax?.css ?? ''}
@@ -121,7 +195,11 @@
 			<span class="status-badge">Target</span>
 			<div class="target-frame battle-frame battle-frame--bordered">
 				{#if isCodeTarget}
-					<AppFrame hax={targetFrameData} />
+					<AppFrame
+						hax={targetFrameData}
+						bind:iframeElement={targetIframeElement}
+						onload={handleTargetLoad}
+					/>
 				{:else}
 					<img src={targetImage} alt={target.name ?? 'Target'} />
 				{/if}
@@ -172,13 +250,31 @@
 								html: rightParticipant.hax?.html ?? '',
 								css: rightParticipant.hax?.css ?? ''
 							}}
+							bind:iframeElement={rightIframeElement}
+							onload={handleRightLoad}
 						/>
 					</div>
 				</div>
+				{#if showDiff}
+					<details class="compare-details">
+						<summary class="status-badge">Diff</summary>
+						<DiffView diffCanvasSrc={rightDiffCanvasSrc} showScale={true} label="" />
+					</details>
+					<details class="compare-details">
+						<summary class="status-badge">Overlay</summary>
+						<OverlayCompare
+							hax={{
+								html: rightParticipant.hax?.html,
+								css: rightParticipant.hax?.css
+							}}
+							target={overlayTargetData}
+						/>
+					</details>
+				{/if}
 				<div class="code-panel">
 					<CodeFrame
 						css_text={rightParticipant.hax?.css ?? ''}
-						html_text={usesTailwind(rightParticipant.hax?.css)
+						html_text={usesTailwind(rightParticipant.hax?.css ?? '')
 							? (rightParticipant.hax?.html ?? '')
 							: ''}
 					/>
@@ -187,6 +283,37 @@
 		</article>
 	{/if}
 </div>
+
+<!-- DiffEngine instances for computing diffs (hidden, write-only) -->
+{#if showDiff && leftParticipant}
+	<DiffEngine
+		bind:this={leftDiffEngine}
+		contestantIframe={leftIframeElement}
+		targetImageSrc={isCodeTarget ? null : targetImage}
+		targetIframe={isCodeTarget ? targetIframeElement : null}
+		haxId={leftParticipant.id ?? ''}
+		currentScore={leftParticipant.hax?.diff_score ?? null}
+		compareWidth={FRAME_WIDTH}
+		compareHeight={FRAME_HEIGHT}
+		enabled={true}
+		onDiffCanvasUpdate={handleLeftDiffCanvasUpdate}
+	/>
+{/if}
+
+{#if showDiff && rightParticipant}
+	<DiffEngine
+		bind:this={rightDiffEngine}
+		contestantIframe={rightIframeElement}
+		targetImageSrc={isCodeTarget ? null : targetImage}
+		targetIframe={isCodeTarget ? targetIframeElement : null}
+		haxId={rightParticipant.id ?? ''}
+		currentScore={rightParticipant.hax?.diff_score ?? null}
+		compareWidth={FRAME_WIDTH}
+		compareHeight={FRAME_HEIGHT}
+		enabled={true}
+		onDiffCanvasUpdate={handleRightDiffCanvasUpdate}
+	/>
+{/if}
 
 <style>
 	.battler-hero {
@@ -332,8 +459,8 @@
 
 	.result-frame,
 	.target-frame {
-		width: calc(var(--frame-width) * 1px);
-		height: calc(var(--frame-height) * 1px);
+		width: var(--frame-width);
+		height: var(--frame-height);
 		background: var(--black);
 		width: 100%;
 		height: auto;
@@ -358,5 +485,43 @@
 
 	.code-panel :global(pre) {
 		margin: 0;
+	}
+
+	/* Collapsible Diff/Overlay sections */
+	.compare-details {
+		margin: 0;
+		border: 1px solid rgb(255 255 255 / 0.08);
+		border-radius: var(--br-s);
+		background: hsl(from var(--black) h s 4%);
+	}
+
+	.compare-details summary {
+		cursor: pointer;
+		padding: 0.5rem 0.75rem;
+		user-select: none;
+		list-style: none;
+	}
+
+	.compare-details summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.compare-details summary::before {
+		content: '▸';
+		margin-right: 0.5rem;
+		display: inline-block;
+		transition: transform 0.15s ease;
+	}
+
+	.compare-details[open] summary::before {
+		transform: rotate(90deg);
+	}
+
+	.compare-details[open] summary {
+		border-bottom: 1px solid rgb(255 255 255 / 0.08);
+	}
+
+	.compare-details > :global(:not(summary)) {
+		padding: 0.5rem;
 	}
 </style>

@@ -1,4 +1,7 @@
 <script lang="ts">
+	/**
+	 * This page is a clone of the ref/[id] page, but with the diff score visible. This page will be merged into the ref/[id] once the recording is finished.
+	 */
 	import { page } from '$app/state';
 	import Countdown from '$lib/battle_mode/Countdown.svelte';
 	import Header from '$lib/battle_mode/Header.svelte';
@@ -190,7 +193,7 @@
 				})}
 				target={battleData.target}
 				showOutcomeLabel={battleData.status === 'COMPLETED'}
-				showDiff={false}
+				showDiff={true}
 			/>
 		</section>
 	</div>
