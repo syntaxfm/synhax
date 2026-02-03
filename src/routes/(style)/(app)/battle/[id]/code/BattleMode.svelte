@@ -171,8 +171,8 @@
 		const y = event.clientY - rect.top;
 		const percentageX = Math.round((x / rect.width) * 100);
 		const percentageY = Math.round((y / rect.height) * 100);
-		overlayMask = Math.max(0, Math.min(100, percentageX));
-		overlayMaskY = Math.max(0, Math.min(100, percentageY));
+		overlayMask = Math.max(10, Math.min(100, percentageX));
+		overlayMaskY = Math.max(10, Math.min(100, percentageY));
 	}
 </script>
 
@@ -321,7 +321,7 @@
 							<input
 								type="range"
 								class="battle-slider"
-								min="0"
+								min="20"
 								max="100"
 								bind:value={overlayOpacity}
 								title="Overlay opacity: {overlayOpacity}%"
