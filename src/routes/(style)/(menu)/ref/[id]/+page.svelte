@@ -219,14 +219,6 @@
 			{/snippet}
 		</Header>
 
-		{#if battleData.status === 'ACTIVE'}
-			<div class="cluster battle-controls" style="--gap: 0.75rem;">
-				<button class="go_button" onclick={toggle_pause} disabled={!is_referee}>
-					{isPaused ? 'Resume Battle' : 'Pause Battle'}
-				</button>
-			</div>
-		{/if}
-
 		<section class="stack" style="--gap: 1rem;">
 			<BattleRecapGrid
 				participants={recapBattlers.map((participant) => {
@@ -305,6 +297,27 @@
 			</div>
 		</Modal>
 	{/if}
+
+	{#if battleData.status === 'ACTIVE'}
+		{#if !isPaused}
+			<button
+				class="pause_button"
+				onclick={toggle_pause}
+				disabled={!is_referee}
+			>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width="32"
+					height="32"
+					fill="#ffffff99"
+					viewBox="0 0 256 256"
+					><path
+						d="M200,28H160a20,20,0,0,0-20,20V208a20,20,0,0,0,20,20h40a20,20,0,0,0,20-20V48A20,20,0,0,0,200,28Zm-4,176H164V52h32ZM96,28H56A20,20,0,0,0,36,48V208a20,20,0,0,0,20,20H96a20,20,0,0,0,20-20V48A20,20,0,0,0,96,28ZM92,204H60V52H92Z"
+					></path></svg
+				>
+			</button>
+		{/if}
+	{/if}
 {:else}
 	<p>Loading battle...</p>
 {/if}
@@ -342,5 +355,11 @@
 	.paused-card {
 		width: min(90vw, 480px);
 		text-align: center;
+	}
+
+	.pause_button {
+		position: fixed;
+		bottom: 20px;
+		right: 20px;
 	}
 </style>
