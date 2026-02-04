@@ -101,8 +101,6 @@
 			battle.data?.referee?.id === z.userID
 	);
 
-	const isPaused = $derived(Boolean(battle.data?.paused_at));
-
 	const hasPerfect = $derived(
 		battle.data?.winner_hax_id ||
 			(battle.data?.participants ?? []).some(
@@ -153,42 +151,6 @@
 				id: battle.data.id,
 				status: 'COMPLETED',
 				winner_hax_id
-			})
-		);
-	}
-
-	function toggle_pause() {
-		if (!battle.data || !is_referee) return;
-
-		if (!isPaused) {
-			z.mutate(
-				mutators.battles.update({
-					id: battle.data.id,
-					paused_at: Date.now()
-				})
-			);
-			return;
-		}
-
-		const pausedAt = battle.data.paused_at ?? null;
-		const derivedEndsAt =
-			battle.data.ends_at ??
-			(battle.data.starts_at && battle.data.total_time_seconds
-				? battle.data.starts_at + battle.data.total_time_seconds * 1000
-				: null);
-
-		const updates: { paused_at: number | null; ends_at?: number | null } = {
-			paused_at: null
-		};
-
-		if (pausedAt && derivedEndsAt) {
-			updates.ends_at = derivedEndsAt + (Date.now() - pausedAt);
-		}
-
-		z.mutate(
-			mutators.battles.update({
-				id: battle.data.id,
-				...updates
 			})
 		);
 	}
@@ -249,11 +211,6 @@
 			<div class="layout-card stack paused-card" style="--gap: 0.75rem;">
 				<h2>Battle Paused</h2>
 				<p>The referee has paused the battle.</p>
-				{#if is_referee}
-					<button class="go_button" onclick={toggle_pause}>
-						Resume Battle
-					</button>
-				{/if}
 			</div>
 		</div>
 	{/if}
@@ -298,27 +255,6 @@
 			</div>
 		</Modal>
 	{/if}
-
-	{#if battleData.status === 'ACTIVE'}
-		{#if !isPaused}
-			<button
-				class="pause_button"
-				onclick={toggle_pause}
-				disabled={!is_referee}
-			>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					width="32"
-					height="32"
-					fill="#ffffff99"
-					viewBox="0 0 256 256"
-					><path
-						d="M200,28H160a20,20,0,0,0-20,20V208a20,20,0,0,0,20,20h40a20,20,0,0,0,20-20V48A20,20,0,0,0,200,28Zm-4,176H164V52h32ZM96,28H56A20,20,0,0,0,36,48V208a20,20,0,0,0,20,20H96a20,20,0,0,0,20-20V48A20,20,0,0,0,96,28ZM92,204H60V52H92Z"
-					></path></svg
-				>
-			</button>
-		{/if}
-	{/if}
 {:else}
 	<p>Loading battle...</p>
 {/if}
@@ -356,11 +292,5 @@
 	.paused-card {
 		width: min(90vw, 480px);
 		text-align: center;
-	}
-
-	.pause_button {
-		position: fixed;
-		bottom: 20px;
-		right: 20px;
 	}
 </style>

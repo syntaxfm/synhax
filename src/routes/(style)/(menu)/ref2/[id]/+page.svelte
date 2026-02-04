@@ -92,11 +92,19 @@
 	}
 
 	let over_status: 'ACTIVE' | 'OVER' = $state('ACTIVE');
+	let custom_overtime_minutes = $state(5);
+
+	const custom_overtime_valid = $derived.by(
+		() =>
+			Number.isInteger(custom_overtime_minutes) && custom_overtime_minutes >= 1
+	);
 
 	const is_referee = $derived(
 		battle.data?.referee_id === z.userID ||
 			battle.data?.referee?.id === z.userID
 	);
+
+	const isPaused = $derived(Boolean(battle.data?.paused_at));
 
 	const hasPerfect = $derived(
 		battle.data?.winner_hax_id ||
@@ -116,6 +124,11 @@
 			})
 		);
 		over_status = 'ACTIVE';
+	}
+
+	function start_custom_overtime() {
+		if (!custom_overtime_valid) return;
+		add_overtime(custom_overtime_minutes);
 	}
 
 	function finish_battle() {
@@ -143,6 +156,42 @@
 				id: battle.data.id,
 				status: 'COMPLETED',
 				winner_hax_id
+			})
+		);
+	}
+
+	function toggle_pause() {
+		if (!battle.data || !is_referee) return;
+
+		if (!isPaused) {
+			z.mutate(
+				mutators.battles.update({
+					id: battle.data.id,
+					paused_at: Date.now()
+				})
+			);
+			return;
+		}
+
+		const pausedAt = battle.data.paused_at ?? null;
+		const derivedEndsAt =
+			battle.data.ends_at ??
+			(battle.data.starts_at && battle.data.total_time_seconds
+				? battle.data.starts_at + battle.data.total_time_seconds * 1000
+				: null);
+
+		const updates: { paused_at: number | null; ends_at?: number | null } = {
+			paused_at: null
+		};
+
+		if (pausedAt && derivedEndsAt) {
+			updates.ends_at = derivedEndsAt + (Date.now() - pausedAt);
+		}
+
+		z.mutate(
+			mutators.battles.update({
+				id: battle.data.id,
+				...updates
 			})
 		);
 	}
@@ -198,6 +247,20 @@
 		</section>
 	</div>
 
+	{#if battleData.paused_at}
+		<div class="paused-overlay">
+			<div class="layout-card stack paused-card" style="--gap: 0.75rem;">
+				<h2>Battle Paused</h2>
+				<p>The referee has paused the battle.</p>
+				{#if is_referee}
+					<button class="go_button big_button" onclick={toggle_pause}>
+						Resume Battle
+					</button>
+				{/if}
+			</div>
+		</div>
+	{/if}
+
 	{#if battleData.type === 'TIMED_MATCH' && battleData.status === 'ACTIVE' && over_status === 'OVER' && is_referee && !hasPerfect}
 		<Modal title="Time's Up!" open={true}>
 			<div class="stack" style="align-items: center;">
@@ -209,14 +272,56 @@
 
 				<div class="stack" style="align-items: center;">
 					<p>Need more time?</p>
-					<div class="cluster">
+					<div class="cluster" style="--gap: 0.5rem;">
 						<button onclick={() => add_overtime(5)}>+5 min</button>
 						<button onclick={() => add_overtime(10)}>+10 min</button>
 						<button onclick={() => add_overtime(15)}>+15 min</button>
 					</div>
+					<form
+						class="cluster"
+						style="--gap: 0.5rem;"
+						onsubmit={(event) => {
+							event.preventDefault();
+							start_custom_overtime();
+						}}
+					>
+						<input
+							type="number"
+							min="1"
+							step="1"
+							inputmode="numeric"
+							aria-label="Custom overtime minutes"
+							bind:value={custom_overtime_minutes}
+						/>
+						<button type="submit" disabled={!custom_overtime_valid}>
+							+ Custom
+						</button>
+					</form>
 				</div>
 			</div>
 		</Modal>
+	{/if}
+
+	{#if battleData.status === 'ACTIVE'}
+		<button
+			class="pause_button"
+			onclick={toggle_pause}
+			disabled={!is_referee}
+			aria-label={isPaused ? 'Resume battle' : 'Pause battle'}
+			title={isPaused ? 'Resume battle' : 'Pause battle'}
+		>
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				width="32"
+				height="32"
+				fill="#ffffff99"
+				viewBox="0 0 256 256"
+			>
+				<path
+					d="M200,28H160a20,20,0,0,0-20,20V208a20,20,0,0,0,20,20h40a20,20,0,0,0,20-20V48A20,20,0,0,0,200,28Zm-4,176H164V52h32ZM96,28H56A20,20,0,0,0,36,48V208a20,20,0,0,0,20,20H96a20,20,0,0,0,20-20V48A20,20,0,0,0,96,28ZM92,204H60V52H92Z"
+				></path>
+			</svg>
+		</button>
 	{/if}
 {:else}
 	<p>Loading battle...</p>
@@ -240,5 +345,27 @@
 	.ref-layout :global(.battler-progress) {
 		--battler-avatar-size: 72px;
 		--min-display-width: 100px;
+	}
+
+	.paused-overlay {
+		position: fixed;
+		inset: 0;
+		background: rgb(0 0 0 / 0.65);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 50;
+	}
+
+	.paused-card {
+		width: min(90vw, 480px);
+		text-align: center;
+	}
+
+	.pause_button {
+		position: fixed;
+		bottom: 20px;
+		right: 20px;
+		z-index: 40;
 	}
 </style>
