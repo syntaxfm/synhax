@@ -266,8 +266,8 @@
 	}
 
 	.battle-frame {
-		width: calc(var(--frame-width) * 1px);
-		height: calc(var(--frame-height) * 1px);
+		width: var(--frame-width);
+		height: var(--frame-height);
 		overflow: hidden;
 	}
 
