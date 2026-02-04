@@ -36,15 +36,15 @@
 	// Handle countdown sounds
 	$effect(() => {
 		const seconds = Math.floor(countdown);
-		console.log(
-			`[Countdown] seconds: ${seconds}, status: ${status}, isTickingPlaying: ${isTickingPlaying}`
-		);
+		// console.log(
+		// 	`[Countdown] seconds: ${seconds}, status: ${status}, isTickingPlaying: ${isTickingPlaying}`
+		// );
 
 		// Clock tick: loop from 60s down to 10s
 		if (seconds <= 60 && seconds > 10 && status === 'ACTIVE' && !isPaused) {
-			console.log(
-				`[Countdown] In tick range (60-10s), isTickingPlaying: ${isTickingPlaying}`
-			);
+			// console.log(
+			// 	`[Countdown] In tick range (60-10s), isTickingPlaying: ${isTickingPlaying}`
+			// );
 			if (!isTickingPlaying) {
 				console.log(`[Countdown] Starting clock tick NOW`);
 				isTickingPlaying = true;
