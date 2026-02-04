@@ -75,7 +75,7 @@
 	let debugIgnoreTransparent = $state(true);
 	let debugIgnoreBackgroundColor = $state(true);
 	let debugBackgroundColorTolerance = $state(10);
-	let debugPanelCollapsed = $state(false);
+	let debugPanelCollapsed = $state(true);
 	let debugDetectedBgColor = $state<{ r: number; g: number; b: number } | null>(
 		null
 	);
@@ -365,7 +365,7 @@
 	}
 	.diff-debug.collapsed {
 		transform: translateX(calc(100% + 10px));
-		opacity: 0.2;
+		opacity: 0.5;
 	}
 	.collapse-toggle {
 		position: absolute;
