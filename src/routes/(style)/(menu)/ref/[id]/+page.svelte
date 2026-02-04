@@ -206,6 +206,15 @@
 		</section>
 	</div>
 
+	{#if battleData.paused_at}
+		<div class="paused-overlay">
+			<div class="layout-card stack paused-card" style="--gap: 0.75rem;">
+				<h2>Battle Paused</h2>
+				<p>The referee has paused the battle.</p>
+			</div>
+		</div>
+	{/if}
+
 	{#if battleData.type === 'TIMED_MATCH' && battleData.status === 'ACTIVE' && over_status === 'OVER' && is_referee && !hasPerfect}
 		<Modal title="Time's Up!" open={true}>
 			<div class="stack" style="align-items: center;">
@@ -268,5 +277,20 @@
 	.ref-layout :global(.battler-progress) {
 		--battler-avatar-size: 72px;
 		--min-display-width: 100px;
+	}
+
+	.paused-overlay {
+		position: fixed;
+		inset: 0;
+		background: rgb(0 0 0 / 0.65);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 50;
+	}
+
+	.paused-card {
+		width: min(90vw, 480px);
+		text-align: center;
 	}
 </style>

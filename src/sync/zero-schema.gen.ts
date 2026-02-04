@@ -316,6 +316,11 @@ const battlesTable = {
 			optional: true,
 			customType: null as unknown as number
 		},
+		paused_at: {
+			type: 'number',
+			optional: true,
+			customType: null as unknown as number
+		},
 		allow_time_extension: {
 			type: 'boolean',
 			optional: true,

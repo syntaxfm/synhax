@@ -32,11 +32,13 @@
 		jukebox.preload();
 	});
 
-	let previousStatus: string | null = $state(null);
+	let previousStatus: string | null = null;
 
 	let battle = $derived(
 		z.createQuery(queries.battles.byIdSimple({ id: page?.params?.id || '' }))
 	);
+
+	const isPaused = $derived(Boolean(battle.data?.paused_at));
 
 	let hax = $derived(
 		z.createQuery(queries.hax.myForBattle({ battleId: battle?.data?.id || '' }))
@@ -72,7 +74,7 @@
 		});
 	});
 
-	let poll_timer: NodeJS.Timeout | null = $state(null);
+	let poll_timer: NodeJS.Timeout | null = null;
 
 	$effect(() => {
 		if (battle.data?.id && folder_name) {
@@ -101,7 +103,12 @@
 	});
 
 	$effect(() => {
-		if (!battle.data?.id || !hax.data?.id || files.status !== 'ACCESS') {
+		if (
+			!battle.data?.id ||
+			!hax.data?.id ||
+			files.status !== 'ACCESS' ||
+			isPaused
+		) {
 			if (poll_timer) {
 				clearInterval(poll_timer);
 				poll_timer = null;
@@ -136,7 +143,6 @@
 	<title>{battle.data?.target?.name ?? 'Battle'} - Synhax</title>
 </svelte:head>
 
-
 {#if battle.data}
 	<main class="stack battle-code-page" style="--stack-gap: 0;">
 		<Header
@@ -158,6 +164,15 @@
 			<BattleMode battle={battle.data} hax={hax.data} />
 		{/if}
 	</main>
+
+	{#if isPaused}
+		<div class="paused-overlay">
+			<div class="layout-card stack paused-card" style="--gap: 0.75rem;">
+				<h2>Battle Paused</h2>
+				<p>The referee has paused the battle.</p>
+			</div>
+		</div>
+	{/if}
 {/if}
 
 <Modal open={files.status !== 'ACCESS'} title="File Access">
@@ -186,5 +201,20 @@
 		flex: 1;
 		min-height: 0;
 		gap: 0 var(--inline-gap);
+	}
+
+	.paused-overlay {
+		position: fixed;
+		inset: 0;
+		background: rgb(0 0 0 / 0.65);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 50;
+	}
+
+	.paused-card {
+		width: min(90vw, 480px);
+		text-align: center;
 	}
 </style>
