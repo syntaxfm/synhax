@@ -68,9 +68,10 @@
 		}
 
 		// Air horn at zero
-		if (seconds === 0 && lastBeepSecond !== 0) {
+		if (seconds === 0 && lastBeepSecond !== 0 && view === 'CODE') {
 			console.log(`[Countdown] Playing air horn at zero`);
 			lastBeepSecond = 0;
+			console.log('playing air horn');
 			jukebox.play('air-horn');
 		}
 	});
