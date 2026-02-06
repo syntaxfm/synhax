@@ -188,7 +188,7 @@
 					const outcomeLabel = winner
 						? isWinner
 							? 'Winner'
-							: 'LOSER'
+							: 'Loser'
 						: 'No Winner';
 					const tone = winner ? (isWinner ? 'win' : 'loss') : 'neutral';
 					return {
@@ -210,7 +210,7 @@
 		<div class="paused-overlay">
 			<div class="layout-card stack paused-card" style="--gap: 0.75rem;">
 				<h2>Battle Paused</h2>
-				<p>The referee has paused the battle.</p>
+				<p>The host has paused the battle.</p>
 			</div>
 		</div>
 	{/if}

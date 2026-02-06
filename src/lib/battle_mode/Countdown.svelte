@@ -193,7 +193,7 @@
 		open={status === 'OVER' &&
 			['ACTIVE', 'COMPLETED'].includes(battle.status ?? 'PENDING')}
 	>
-		<p>Battle recap pending....</p>
+		<p>Calculating results...</p>
 		{#if view === 'CODE'}
 			<a
 				class="go_button button big_button"

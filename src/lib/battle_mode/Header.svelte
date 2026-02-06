@@ -45,7 +45,7 @@
 		hasHeadToHead && rightScore > leftScore && rightScore > 0
 	);
 	const WINNING_TEXT = $derived(
-		battle.status === 'COMPLETED' ? 'WINNER' : 'WINNING'
+		battle.status === 'COMPLETED' ? 'Winner' : 'Winning'
 	);
 </script>
 

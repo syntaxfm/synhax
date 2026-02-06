@@ -120,13 +120,13 @@
 
 	function getOutcomeLabel(participant: WinnerParticipant) {
 		if (isSoloBattle) {
-			return 'COMPLETED';
+			return 'Completed';
 		}
 		if (!winner) {
 			return 'No Winner';
 		}
 
-		return isWinnerParticipant(participant) ? 'WINNER' : 'LOSER';
+		return isWinnerParticipant(participant) ? 'Winner' : 'Loser';
 	}
 
 	const soloLeaderboardRows = $derived.by(() => {
@@ -228,8 +228,8 @@
 		<section class="stack" style="--gap: 1rem;">
 			{#if isSoloBattle}
 				<p class="solo-copy">
-					Solo challenge recap. Your score is measured against the target and
-					timer, not against a loser.
+					Solo battle recap. Your score is measured against the target and
+					timer, not against an opponent.
 				</p>
 			{/if}
 			<BattleRecapGrid
@@ -258,7 +258,7 @@
 			<section class="stack leaderboard" style="--gap: 0.75rem;">
 				<h2>Public Solo Leaderboard</h2>
 				<p class="muted">
-					This leaderboard includes public completed solo challenges for this
+					This leaderboard includes public completed solo battles for this
 					target.
 				</p>
 				<div class="table-wrap">

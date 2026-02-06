@@ -129,7 +129,7 @@
 				></path></g
 			>
 		</svg>
-		Login With Github
+		Log in with GitHub
 	</button>
 
 	{#if dev}

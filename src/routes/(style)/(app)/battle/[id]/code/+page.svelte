@@ -208,14 +208,17 @@
 		<div class="paused-overlay">
 			<div class="layout-card stack paused-card" style="--gap: 0.75rem;">
 				<h2>Battle Paused</h2>
-				<p>The referee has paused the battle.</p>
+				<p>The host has paused the battle.</p>
 			</div>
 		</div>
 	{/if}
 {/if}
 
 <Modal open={files.status !== 'ACCESS'} title="File Access">
-	<p>Your file access needs to be restored after refresh</p>
+	<p>
+		Re-grant folder access to continue (browser security requires this after a
+		refresh).
+	</p>
 	<button
 		onclick={() => files.restore_directory_handle()}
 		class="big_button go_button">Give Access</button

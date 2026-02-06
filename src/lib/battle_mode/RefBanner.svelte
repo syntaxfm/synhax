@@ -7,10 +7,10 @@
 {#if battle.referee_id === z.userID}
 	<section>
 		<p>
-			You are the referee, head on over to the <a
+			You're hosting this battle. Open the <a
 				target="_blank"
-				href={`/battle/${battle.id}/ref`}>referee dashboard</a
-			> to get this party started.
+				href={`/battle/${battle.id}/ref`}>host dashboard</a
+			> to manage the match.
 		</p>
 	</section>
 {/if}

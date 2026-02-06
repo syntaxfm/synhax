@@ -8,6 +8,7 @@
 	import Modal from '$lib/ui/Modal.svelte';
 	import ToggleButton from '$lib/ui/ToggleButton.svelte';
 	import { mutators, queries, z } from '$lib/zero.svelte';
+	import { formatBattleStatus } from '$lib/constants';
 	import Battlers from './Battlers.svelte';
 
 	let battle = $derived(
@@ -72,6 +73,10 @@
 
 	let soloStarting = $state(false);
 	let soloStartError = $state('');
+	let modeSwitching = $state(false);
+	let battleModeError = $state('');
+
+	const can_switch_to_solo = $derived(active_participants.length <= 1);
 
 	$effect(() => {
 		if (!battle.data) return;
@@ -125,7 +130,7 @@
 		try {
 			await mutation.server;
 		} catch (error) {
-			console.error('Failed to finish solo challenge:', error);
+			console.error('Failed to finish solo battle:', error);
 		}
 	}
 
@@ -237,16 +242,18 @@
 		soloStartError = '';
 
 		if (!folder_name || !my_solo_hax) {
-			soloStartError = 'Solo files are not ready yet. Refresh and try again.';
+			soloStartError = 'Battle files are not ready yet. Refresh and try again.';
 			soloStarting = false;
 			return;
 		}
 
 		const hasAccess =
-			files.status === 'ACCESS' || (await files.restore_directory_handle());
-		if (!hasAccess) {
+			files.status === 'ACCESS' && files.synhax_directory_handle
+				? true
+				: await files.restore_directory_handle();
+		if (!hasAccess || !files.synhax_directory_handle) {
 			soloStartError =
-				'File access is required before starting a solo challenge.';
+				'Grant folder access so Synhax can save your code files locally.';
 			soloStarting = false;
 			return;
 		}
@@ -259,7 +266,7 @@
 				battle.data.id
 			);
 		} catch (error) {
-			soloStartError = 'Unable to prepare your local challenge files.';
+			soloStartError = 'Unable to prepare your local battle files.';
 			console.error('Failed to set up solo files:', error);
 			soloStarting = false;
 			return;
@@ -275,10 +282,53 @@
 			await mutation.server;
 			goto(`/battle/${battle.data.id}/code`);
 		} catch (error) {
-			soloStartError = 'Could not start challenge. Please try again.';
-			console.error('Failed to start solo challenge:', error);
+			soloStartError = 'Could not start battle. Please try again.';
+			console.error('Failed to start solo battle:', error);
 		} finally {
 			soloStarting = false;
+		}
+	}
+
+	async function set_battle_mode(next_type: 'SOLO' | 'TIMED_MATCH') {
+		if (
+			!battle.data ||
+			!is_referee ||
+			battle.data.status !== 'PENDING' ||
+			modeSwitching ||
+			next_type === battle.data.type
+		) {
+			return;
+		}
+
+		if (next_type === 'SOLO' && !can_switch_to_solo) {
+			battleModeError =
+				'Two-player battles with invited participants cannot switch back to solo.';
+			return;
+		}
+
+		modeSwitching = true;
+		battleModeError = '';
+
+		const mutation = z.mutate(
+			mutators.battles.update({
+				id: battle.data.id,
+				type: next_type,
+				allow_time_extension: next_type === 'TIMED_MATCH',
+				overtime_seconds: 0,
+				win_condition:
+					next_type === 'SOLO'
+						? 'FIRST_TO_PERFECT'
+						: (battle.data.win_condition ?? 'FIRST_TO_PERFECT')
+			})
+		);
+
+		try {
+			await mutation.server;
+		} catch (error) {
+			battleModeError = `Could not switch to ${next_type === 'SOLO' ? 'solo' : '2-player'} mode. Please try again.`;
+			console.error('Failed to switch battle mode:', error);
+		} finally {
+			modeSwitching = false;
 		}
 	}
 
@@ -358,9 +408,9 @@
 
 		<!-- Battle status indicator -->
 		{#if battle.data.status !== 'PENDING'}
-			<p class="cluster" style="justify-content: center; t">
+			<p class="cluster" style="justify-content: center;">
 				<span class="status-text {battle.data.status?.toLowerCase()}">
-					{battle.data.status}
+					{formatBattleStatus(battle.data.status)}
 				</span>
 			</p>
 		{/if}
@@ -385,6 +435,25 @@
 						onchange={update_battle_name}
 					/>
 				</div>
+
+				<div class="cluster">
+					<span>Battle Mode:</span>
+					<ToggleButton
+						toggle={is_solo}
+						on_text="Solo"
+						off_text="Two Player"
+						disabled={modeSwitching}
+						ontoggle={() => set_battle_mode(is_solo ? 'TIMED_MATCH' : 'SOLO')}
+					/>
+					<span class="help-text">
+						{is_solo
+							? 'Complete the target on your own against a timer.'
+							: 'Invite an opponent. Both players must be ready before the battle can start.'}
+					</span>
+				</div>
+				{#if battleModeError}
+					<p class="error-message">{battleModeError}</p>
+				{/if}
 
 				{#if !is_solo}
 					<div class="cluster">
@@ -426,7 +495,7 @@
 							/>
 							<span class="help-text">
 								{(battle.data.allow_time_extension ?? true)
-									? 'Referee can extend time when battle ends'
+									? 'Host can extend time when battle ends'
 									: 'Battle auto-ends and goes to recap'}
 							</span>
 						</div>
@@ -460,15 +529,7 @@
 			/>
 		{/if}
 
-		{#if is_solo}
-			<section class="stack" style="align-items: center; --gap: 0.35rem;">
-				<h2 class="game-title">Solo Challenge</h2>
-				<p class="muted" style="text-align: center;">
-					You're competing against the clock only - no invites or head-to-head
-					rounds.
-				</p>
-			</section>
-		{:else}
+		{#if !is_solo}
 			<Battlers battle={battleData} {is_referee} />
 		{/if}
 
@@ -492,8 +553,14 @@
 					onclick={start_solo}
 					disabled={soloStarting}
 				>
-					{soloStarting ? 'Starting...' : 'Start Challenge'}
+					{soloStarting ? 'Starting...' : 'Start Battle'}
 				</button>
+				{#if files.status !== 'ACCESS'}
+					<p class="help-text" style="text-align: center;">
+						Synhax needs access to a folder on your computer to save your code
+						files locally.
+					</p>
+				{/if}
 				<p class="muted" style="text-align: center;">
 					No overtime and no pauses. Timer starts immediately.
 				</p>
@@ -508,18 +575,17 @@
 					onclick={lock_in}
 					disabled={!can_start}
 				>
-					Lock In Players
+					Confirm Players
 				</button>
 			</div>
 			{#if !can_start}
 				<p class="muted" style="text-align: center;">
-					Need at least {MIN_PARTICIPANTS} battler{MIN_PARTICIPANTS === 1
-						? ''
-						: 's'} ready to lock in ({ready_count}/{MIN_PARTICIPANTS})
+					Both players need to be ready before you can start ({ready_count}/{MIN_PARTICIPANTS}
+					ready)
 				</p>
 			{/if}
 		{:else if battle.data?.status === 'PENDING' && is_participant && !is_solo}
-			<p class="waiting-message">Waiting for referee to lock in players...</p>
+			<p class="waiting-message">Waiting for the host to start the battle...</p>
 		{/if}
 
 		<!-- READY state controls -->
@@ -527,16 +593,16 @@
 			<div class="stack" style="align-items: center; --gap: 1rem;">
 				{#if is_referee}
 					<button class="go_button big_button" onclick={start}>
-						Start Battle
+						Start the Battle
 					</button>
 					<p class="muted" style="text-align: center;">
-						Players are preparing. Click to start the clock!
+						Everyone's ready. Click to start the countdown!
 					</p>
 				{/if}
 
 				{#if is_participant}
 					<a href={`/battle/${battle.data.id}/code`} class="button primary">
-						Battle Ready! Please click to enter the battle →
+						You're in! Click here to enter the battle.
 					</a>
 				{/if}
 			</div>
@@ -546,10 +612,10 @@
 		{#if battle.data?.status === 'ACTIVE' && is_referee && !is_solo}
 			<div class="cluster" style="justify-content: center; --gap: 1rem;">
 				<a href={`/battle/${battle.data.id}/ref`} class="button">
-					View Battle
+					Enter Battle
 				</a>
 				<button class="go_button" onclick={finish_battle}>
-					End Battle Now
+					End Battle Early
 				</button>
 			</div>
 		{/if}
@@ -612,7 +678,10 @@
 	<div class="layout-readable stack battle-surface">
 		<h2 class="game-title">Battle Not Found!</h2>
 		<p>The battle you are looking for does not exist.</p>
-		<p>If you believe this is an error, please contact support.</p>
+		<p>
+			If you believe this is an error, try refreshing or heading back to the
+			dashboard.
+		</p>
 		<code>Battle ID: {page.params.id}</code>
 	</div>
 {/if}

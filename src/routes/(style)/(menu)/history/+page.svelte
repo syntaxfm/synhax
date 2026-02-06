@@ -12,7 +12,7 @@
 	<h1 class="game-title">History</h1>
 
 	{#if history.data.length === 0}
-		<p>No battles found.</p>
+		<p>You haven't completed any battles yet.</p>
 	{:else}
 		<table>
 			<thead>

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { type Battle, type Target } from '$sync/schema';
+	import { formatBattleStatus } from '$lib/constants';
 	import { onMount } from 'svelte';
 
 	const {
@@ -136,7 +137,7 @@
 		<div class="title-row">
 			<h2>{battle.name || battle.target?.name || 'Unknown Target'}</h2>
 			<span class="status-badge" style="--status-color: {statusColor}">
-				{battle.status}
+				{formatBattleStatus(battle.status)}
 			</span>
 		</div>
 
@@ -233,7 +234,7 @@
 			{#if battle.status === 'PENDING'}
 				Join Lobby
 			{:else if battle.status === 'READY'}
-				Prepare for Battle
+				Enter Lobby
 			{:else if battle.status === 'ACTIVE'}
 				Continue Battle
 			{:else}
