@@ -12,6 +12,8 @@ import {
 	user_award_enum,
 	target_type_enum
 } from '$db/schema';
+import { CSS_TEMPLATE, HTML_TEMPLATE } from '$lib/constants';
+import { parseTargetCode } from '$utils/code';
 
 /**
  * Battle Mode Mutators
@@ -71,6 +73,10 @@ async function getVote(tx: RunTx, voteId: string) {
 
 async function getRating(tx: RunTx, ratingId: string) {
 	return runOne(tx, zql.ratings.where('id', ratingId).one());
+}
+
+async function getTarget(tx: RunTx, targetId: string) {
+	return runOne(tx, zql.targets.where('id', targetId).one());
 }
 
 async function assertBattleOwner(
@@ -189,6 +195,243 @@ export const mutators = defineMutators({
 	// BATTLES
 	// ==================
 	battles: {
+		create_solo: defineMutator(
+			type({
+				battle_id: 'string',
+				participant_id: 'string',
+				hax_id: 'string',
+				zero_room_id: 'string',
+				target_id: 'string',
+				'total_time_seconds?': 'number',
+				'name?': 'string'
+			}),
+			async ({ tx, args, ctx }) => {
+				assertAuthenticated(ctx);
+				const userId = ctx.userID;
+				const existing = (await runOne(
+					tx,
+					zql.battles.where(({ and, cmp }) =>
+						and(
+							cmp('type', 'SOLO'),
+							cmp('target_id', args.target_id),
+							cmp('referee_id', userId)
+						)
+					)
+				)) as { id?: string } | null;
+				if (existing?.id) {
+					throw new Error(
+						'You already have a solo challenge for this target. Continue the existing attempt.'
+					);
+				}
+
+				const target = (await getTarget(tx, args.target_id)) as {
+					id?: string;
+					name?: string | null;
+					inspo?: string | null;
+				} | null;
+				if (!target?.id) {
+					throw new Error('Target not found');
+				}
+
+				const targetCode = parseTargetCode(target.inspo ?? '');
+				const starterHtml = targetCode.starter_html || HTML_TEMPLATE;
+				const starterCss = targetCode.starter_css || CSS_TEMPLATE;
+				const now = Date.now();
+				const totalTimeSeconds = Math.max(
+					60,
+					Math.round(args.total_time_seconds ?? 600)
+				);
+				try {
+					await tx.mutate.battles.insert({
+						id: args.battle_id,
+						name: args.name ?? `${target.name ?? 'Target'} Solo Challenge`,
+						target_id: args.target_id,
+						zero_room_id: args.zero_room_id,
+						referee_id: userId,
+						type: 'SOLO',
+						status: 'PENDING',
+						visibility: 'PUBLIC',
+						win_condition: 'FIRST_TO_PERFECT',
+						total_time_seconds: totalTimeSeconds,
+						overtime_seconds: 0,
+						allow_time_extension: false,
+						date: now,
+						created_at: now,
+						updated_at: now
+					});
+
+					await tx.mutate.battle_participants.insert({
+						id: args.participant_id,
+						battle_id: args.battle_id,
+						user_id: userId,
+						status: 'READY',
+						display_order: 0,
+						joined_at: now,
+						created_at: now,
+						updated_at: now
+					});
+
+					await tx.mutate.hax.insert({
+						id: args.hax_id,
+						user_id: userId,
+						target_id: args.target_id,
+						battle_id: args.battle_id,
+						html: starterHtml,
+						css: starterCss,
+						type: 'BATTLE',
+						is_final: false,
+						created_at: now,
+						updated_at: now
+					});
+				} catch (error) {
+					const message =
+						error instanceof Error ? error.message : String(error);
+					if (message.includes('battles_unique_solo_attempt_per_target')) {
+						throw new Error(
+							'You already have a solo challenge for this target. Continue the existing attempt.'
+						);
+					}
+					throw error;
+				}
+			}
+		),
+		start_solo: defineMutator(
+			type({
+				id: 'string',
+				'total_time_seconds?': 'number'
+			}),
+			async ({ tx, args, ctx }) => {
+				assertAuthenticated(ctx);
+				const battle = (await getBattle(tx, args.id)) as {
+					id?: string;
+					type?: string | null;
+					status?: string | null;
+					referee_id?: string;
+					total_time_seconds?: number | null;
+				} | null;
+				if (!battle?.id) {
+					throw new Error('Battle not found');
+				}
+				if (battle.type !== 'SOLO') {
+					throw new Error('Only SOLO battles can be started with start_solo');
+				}
+				if (!isAdmin(ctx) && battle.referee_id !== ctx.userID) {
+					throw new Error('Only the solo owner can start this challenge');
+				}
+				if (battle.status !== 'PENDING') {
+					throw new Error('Solo challenge can only start from PENDING status');
+				}
+
+				const durationSeconds = Math.min(
+					7200,
+					Math.max(
+						60,
+						Math.round(
+							args.total_time_seconds ?? battle.total_time_seconds ?? 600
+						)
+					)
+				);
+				const now = Date.now();
+				const participants = (await tx.run(
+					zql.battle_participants.where('battle_id', args.id)
+				)) as { id: string }[];
+
+				await tx.mutate.battles.update({
+					id: args.id,
+					status: 'ACTIVE',
+					total_time_seconds: durationSeconds,
+					starts_at: now,
+					ends_at: now + durationSeconds * 1000,
+					overtime_seconds: 0,
+					allow_time_extension: false,
+					win_condition: 'FIRST_TO_PERFECT',
+					updated_at: now
+				});
+
+				for (const participant of participants) {
+					await tx.mutate.battle_participants.update({
+						id: participant.id,
+						status: 'ACTIVE',
+						updated_at: now
+					});
+				}
+			}
+		),
+		finish_solo: defineMutator(
+			type({
+				id: 'string'
+			}),
+			async ({ tx, args, ctx }) => {
+				assertAuthenticated(ctx);
+				const battle = (await getBattle(tx, args.id)) as {
+					id?: string;
+					type?: string | null;
+					status?: string | null;
+					referee_id?: string;
+					starts_at?: number | null;
+					winner_hax_id?: string | null;
+				} | null;
+				if (!battle?.id) {
+					throw new Error('Battle not found');
+				}
+				if (battle.type !== 'SOLO') {
+					throw new Error('Only SOLO battles can be finished with finish_solo');
+				}
+				if (!isAdmin(ctx) && battle.referee_id !== ctx.userID) {
+					throw new Error('Only the solo owner can finish this challenge');
+				}
+				if (battle.status === 'COMPLETED') {
+					return;
+				}
+				if (battle.status !== 'ACTIVE') {
+					throw new Error(
+						'Solo challenge can only be finished from ACTIVE status'
+					);
+				}
+
+				const participant = (await runOne(
+					tx,
+					zql.battle_participants.where(({ and, cmp }) =>
+						and(
+							cmp('battle_id', args.id),
+							cmp('user_id', battle.referee_id ?? '')
+						)
+					)
+				)) as { id?: string } | null;
+				if (!participant?.id) {
+					throw new Error('Solo participant not found');
+				}
+
+				const battleHax = (await runOne(
+					tx,
+					zql.hax.where(({ and, cmp }) =>
+						and(
+							cmp('battle_id', args.id),
+							cmp('user_id', battle.referee_id ?? '')
+						)
+					)
+				)) as { id?: string } | null;
+				if (!battleHax?.id) {
+					throw new Error('Solo submission not found');
+				}
+
+				const now = Date.now();
+				await tx.mutate.battle_participants.update({
+					id: participant.id,
+					status: 'FINISHED',
+					finished_at: now,
+					updated_at: now
+				});
+
+				await tx.mutate.battles.update({
+					id: args.id,
+					status: 'COMPLETED',
+					winner_hax_id: battle.winner_hax_id ?? battleHax.id,
+					ends_at: now,
+					updated_at: now
+				});
+			}
+		),
 		insert: defineMutator(
 			type({
 				id: 'string',
@@ -258,6 +501,38 @@ export const mutators = defineMutators({
 					status: args.status,
 					winner_hax_id: args.winner_hax_id
 				});
+				const existingBattle = (await getBattle(tx, args.id)) as {
+					type?: string | null;
+				} | null;
+				if (!existingBattle) {
+					throw new Error('Battle not found');
+				}
+				if (existingBattle.type === 'SOLO') {
+					if (args.type !== undefined && args.type !== 'SOLO') {
+						throw new Error('SOLO battle type cannot be changed');
+					}
+					if (
+						args.win_condition !== undefined &&
+						args.win_condition !== 'FIRST_TO_PERFECT'
+					) {
+						throw new Error(
+							'SOLO battles must use FIRST_TO_PERFECT win condition'
+						);
+					}
+					if (args.status === 'READY') {
+						throw new Error('SOLO battles do not use READY status');
+					}
+					if (args.allow_time_extension === true) {
+						throw new Error('SOLO battles cannot enable time extensions');
+					}
+					if (
+						args.overtime_seconds !== undefined &&
+						args.overtime_seconds !== null &&
+						args.overtime_seconds > 0
+					) {
+						throw new Error('SOLO battles cannot have overtime');
+					}
+				}
 				if (battleAccess === 'winner') {
 					const disallowedWinnerFieldUpdate =
 						args.name !== undefined ||
@@ -346,19 +621,36 @@ export const mutators = defineMutators({
 				if (!isAdmin(ctx) && args.user_id !== ctx.userID) {
 					throw new Error('Participants can only be created for yourself');
 				}
+				const battle = (await getBattle(tx, args.battle_id)) as {
+					type?: string | null;
+					referee_id?: string;
+				} | null;
+				if (!battle) {
+					throw new Error('Battle not found');
+				}
 				const participants = (await tx.run(
 					zql.battle_participants.where('battle_id', args.battle_id)
 				)) as { id?: string; status?: string | null }[];
+				const maxParticipants = battle.type === 'SOLO' ? 1 : 2;
 				const activeCount = Array.isArray(participants)
 					? participants.filter(
 							(participant) =>
 								participant.status !== 'DROPPED' && participant.id !== args.id
 						).length
 					: 0;
-				if (activeCount >= 2) {
-					throw new Error('Battle already has two participants');
+				if (activeCount >= maxParticipants) {
+					throw new Error(
+						battle.type === 'SOLO'
+							? 'SOLO challenges only allow one participant'
+							: 'Battle already has two participants'
+					);
 				}
 				const userId = isAdmin(ctx) ? args.user_id : ctx.userID;
+				if (battle.type === 'SOLO' && battle.referee_id !== userId) {
+					throw new Error(
+						'SOLO challenges only allow the owner as a participant'
+					);
+				}
 				const now = Date.now();
 				await tx.mutate.battle_participants.insert({
 					id: args.id,
@@ -405,6 +697,13 @@ export const mutators = defineMutators({
 					joined_at?: number | null;
 					created_at?: number | null;
 				} | null;
+				const battle = (await getBattle(tx, args.battle_id)) as {
+					type?: string | null;
+					referee_id?: string;
+				} | null;
+				if (!battle) {
+					throw new Error('Battle not found');
+				}
 				if (existing) {
 					await assertParticipantOwner(tx, ctx, args.id);
 				}
@@ -412,6 +711,30 @@ export const mutators = defineMutators({
 					throw new Error('Participants can only be updated for yourself');
 				}
 				const userId = isAdmin(ctx) ? args.user_id : ctx.userID;
+				if (battle.type === 'SOLO' && battle.referee_id !== userId) {
+					throw new Error(
+						'SOLO challenges only allow the owner as a participant'
+					);
+				}
+				if (!existing) {
+					const participants = (await tx.run(
+						zql.battle_participants.where('battle_id', args.battle_id)
+					)) as { id?: string; status?: string | null }[];
+					const maxParticipants = battle.type === 'SOLO' ? 1 : 2;
+					const activeCount = Array.isArray(participants)
+						? participants.filter(
+								(participant) =>
+									participant.status !== 'DROPPED' && participant.id !== args.id
+							).length
+						: 0;
+					if (activeCount >= maxParticipants) {
+						throw new Error(
+							battle.type === 'SOLO'
+								? 'SOLO challenges only allow one participant'
+								: 'Battle already has two participants'
+						);
+					}
+				}
 				const now = Date.now();
 				const joinedAt = Math.trunc(existing?.joined_at ?? now);
 				const createdAt = Math.trunc(existing?.created_at ?? now);
@@ -450,9 +773,13 @@ export const mutators = defineMutators({
 				// Verify caller is the battle's referee or admin
 				const battle = (await getBattle(tx, args.battle_id)) as {
 					referee_id?: string;
+					type?: string | null;
 				} | null;
 				if (!battle?.referee_id) {
 					throw new Error('Battle not found');
+				}
+				if (battle.type === 'SOLO') {
+					throw new Error('SOLO challenges do not support invites');
 				}
 				if (!isAdmin(ctx) && battle.referee_id !== ctx.userID) {
 					throw new Error('Only the referee can invite users');

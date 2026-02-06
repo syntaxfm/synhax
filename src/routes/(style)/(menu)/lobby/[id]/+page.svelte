@@ -4,7 +4,7 @@
 	import Countdown from '$lib/battle_mode/Countdown.svelte';
 	import InviteUser from '$lib/battle_mode/InviteUser.svelte';
 	import ShareLinks from '$lib/battle_mode/ShareLinks.svelte';
-	import { build_hax_folder_name } from '$lib/state/FileState.svelte';
+	import { build_hax_folder_name, files } from '$lib/state/FileState.svelte';
 	import Modal from '$lib/ui/Modal.svelte';
 	import ToggleButton from '$lib/ui/ToggleButton.svelte';
 	import { mutators, queries, z } from '$lib/zero.svelte';
@@ -16,6 +16,7 @@
 
 	const user = z.createQuery(queries.user.current());
 	const is_admin = $derived(user.data?.role === 'syntax');
+	const is_solo = $derived(battle.data?.type === 'SOLO');
 
 	// Track countdown status for modal
 	let over_status: 'ACTIVE' | 'OVER' = $state('ACTIVE');
@@ -61,12 +62,24 @@
 		});
 	});
 
+	const my_solo_hax = $derived.by(() => {
+		if (!is_solo) return null;
+		const participant = battle.data?.participants?.find(
+			(candidate) => candidate.user_id === z.userID
+		);
+		return participant?.hax ?? null;
+	});
+
+	let soloStarting = $state(false);
+	let soloStartError = $state('');
+
 	$effect(() => {
 		if (!battle.data) return;
 		if (
+			!is_solo &&
 			is_referee &&
 			battle.data.type === 'TIME_TRIAL' &&
-			['PENDING', 'READY'].includes(battle.data.status)
+			['PENDING', 'READY'].includes(battle.data.status ?? '')
 		) {
 			z.mutate(
 				mutators.battles.update({
@@ -75,8 +88,12 @@
 				})
 			);
 		}
+		if (battle.data.status === 'ACTIVE' && is_solo && is_participant) {
+			goto(`/battle/${battle.data.id}/code`);
+			return;
+		}
 		// ACTIVE state: redirect Referee to referee view
-		if (battle.data.status === 'ACTIVE' && is_referee) {
+		if (battle.data.status === 'ACTIVE' && is_referee && !is_solo) {
 			goto(`/ref/${battle.data.id}`);
 			return;
 		}
@@ -97,6 +114,20 @@
 			goto(`/recap/${battle.data.id}`);
 		}
 	});
+
+	async function finish_solo_battle() {
+		if (!battle.data || !is_referee || !is_solo) return;
+		const mutation = z.mutate(
+			mutators.battles.finish_solo({
+				id: battle.data.id
+			})
+		);
+		try {
+			await mutation.server;
+		} catch (error) {
+			console.error('Failed to finish solo challenge:', error);
+		}
+	}
 
 	async function toggle_privacy() {
 		if (!battle.data || !is_referee) return;
@@ -175,7 +206,7 @@
 
 	async function start() {
 		if (!battle.data || !is_referee) {
-			toast.error('You are not authorized to start this battle');
+			console.error('You are not authorized to start this battle');
 			return;
 		}
 		// Can only start from READY state
@@ -198,6 +229,57 @@
 
 		// Redirect battlers to the battle code view
 		goto(`/battle/${page.params.id}/code`);
+	}
+
+	async function start_solo() {
+		if (!battle.data || !is_referee || !is_solo || soloStarting) return;
+		soloStarting = true;
+		soloStartError = '';
+
+		if (!folder_name || !my_solo_hax) {
+			soloStartError = 'Solo files are not ready yet. Refresh and try again.';
+			soloStarting = false;
+			return;
+		}
+
+		const hasAccess =
+			files.status === 'ACCESS' || (await files.restore_directory_handle());
+		if (!hasAccess) {
+			soloStartError =
+				'File access is required before starting a solo challenge.';
+			soloStarting = false;
+			return;
+		}
+
+		try {
+			await files.create_hax_directory(
+				folder_name,
+				my_solo_hax.html ?? '',
+				my_solo_hax.css ?? '',
+				battle.data.id
+			);
+		} catch (error) {
+			soloStartError = 'Unable to prepare your local challenge files.';
+			console.error('Failed to set up solo files:', error);
+			soloStarting = false;
+			return;
+		}
+
+		const mutation = z.mutate(
+			mutators.battles.start_solo({
+				id: battle.data.id,
+				total_time_seconds: battle.data.total_time_seconds || 600
+			})
+		);
+		try {
+			await mutation.server;
+			goto(`/battle/${battle.data.id}/code`);
+		} catch (error) {
+			soloStartError = 'Could not start challenge. Please try again.';
+			console.error('Failed to start solo challenge:', error);
+		} finally {
+			soloStarting = false;
+		}
 	}
 
 	async function add_overtime(minutes: number) {
@@ -269,7 +351,7 @@
 					battle={battle.data}
 					bind:status={over_status}
 					view="REF"
-					onautoend={finish_battle}
+					onautoend={is_solo ? finish_solo_battle : finish_battle}
 				/>
 			</div>
 		{/if}
@@ -304,16 +386,18 @@
 					/>
 				</div>
 
-				<div class="cluster">
-					<ToggleButton
-						toggle={battle.data.visibility === 'PUBLIC'}
-						ontoggle={toggle_privacy}
-						on_text="Public"
-						off_text="Private"
-					/>
-				</div>
+				{#if !is_solo}
+					<div class="cluster">
+						<ToggleButton
+							toggle={battle.data.visibility === 'PUBLIC'}
+							ontoggle={toggle_privacy}
+							on_text="Public"
+							off_text="Private"
+						/>
+					</div>
+				{/if}
 
-				{#if battle.data?.type === 'TIMED_MATCH'}
+				{#if battle.data?.type === 'TIMED_MATCH' || is_solo}
 					<div class="cluster">
 						<label for="time-limit">Time Limit:</label>
 						<input
@@ -328,38 +412,44 @@
 						<span>minutes</span>
 					</div>
 
-					<div class="cluster">
-						<ToggleButton
-							toggle={battle.data.allow_time_extension ?? true}
-							ontoggle={toggle_time_extension}
-							on_text="Allow Overtime"
-							off_text="Auto-End"
-						/>
-						<span class="help-text">
-							{(battle.data.allow_time_extension ?? true)
-								? 'Referee can extend time when battle ends'
-								: 'Battle auto-ends and goes to recap'}
-						</span>
-					</div>
+					{#if is_solo}
+						<p class="help-text">
+							Solo mode uses a strict timer. No overtime is available.
+						</p>
+					{:else}
+						<div class="cluster">
+							<ToggleButton
+								toggle={battle.data.allow_time_extension ?? true}
+								ontoggle={toggle_time_extension}
+								on_text="Allow Overtime"
+								off_text="Auto-End"
+							/>
+							<span class="help-text">
+								{(battle.data.allow_time_extension ?? true)
+									? 'Referee can extend time when battle ends'
+									: 'Battle auto-ends and goes to recap'}
+							</span>
+						</div>
 
-					<div class="cluster">
-						<ToggleButton
-							toggle={battle.data.win_condition === 'FIRST_TO_PERFECT'}
-							ontoggle={toggle_win_condition}
-							on_text="Race to 100%"
-							off_text="Voting"
-						/>
-						<span class="help-text">
-							{battle.data.win_condition === 'FIRST_TO_PERFECT'
-								? 'First to 100% accuracy wins instantly'
-								: 'Winner decided by voting after battle'}
-						</span>
-					</div>
+						<div class="cluster">
+							<ToggleButton
+								toggle={battle.data.win_condition === 'FIRST_TO_PERFECT'}
+								ontoggle={toggle_win_condition}
+								on_text="Race to 100%"
+								off_text="Voting"
+							/>
+							<span class="help-text">
+								{battle.data.win_condition === 'FIRST_TO_PERFECT'
+									? 'First to 100% accuracy wins instantly'
+									: 'Winner decided by voting after battle'}
+							</span>
+						</div>
+					{/if}
 				{/if}
 			</section>
 		{/if}
 
-		{#if is_referee || is_admin}
+		{#if !is_solo && (is_referee || is_admin)}
 			<ShareLinks
 				battle={battleData}
 				lobby={true}
@@ -370,10 +460,20 @@
 			/>
 		{/if}
 
-		<Battlers battle={battleData} {is_referee} />
+		{#if is_solo}
+			<section class="stack" style="align-items: center; --gap: 0.35rem;">
+				<h2 class="game-title">Solo Challenge</h2>
+				<p class="muted" style="text-align: center;">
+					You're competing against the clock only - no invites or head-to-head
+					rounds.
+				</p>
+			</section>
+		{:else}
+			<Battlers battle={battleData} {is_referee} />
+		{/if}
 
 		<!-- Invite players (ref only, when PENDING and less than 2 participants) -->
-		{#if battle.data?.status === 'PENDING' && is_referee && active_participants.length < 2}
+		{#if !is_solo && battle.data?.status === 'PENDING' && is_referee && active_participants.length < 2}
 			<section class="stack">
 				<h2 class="game-title">Invite Player</h2>
 				<InviteUser
@@ -385,7 +485,23 @@
 		{/if}
 
 		<!-- Lock In button when PENDING (ref only) -->
-		{#if battle.data?.status === 'PENDING' && is_referee}
+		{#if battle.data?.status === 'PENDING' && is_referee && is_solo}
+			<div class="stack" style="align-items: center; --gap: 0.75rem;">
+				<button
+					class="go_button big_button"
+					onclick={start_solo}
+					disabled={soloStarting}
+				>
+					{soloStarting ? 'Starting...' : 'Start Challenge'}
+				</button>
+				<p class="muted" style="text-align: center;">
+					No overtime and no pauses. Timer starts immediately.
+				</p>
+				{#if soloStartError}
+					<p class="error-message">{soloStartError}</p>
+				{/if}
+			</div>
+		{:else if battle.data?.status === 'PENDING' && is_referee}
 			<div class="cluster" style="justify-content: center;">
 				<button
 					class="go_button big_button"
@@ -402,12 +518,12 @@
 						: 's'} ready to lock in ({ready_count}/{MIN_PARTICIPANTS})
 				</p>
 			{/if}
-		{:else if battle.data?.status === 'PENDING' && is_participant}
+		{:else if battle.data?.status === 'PENDING' && is_participant && !is_solo}
 			<p class="waiting-message">Waiting for referee to lock in players...</p>
 		{/if}
 
 		<!-- READY state controls -->
-		{#if battle.data?.status === 'READY'}
+		{#if battle.data?.status === 'READY' && !is_solo}
 			<div class="stack" style="align-items: center; --gap: 1rem;">
 				{#if is_referee}
 					<button class="go_button big_button" onclick={start}>
@@ -427,7 +543,7 @@
 		{/if}
 
 		<!-- Controls when ACTIVE -->
-		{#if battle.data?.status === 'ACTIVE' && is_referee}
+		{#if battle.data?.status === 'ACTIVE' && is_referee && !is_solo}
 			<div class="cluster" style="justify-content: center; --gap: 1rem;">
 				<a href={`/battle/${battle.data.id}/ref`} class="button">
 					View Battle
@@ -449,7 +565,7 @@
 	</div>
 
 	<!-- Time's up modal for TIMED_MATCH -->
-	{#if battle.data?.type === 'TIMED_MATCH'}
+	{#if battle.data?.type === 'TIMED_MATCH' && !is_solo}
 		<Modal
 			title="Time's Up!"
 			open={battle.data.status === 'ACTIVE' && over_status === 'OVER'}
@@ -524,6 +640,13 @@
 	.help-text {
 		color: var(--fg-muted);
 		font-size: var(--font-size-sm);
+	}
+
+	.error-message {
+		margin: 0;
+		color: var(--red);
+		font-size: 0.85rem;
+		text-align: center;
 	}
 
 	input[type='number'] {

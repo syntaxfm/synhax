@@ -17,7 +17,7 @@
 <!-- Difference between battle and target? -->
 <script lang="ts">
 	import BattleMode from './BattleMode.svelte';
-	import { z, queries } from '$lib/zero.svelte';
+	import { z, queries, mutators } from '$lib/zero.svelte';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 	import Countdown from '$lib/battle_mode/Countdown.svelte';
@@ -39,6 +39,7 @@
 	);
 
 	const isPaused = $derived(Boolean(battle.data?.paused_at));
+	const isSoloBattle = $derived(battle.data?.type === 'SOLO');
 
 	let hax = $derived(
 		z.createQuery(queries.hax.myForBattle({ battleId: battle?.data?.id || '' }))
@@ -75,6 +76,7 @@
 	});
 
 	let poll_timer: NodeJS.Timeout | null = null;
+	let soloFinishing = $state(false);
 
 	$effect(() => {
 		if (battle.data?.id && folder_name) {
@@ -137,6 +139,38 @@
 			}
 		};
 	});
+
+	async function finishSoloIfNeeded() {
+		if (
+			!battle.data?.id ||
+			!isSoloBattle ||
+			battle.data.status !== 'ACTIVE' ||
+			soloFinishing
+		) {
+			return;
+		}
+		soloFinishing = true;
+		const mutation = z.mutate(
+			mutators.battles.finish_solo({ id: battle.data.id })
+		);
+		try {
+			await mutation.server;
+		} catch (error) {
+			console.error('Failed to finish solo battle:', error);
+		} finally {
+			soloFinishing = false;
+		}
+	}
+
+	$effect(() => {
+		if (
+			isSoloBattle &&
+			battle.data?.status === 'ACTIVE' &&
+			(hax.data?.diff_score ?? 0) >= 100
+		) {
+			finishSoloIfNeeded();
+		}
+	});
 </script>
 
 <svelte:head>
@@ -144,9 +178,10 @@
 </svelte:head>
 
 {#if battle.data}
+	{@const battleData = battle.data}
 	<main class="stack battle-code-page" style="--stack-gap: 0;">
 		<Header
-			battle={battle.data}
+			battle={battleData}
 			target={false}
 			diffScore={hax.data?.diff_score ?? null}
 			{battlers}
@@ -154,14 +189,18 @@
 		>
 			{#snippet detail()}{/snippet}
 			{#snippet countdown()}
-				{#if battle.data?.type === 'TIMED_MATCH'}
-					<Countdown battle={battle.data} view="CODE" />
+				{#if battleData.type === 'TIMED_MATCH' || isSoloBattle}
+					<Countdown
+						battle={battleData}
+						view="CODE"
+						onautoend={isSoloBattle ? finishSoloIfNeeded : undefined}
+					/>
 				{/if}
 			{/snippet}
 		</Header>
 
-		{#if hax.data && battle.data}
-			<BattleMode battle={battle.data} hax={hax.data} />
+		{#if hax.data}
+			<BattleMode battle={battleData} hax={hax.data} />
 		{/if}
 	</main>
 

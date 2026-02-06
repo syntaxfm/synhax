@@ -37,8 +37,13 @@
 	// Determine who's winning (higher diff_score is better)
 	const leftScore = $derived(leftBattler?.hax?.diff_score ?? 0);
 	const rightScore = $derived(rightBattler?.hax?.diff_score ?? 0);
-	const leftIsWinning = $derived(leftScore > rightScore && leftScore > 0);
-	const rightIsWinning = $derived(rightScore > leftScore && rightScore > 0);
+	const hasHeadToHead = $derived(Boolean(leftBattler && rightBattler));
+	const leftIsWinning = $derived(
+		hasHeadToHead && leftScore > rightScore && leftScore > 0
+	);
+	const rightIsWinning = $derived(
+		hasHeadToHead && rightScore > leftScore && rightScore > 0
+	);
 	const WINNING_TEXT = $derived(
 		battle.status === 'COMPLETED' ? 'WINNER' : 'WINNING'
 	);
@@ -51,7 +56,9 @@
 			{#if leftBattler?.user}
 				<h3>
 					{leftBattler.user.name}
-					{#if leftIsWinning}<span class="winning">{WINNING_TEXT}</span>{/if}
+					{#if hasHeadToHead && leftIsWinning}
+						<span class="winning">{WINNING_TEXT}</span>
+					{/if}
 					{#if currentUserId && leftBattler.user_id === currentUserId}
 						<span class="you">You!</span>
 					{/if}
@@ -60,7 +67,7 @@
 					user={leftBattler.user}
 					hax={leftBattler.hax ?? null}
 					position="left"
-					color={'var(--blue)'}
+					color="var(--blue)"
 				/>
 			{/if}
 		</div>
@@ -76,14 +83,16 @@
 					{#if currentUserId && rightBattler.user_id === currentUserId}
 						<span class="you">You!</span>
 					{/if}
-					{#if rightIsWinning}<span class="winning">{WINNING_TEXT}</span>{/if}
+					{#if hasHeadToHead && rightIsWinning}
+						<span class="winning">{WINNING_TEXT}</span>
+					{/if}
 					{rightBattler.user.name}
 				</h3>
 				<BattlerProgress
 					user={rightBattler.user}
 					hax={rightBattler.hax ?? null}
 					position="right"
-					color={'var(--red)'}
+					color="var(--red)"
 				/>
 			{/if}
 		</div>
@@ -118,9 +127,6 @@
 			0 -1px 1px rgb(255 255 255 / 0.1) inset;
 	}
 
-	header.has-battlers {
-		/* align-items: center; */
-	}
 	.clock-wrap {
 		height: 100%;
 		display: flex;

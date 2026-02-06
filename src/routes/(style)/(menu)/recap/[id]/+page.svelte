@@ -59,6 +59,15 @@
 			queries.ratings.myForTarget({ targetId: battle.data?.target?.id || '' })
 		)
 	);
+	let soloLeaderboard = $derived(
+		z.createQuery(
+			queries.battles.soloLeaderboardByTarget({
+				targetId: battle.data?.target?.id || ''
+			})
+		)
+	);
+
+	const isSoloBattle = $derived(battle.data?.type === 'SOLO');
 
 	const isParticipant = $derived(
 		battle.data?.participants?.some(
@@ -110,11 +119,62 @@
 	}
 
 	function getOutcomeLabel(participant: WinnerParticipant) {
+		if (isSoloBattle) {
+			return 'COMPLETED';
+		}
 		if (!winner) {
 			return 'No Winner';
 		}
 
 		return isWinnerParticipant(participant) ? 'WINNER' : 'LOSER';
+	}
+
+	const soloLeaderboardRows = $derived.by(() => {
+		if (!isSoloBattle) return [];
+
+		const rows = soloLeaderboard.data
+			.map((leaderboardBattle) => {
+				const participants = leaderboardBattle.participants ?? [];
+				const participant =
+					participants.find(
+						(candidate) => candidate.user_id === leaderboardBattle.referee_id
+					) ?? participants[0];
+				if (!participant) return null;
+				const score = participant.hax?.diff_score ?? 0;
+				const completionMs =
+					participant.finished_at && leaderboardBattle.starts_at
+						? Math.max(0, participant.finished_at - leaderboardBattle.starts_at)
+						: null;
+				return {
+					battleId: leaderboardBattle.id,
+					userId: participant.user_id,
+					userName: participant.user?.name ?? 'Unknown user',
+					score,
+					completionMs,
+					createdAt: leaderboardBattle.created_at ?? 0
+				};
+			})
+			.filter((row): row is NonNullable<typeof row> => row !== null)
+			.sort((a, b) => {
+				if (b.score !== a.score) return b.score - a.score;
+				const aCompletion = a.completionMs ?? Number.POSITIVE_INFINITY;
+				const bCompletion = b.completionMs ?? Number.POSITIVE_INFINITY;
+				if (aCompletion !== bCompletion) return aCompletion - bCompletion;
+				return a.createdAt - b.createdAt;
+			})
+			.map((row, index) => ({ ...row, rank: index + 1 }));
+
+		return rows;
+	});
+
+	function formatDuration(ms: number | null) {
+		if (ms === null) return 'n/a';
+		const totalSeconds = Math.floor(ms / 1000);
+		const minutes = Math.floor(totalSeconds / 60)
+			.toString()
+			.padStart(2, '0');
+		const seconds = (totalSeconds % 60).toString().padStart(2, '0');
+		return `${minutes}:${seconds}`;
 	}
 
 	function rate_battle(
@@ -166,6 +226,12 @@
 		</Header>
 
 		<section class="stack" style="--gap: 1rem;">
+			{#if isSoloBattle}
+				<p class="solo-copy">
+					Solo challenge recap. Your score is measured against the target and
+					timer, not against a loser.
+				</p>
+			{/if}
 			<BattleRecapGrid
 				participants={recapBattlers.map((participant) => {
 					const isWinner = isWinnerParticipant(participant);
@@ -174,13 +240,58 @@
 						user: participant.user,
 						hax: participant.hax,
 						outcomeLabel: getOutcomeLabel(participant),
-						tone: isWinner ? 'win' : winner ? 'loss' : 'neutral'
+						tone: isSoloBattle
+							? 'neutral'
+							: isWinner
+								? 'win'
+								: winner
+									? 'loss'
+									: 'neutral'
 					};
 				})}
 				target={battleData.target}
-				showOutcomeLabel={true}
+				showOutcomeLabel={!isSoloBattle}
 			/>
 		</section>
+
+		{#if isSoloBattle}
+			<section class="stack leaderboard" style="--gap: 0.75rem;">
+				<h2>Public Solo Leaderboard</h2>
+				<p class="muted">
+					This leaderboard includes public completed solo challenges for this
+					target.
+				</p>
+				<div class="table-wrap">
+					<table>
+						<thead>
+							<tr>
+								<th>Rank</th>
+								<th>User</th>
+								<th>Score</th>
+								<th>Time</th>
+								<th>Tie-break</th>
+							</tr>
+						</thead>
+						<tbody>
+							{#each soloLeaderboardRows as row (row.battleId)}
+								<tr class:me={row.userId === z.userID}>
+									<td>#{row.rank}</td>
+									<td>{row.userName}</td>
+									<td>{Math.round(row.score)}%</td>
+									<td>{formatDuration(row.completionMs)}</td>
+									<td>{new Date(row.createdAt).toLocaleDateString()}</td>
+								</tr>
+							{:else}
+								<tr>
+									<td colspan="5" class="muted">No public solo attempts yet.</td
+									>
+								</tr>
+							{/each}
+						</tbody>
+					</table>
+				</div>
+			</section>
+		{/if}
 	</div>
 {:else if battle.data}
 	<p>This battle is private. Sorry.</p>
@@ -202,6 +313,51 @@
 	.recap-layout :global(.battler-progress) {
 		--battler-avatar-size: 72px;
 		--min-display-width: 100px;
+	}
+
+	.solo-copy {
+		margin: 0;
+		color: var(--fg-4);
+	}
+
+	.leaderboard h2 {
+		margin: 0;
+	}
+
+	.table-wrap {
+		overflow-x: auto;
+	}
+
+	table {
+		width: 100%;
+		border-collapse: collapse;
+		background: var(--surface-1);
+		border: 1px solid var(--border-subtle);
+		border-radius: var(--br-s);
+		overflow: hidden;
+	}
+
+	th,
+	td {
+		padding: 0.65rem 0.75rem;
+		text-align: left;
+		font-size: 0.85rem;
+		border-bottom: 1px solid var(--border-subtle);
+	}
+
+	th {
+		font-size: 0.75rem;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: var(--fg-5);
+	}
+
+	tbody tr:last-child td {
+		border-bottom: 0;
+	}
+
+	tbody tr.me {
+		background: hsl(from var(--yellow) h s l / 0.12);
 	}
 
 	/*
