@@ -81,7 +81,7 @@ async function assertBattleOwner(
 		winner_hax_id?: string | null;
 		status?: string | null;
 	}
-) {
+): Promise<'referee' | 'winner'> {
 	const battle = (await getBattle(tx, update.id)) as {
 		referee_id?: string;
 		win_condition?: string | null;
@@ -90,7 +90,7 @@ async function assertBattleOwner(
 		throw new Error('Battle not found');
 	}
 	if (isAdmin(ctx) || battle.referee_id === ctx.userID) {
-		return;
+		return 'referee';
 	}
 	if (
 		battle.win_condition === 'FIRST_TO_PERFECT' &&
@@ -99,9 +99,10 @@ async function assertBattleOwner(
 	) {
 		const hax = (await getHax(tx, update.winner_hax_id)) as {
 			user_id?: string;
+			battle_id?: string | null;
 		} | null;
-		if (hax?.user_id === ctx.userID) {
-			return;
+		if (hax?.user_id === ctx.userID && hax.battle_id === update.id) {
+			return 'winner';
 		}
 	}
 	throw new Error('Only the referee can update this battle');
@@ -252,11 +253,32 @@ export const mutators = defineMutators({
 			}),
 			async ({ tx, args, ctx }) => {
 				assertAuthenticated(ctx);
-				await assertBattleOwner(tx, ctx, {
+				const battleAccess = await assertBattleOwner(tx, ctx, {
 					id: args.id,
 					status: args.status,
 					winner_hax_id: args.winner_hax_id
 				});
+				if (battleAccess === 'winner') {
+					const disallowedWinnerFieldUpdate =
+						args.name !== undefined ||
+						args.visibility !== undefined ||
+						args.type !== undefined ||
+						args.win_condition !== undefined ||
+						args.total_time_seconds !== undefined ||
+						args.overtime_seconds !== undefined ||
+						args.starts_at !== undefined ||
+						args.paused_at !== undefined ||
+						args.allow_time_extension !== undefined ||
+						args.revealed_at !== undefined;
+					if (disallowedWinnerFieldUpdate) {
+						throw new Error(
+							'Winning participant can only set battle completion fields'
+						);
+					}
+					if (args.status !== 'COMPLETED' || !args.winner_hax_id) {
+						throw new Error('Winning participant can only complete the battle');
+					}
+				}
 				const winnerProvided = Object.prototype.hasOwnProperty.call(
 					args,
 					'winner_hax_id'
@@ -275,6 +297,14 @@ export const mutators = defineMutators({
 						}
 						if (args.winner_hax_id !== battle.winner_hax_id) {
 							throw new Error('Battle winner is already set');
+						}
+					}
+					if (args.winner_hax_id) {
+						const winnerHax = (await getHax(tx, args.winner_hax_id)) as {
+							battle_id?: string | null;
+						} | null;
+						if (!winnerHax || winnerHax.battle_id !== args.id) {
+							throw new Error('Winner hax must belong to this battle');
 						}
 					}
 				}
@@ -430,7 +460,7 @@ export const mutators = defineMutators({
 				// Check participant limit
 				const participants = (await tx.run(
 					zql.battle_participants.where('battle_id', args.battle_id)
-				)) as { id?: string; status?: string | null }[];
+				)) as { id?: string; user_id?: string; status?: string | null }[];
 				const activeCount = Array.isArray(participants)
 					? participants.filter((p) => p.status !== 'DROPPED').length
 					: 0;
@@ -439,7 +469,7 @@ export const mutators = defineMutators({
 				}
 				// Check if user is already a participant
 				const existingParticipant = Array.isArray(participants)
-					? participants.find((p) => p.id === args.user_id)
+					? participants.find((p) => p.user_id === args.user_id)
 					: null;
 				if (existingParticipant) {
 					throw new Error('User is already a participant in this battle');
@@ -486,9 +516,13 @@ export const mutators = defineMutators({
 				// Verify participant exists
 				const participant = (await getParticipant(tx, args.id)) as {
 					id?: string;
+					battle_id?: string;
 				} | null;
 				if (!participant) {
 					throw new Error('Participant not found');
+				}
+				if (participant.battle_id !== args.battle_id) {
+					throw new Error('Participant does not belong to this battle');
 				}
 				// Delete the participant
 				await tx.mutate.battle_participants.delete({ id: args.id });
@@ -654,6 +688,9 @@ export const mutators = defineMutators({
 				if (!isAdmin(ctx)) {
 					throw new Error('Only admins can create targets');
 				}
+				if (!ctx.userID || ctx.userID === 'anon') {
+					throw new Error(AUTH_ERROR);
+				}
 				const now = Date.now();
 				await tx.mutate.targets.insert({
 					id: args.id,
@@ -661,7 +698,7 @@ export const mutators = defineMutators({
 					image: args.image,
 					type: args.type,
 					inspo: args.inspo,
-					created_by: args.created_by,
+					created_by: ctx.userID,
 					is_active: true,
 					last_updated_at: now,
 					created_at: now,

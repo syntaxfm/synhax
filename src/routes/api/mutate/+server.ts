@@ -29,5 +29,10 @@ export async function POST({ request, platform, locals }: RequestEvent) {
 		request
 	);
 
-	return new Response(JSON.stringify(result));
+	return new Response(JSON.stringify(result), {
+		headers: {
+			'Content-Type': 'application/json',
+			'Cache-Control': 'no-store'
+		}
+	});
 }

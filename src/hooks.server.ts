@@ -17,16 +17,13 @@ import { betterAuth } from 'better-auth';
 // Sentry disabled on Cloudflare Workers due to edge runtime compatibility issues
 // See beads issue battle_mode-pfd for @sentry/cloudflare-workers setup
 
-const myErrorHandler = ({
-	error,
-	event
-}: {
-	error: unknown;
-	event: unknown;
-}) => {
-	console.error('An error occurred on the server side:', error, event);
+export const handleError: HandleServerError = ({ error, event }) => {
+	console.error('Server error', {
+		path: event.url.pathname,
+		method: event.request.method,
+		error: error instanceof Error ? error.message : String(error)
+	});
 };
-export const handleError: HandleServerError = myErrorHandler;
 
 export const handle: Handle = async ({ event, resolve }) => {
 	const env = event.platform?.env as
@@ -122,17 +119,14 @@ export const handle: Handle = async ({ event, resolve }) => {
 							id: payload.sub ?? payload.id ?? 'anon',
 							role: payload.role || undefined
 						};
-					} else {
-						console.log('PAYLOAD UNDEFINED SESSION MIDDLEWEAR ~!!!!!');
-						console.error({ payload, result });
 					}
-				} else {
-					console.log('TOKEN UNDEFINED SESSION MIDDLEWEAR ~(((((((');
-					console.error({ token, authHeader, headers: event.request.headers });
 				}
 			}
 		} catch (e) {
-			console.error('Session error:', e);
+			console.error(
+				'Session error:',
+				e instanceof Error ? e.message : String(e)
+			);
 		}
 		const response = await resolve(event);
 		return response;

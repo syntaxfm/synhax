@@ -32,18 +32,44 @@ const BASE_STYLES = /*css*/ `
 // Note: SRI not used as CDN content changes frequently with JIT compilation
 const TAILWIND_CDN = 'https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4';
 
+function createContentSecurityPolicy(hasTailwind: boolean): {
+	policy: string;
+	tailwindNonce: string | null;
+} {
+	const tailwindNonce = hasTailwind
+		? crypto.randomUUID().replaceAll('-', '')
+		: null;
+	const scriptSrc = tailwindNonce
+		? `script-src 'nonce-${tailwindNonce}'`
+		: "script-src 'none'";
+
+	const policy = [
+		"default-src 'none'",
+		scriptSrc,
+		"style-src 'unsafe-inline' https: http:",
+		'img-src data: blob: https: http:',
+		'media-src data: blob: https: http:',
+		'font-src data: blob: https: http:',
+		'connect-src https: http:',
+		"base-uri 'none'",
+		"form-action 'none'",
+		"object-src 'none'"
+	].join('; ');
+
+	return { policy, tailwindNonce };
+}
+
 export function usesTailwind(css = ''): boolean {
 	return /^\s*@import\s+["']tailwindcss["']/m.test(css);
 }
 
 export function combine_html_and_css(html = '', css = ''): string {
 	const hasTailwind = usesTailwind(css);
+	const { policy, tailwindNonce } = createContentSecurityPolicy(hasTailwind);
 
-	const csp = hasTailwind
-		? `<meta http-equiv="Content-Security-Policy" content="script-src ${TAILWIND_CDN}">`
-		: '';
+	const csp = `<meta http-equiv="Content-Security-Policy" content="${policy}">`;
 	const tailwindScript = hasTailwind
-		? `<script async src="${TAILWIND_CDN}"></script>`
+		? `<script nonce="${tailwindNonce}" async src="${TAILWIND_CDN}"></script>`
 		: '';
 
 	return `<!DOCTYPE html>
@@ -106,7 +132,13 @@ export function parseTargetCode(inspo = ''): TargetCode {
 
 	// Legacy: for IMAGE/VIDEO, inspo might be a plain URL string
 	if (trimmed.startsWith('http') || trimmed.startsWith('/')) {
-		return { html: '', css: '', starter_html: '', starter_css: '', url: trimmed };
+		return {
+			html: '',
+			css: '',
+			starter_html: '',
+			starter_css: '',
+			url: trimmed
+		};
 	}
 
 	return { html: trimmed, css: '', starter_html: '', starter_css: '', url: '' };

@@ -3,34 +3,60 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 
 const APP_ID = 'synhax';
+const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = new Set([
+	'image/jpeg',
+	'image/png',
+	'image/webp',
+	'image/gif',
+	'image/avif'
+]);
 
-export const POST: RequestHandler = async ({ request }) => {
+function isAdmin(locals: App.Locals) {
+	return locals.user?.role === 'syntax';
+}
+
+export const POST: RequestHandler = async ({ request, locals }) => {
 	try {
+		if (!isAdmin(locals)) {
+			return json({ error: 'Forbidden' }, { status: 403 });
+		}
+
 		const formData = await request.formData();
-		const file = formData.get('file') as File;
+		const candidate = formData.get('file');
+		if (!(candidate instanceof File)) {
+			return json({ error: 'No file provided' }, { status: 400 });
+		}
+		const file = candidate;
 		const image_id = formData.get('image_id') as string | null;
 
-		if (!file) {
-			return json({ error: 'No file provided' }, { status: 400 });
+		if (!ALLOWED_IMAGE_TYPES.has(file.type)) {
+			return json({ error: 'Unsupported image type' }, { status: 415 });
+		}
+
+		if (file.size > MAX_IMAGE_BYTES) {
+			return json({ error: 'Image file is too large' }, { status: 413 });
 		}
 
 		// Step 1: Get presigned URL
-		const presignRes = await fetch('https://assets.break-code.com/generate-image-upload-url', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				'x-api-key': IV_API_KEY
-			},
-			body: JSON.stringify({
-				app_id: APP_ID,
-				image_id: image_id || crypto.randomUUID(),
-				content_type: file.type
-			})
-		});
+		const presignRes = await fetch(
+			'https://assets.break-code.com/generate-image-upload-url',
+			{
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'x-api-key': IV_API_KEY
+				},
+				body: JSON.stringify({
+					app_id: APP_ID,
+					image_id: image_id || crypto.randomUUID(),
+					content_type: file.type
+				})
+			}
+		);
 
 		if (!presignRes.ok) {
-			const error = await presignRes.text();
-			return json({ error: 'Failed to get presigned URL', details: error }, { status: 500 });
+			return json({ error: 'Failed to get presigned URL' }, { status: 502 });
 		}
 
 		const { upload_url, transform_url, asset_url } = await presignRes.json();
@@ -45,7 +71,10 @@ export const POST: RequestHandler = async ({ request }) => {
 		});
 
 		if (!uploadRes.ok) {
-			return json({ error: 'Failed to upload image to storage' }, { status: 500 });
+			return json(
+				{ error: 'Failed to upload image to storage' },
+				{ status: 502 }
+			);
 		}
 
 		// Step 3: Return URLs
@@ -55,10 +84,10 @@ export const POST: RequestHandler = async ({ request }) => {
 			success: true
 		});
 	} catch (error) {
-		console.error('Image upload error:', error);
-		return json(
-			{ error: 'Failed to upload image', details: error instanceof Error ? error.message : 'Unknown error' },
-			{ status: 500 }
+		console.error(
+			'Image upload error:',
+			error instanceof Error ? error.message : error
 		);
+		return json({ error: 'Failed to upload image' }, { status: 500 });
 	}
 };
