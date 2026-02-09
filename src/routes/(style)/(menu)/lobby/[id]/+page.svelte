@@ -93,6 +93,18 @@
 				})
 			);
 		}
+		if (
+			is_referee &&
+			['PENDING', 'READY'].includes(battle.data.status ?? '') &&
+			battle.data.win_condition !== 'FIRST_TO_PERFECT'
+		) {
+			z.mutate(
+				mutators.battles.update({
+					id: battle.data.id,
+					win_condition: 'FIRST_TO_PERFECT'
+				})
+			);
+		}
 		if (battle.data.status === 'ACTIVE' && is_solo && is_participant) {
 			goto(`/battle/${battle.data.id}/code`);
 			return;
@@ -170,20 +182,6 @@
 		);
 	}
 
-	function toggle_win_condition() {
-		if (!battle.data || !is_referee) return;
-		const new_condition =
-			battle.data.win_condition === 'FIRST_TO_PERFECT'
-				? 'VOTING'
-				: 'FIRST_TO_PERFECT';
-		z.mutate(
-			mutators.battles.update({
-				id: battle.data.id,
-				win_condition: new_condition
-			})
-		);
-	}
-
 	function update_battle_name(event: Event) {
 		if (!battle.data || !is_referee) return;
 		const input = event.target as HTMLInputElement;
@@ -222,7 +220,8 @@
 			id: page.params.id,
 			status: 'ACTIVE' as const,
 			starts_at: now,
-			type: 'TIMED_MATCH' as const
+			type: 'TIMED_MATCH' as const,
+			win_condition: 'FIRST_TO_PERFECT' as const
 		};
 
 		// Default to 10 minutes (600 seconds) if total_time_seconds not set
@@ -315,10 +314,7 @@
 				type: next_type,
 				allow_time_extension: next_type === 'TIMED_MATCH',
 				overtime_seconds: 0,
-				win_condition:
-					next_type === 'SOLO'
-						? 'FIRST_TO_PERFECT'
-						: (battle.data.win_condition ?? 'FIRST_TO_PERFECT')
+				win_condition: 'FIRST_TO_PERFECT'
 			})
 		);
 
@@ -497,20 +493,6 @@
 								{(battle.data.allow_time_extension ?? true)
 									? 'Host can extend time when battle ends'
 									: 'Battle auto-ends and goes to recap'}
-							</span>
-						</div>
-
-						<div class="cluster">
-							<ToggleButton
-								toggle={battle.data.win_condition === 'FIRST_TO_PERFECT'}
-								ontoggle={toggle_win_condition}
-								on_text="Race to 100%"
-								off_text="Voting"
-							/>
-							<span class="help-text">
-								{battle.data.win_condition === 'FIRST_TO_PERFECT'
-									? 'First to 100% accuracy wins instantly'
-									: 'Winner decided by voting after battle'}
 							</span>
 						</div>
 					{/if}

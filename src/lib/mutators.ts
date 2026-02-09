@@ -79,10 +79,6 @@ async function getRating(tx: RunTx, ratingId: string) {
 	return runOne(tx, zql.ratings.where('id', ratingId).one());
 }
 
-async function getTarget(tx: RunTx, targetId: string) {
-	return runOne(tx, zql.targets.where('id', targetId).one());
-}
-
 async function assertBattleOwner(
 	tx: RunTx,
 	ctx: ZeroContext,
@@ -464,7 +460,9 @@ export const mutators = defineMutators({
 						is_private?: boolean | null;
 					} | null;
 					if (target?.is_private) {
-						throw new Error('Only admins can create battles with private targets');
+						throw new Error(
+							'Only admins can create battles with private targets'
+						);
 					}
 				}
 				const refereeId = isAdmin(ctx) ? args.referee_id : ctx.userID;
