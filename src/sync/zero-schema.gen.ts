@@ -668,6 +668,11 @@ const targetsTable = {
 			optional: true,
 			customType: null as unknown as boolean
 		},
+		is_private: {
+			type: 'boolean',
+			optional: true,
+			customType: null as unknown as boolean
+		},
 		archived_at: {
 			type: 'number',
 			optional: true,
