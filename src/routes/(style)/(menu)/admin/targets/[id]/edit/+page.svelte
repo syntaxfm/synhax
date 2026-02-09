@@ -9,7 +9,7 @@
 		z.createQuery(queries.targets.byId({ id: page?.params?.id || '' }))
 	);
 
-	async function handleSubmit({ name, image, type, inspo }: Target) {
+	async function handleSubmit({ name, image, type, inspo, is_private }: Target) {
 		isLoading = true;
 
 		try {
@@ -22,7 +22,8 @@
 						image,
 						type,
 						inspo,
-						is_active: true
+						is_active: true,
+						is_private
 					})
 				).server;
 			}

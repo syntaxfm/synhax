@@ -57,6 +57,10 @@ async function getBattle(tx: RunTx, battleId: string) {
 	return runOne(tx, zql.battles.where('id', battleId).one());
 }
 
+async function getTarget(tx: RunTx, targetId: string) {
+	return runOne(tx, zql.targets.where('id', targetId).one());
+}
+
 async function getParticipant(tx: RunTx, participantId: string) {
 	return runOne(tx, zql.battle_participants.where('id', participantId).one());
 }
@@ -210,6 +214,15 @@ export const mutators = defineMutators({
 				assertAuthenticated(ctx);
 				if (!isAdmin(ctx) && args.referee_id !== ctx.userID) {
 					throw new Error('Referee must match the authenticated user');
+				}
+				// Prevent non-admins from creating battles with private targets
+				if (!isAdmin(ctx)) {
+					const target = (await getTarget(tx, args.target_id)) as {
+						is_private?: boolean | null;
+					} | null;
+					if (target?.is_private) {
+						throw new Error('Only admins can create battles with private targets');
+					}
 				}
 				const refereeId = isAdmin(ctx) ? args.referee_id : ctx.userID;
 				const now = Date.now();
@@ -681,7 +694,8 @@ export const mutators = defineMutators({
 				image: 'string',
 				type: targetTypeEnum,
 				inspo: 'string',
-				created_by: 'string'
+				created_by: 'string',
+				'is_private?': 'boolean'
 			}),
 			async ({ tx, args, ctx }) => {
 				// Admin check - ctx is typed via DefaultTypes in schema.ts
@@ -700,6 +714,7 @@ export const mutators = defineMutators({
 					inspo: args.inspo,
 					created_by: ctx.userID,
 					is_active: true,
+					is_private: args.is_private ?? false,
 					last_updated_at: now,
 					created_at: now,
 					updated_at: now
@@ -713,7 +728,8 @@ export const mutators = defineMutators({
 				'image?': 'string',
 				'type?': targetTypeEnum,
 				'inspo?': 'string',
-				'is_active?': 'boolean'
+				'is_active?': 'boolean',
+				'is_private?': 'boolean'
 			}),
 			async ({ tx, args, ctx }) => {
 				// Admin check - ctx is typed via DefaultTypes in schema.ts
@@ -728,6 +744,7 @@ export const mutators = defineMutators({
 					type: args.type,
 					inspo: args.inspo,
 					is_active: args.is_active,
+					is_private: args.is_private,
 					last_updated_at: now,
 					updated_at: now
 				});

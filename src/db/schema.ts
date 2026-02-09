@@ -179,6 +179,7 @@ export const targets = pgTable(
 			.notNull()
 			.references(() => user.id, { onDelete: 'restrict' }),
 		is_active: boolean().notNull().default(true),
+		is_private: boolean().notNull().default(false),
 		archived_at: timestamp({ withTimezone: true }),
 		last_updated_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
 		created_at: timestamp({ withTimezone: true }).notNull().defaultNow(),

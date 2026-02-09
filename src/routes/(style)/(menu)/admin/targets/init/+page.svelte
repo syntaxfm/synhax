@@ -5,7 +5,7 @@
 
 	let isLoading = $state(false);
 
-	async function handleSubmit({ name, image, type, inspo }: Target) {
+	async function handleSubmit({ name, image, type, inspo, is_private }: Target) {
 		isLoading = true;
 
 		try {
@@ -25,7 +25,8 @@
 					image,
 					type,
 					inspo,
-					created_by: z.userID
+					created_by: z.userID,
+					is_private
 				})
 			).server;
 

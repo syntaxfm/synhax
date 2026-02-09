@@ -14,9 +14,12 @@ export const queries = defineQueries({
 	// TARGETS
 	// ==================
 	targets: {
-		/** Get all targets with their ratings */
-		withRatings: defineQuery(type({ 'limit?': 'number' }), ({ args }) => {
-			const q = zql.targets.related('ratings').orderBy('created_at', 'desc');
+		/** Get all targets with their ratings (private targets only visible to admins) */
+		withRatings: defineQuery(type({ 'limit?': 'number' }), ({ args, ctx }) => {
+			let q = zql.targets.related('ratings').orderBy('created_at', 'desc');
+			if (ctx.userRole !== 'syntax') {
+				q = q.where('is_private', false);
+			}
 			return args.limit ? q.limit(args.limit) : q;
 		}),
 
