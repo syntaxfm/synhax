@@ -40,6 +40,20 @@
 			enableColumnFilter: true
 		},
 		{
+			accessorKey: 'createdAt',
+			header: 'Signed Up',
+			cell: (info) => {
+				const timestamp = info.getValue() as number;
+				if (!timestamp) return 'N/A';
+				const date = new Date(timestamp);
+				return date.toLocaleDateString('en-US', {
+					year: 'numeric',
+					month: 'short',
+					day: 'numeric'
+				});
+			}
+		},
+		{
 			accessorKey: 'role',
 			header: 'Role',
 			filterFn: 'includesString',

@@ -45,7 +45,7 @@ export const queries = defineQueries({
 		/** Get all users (admin) */
 		all: defineQuery(({ ctx }) =>
 			ctx.userRole === 'syntax'
-				? zql.user
+				? zql.user.orderBy('createdAt', 'desc')
 				: zql.user.where('id', '__admin_only__')
 		),
 
