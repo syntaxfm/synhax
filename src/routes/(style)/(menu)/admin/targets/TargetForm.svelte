@@ -4,6 +4,7 @@
 		image: string;
 		type: 'CODE' | 'IMAGE' | 'VIDEO';
 		inspo: string;
+		is_private?: boolean;
 	};
 </script>
 
@@ -38,7 +39,8 @@
 			name: '',
 			image: '',
 			type: 'CODE',
-			inspo: ''
+			inspo: '',
+			is_private: false
 		}
 	}: Props = $props();
 
@@ -47,6 +49,7 @@
 	let name = $state(initial_target.name);
 	let image = $state(initial_target.image);
 	let type: 'CODE' | 'IMAGE' | 'VIDEO' = $state(initial_target.type);
+	let is_private = $state(initial_target.is_private ?? false);
 	// For IMAGE/VIDEO: use url from parsed JSON, fallback to raw inspo for backward compat
 	let inspo = $state(
 		initial_target.type !== 'CODE'
@@ -195,7 +198,8 @@
 					trimmedCss,
 					trimmedStarterHtml,
 					trimmedStarterCss
-				)
+				),
+				is_private
 			});
 			return;
 		}
@@ -214,7 +218,8 @@
 				trimmedInspo,
 				trimmedStarterHtml,
 				trimmedStarterCss
-			)
+			),
+			is_private
 		});
 	}
 
@@ -279,6 +284,19 @@
 			<option value="IMAGE">Image</option>
 			<option value="VIDEO">Video</option>
 		</select>
+	</div>
+
+	<div class="field checkbox-field">
+		<label for="is_private">
+			<input
+				id="is_private"
+				type="checkbox"
+				bind:checked={is_private}
+				disabled={isLoading}
+			/>
+			Private Target
+		</label>
+		<p class="field-hint">Private targets are only visible to admins and can only be used in admin-created battles.</p>
 	</div>
 	{#if type === 'IMAGE'}
 		<div class="field">
@@ -462,6 +480,19 @@
 		font-size: 0.875rem;
 		color: var(--fg-muted, #888);
 		margin: 0;
+	}
+
+	.checkbox-field label {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		cursor: pointer;
+	}
+
+	.checkbox-field input[type='checkbox'] {
+		width: 1.1rem;
+		height: 1.1rem;
+		cursor: pointer;
 	}
 
 	.preview-section {

@@ -40,6 +40,12 @@
 			filterFn: 'equalsString',
 			enableColumnFilter: true,
 			cell: (info: any) => info.getValue()
+		},
+		{
+			accessorKey: 'is_private',
+			header: 'Private',
+			enableColumnFilter: false,
+			cell: (info: any) => (info.getValue() ? '🔒 Yes' : 'No')
 		}
 	];
 </script>
