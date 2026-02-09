@@ -503,15 +503,50 @@ export const mutators = defineMutators({
 				});
 				const existingBattle = (await getBattle(tx, args.id)) as {
 					type?: string | null;
+					status?: string | null;
 				} | null;
 				if (!existingBattle) {
 					throw new Error('Battle not found');
 				}
+				const targetType = args.type ?? existingBattle.type;
+				const switchedFromSoloToMultiplayer =
+					existingBattle.type === 'SOLO' && targetType === 'TIMED_MATCH';
+				const switchedToSolo =
+					existingBattle.type !== 'SOLO' && targetType === 'SOLO';
+				if (switchedToSolo) {
+					if (existingBattle.status !== 'PENDING') {
+						throw new Error('Battle can only switch to SOLO before it starts');
+					}
+					const participants = (await tx.run(
+						zql.battle_participants.where('battle_id', args.id)
+					)) as { status?: string | null }[];
+					const activeParticipants = participants.filter(
+						(participant) => participant.status !== 'DROPPED'
+					);
+					if (activeParticipants.length > 1) {
+						throw new Error(
+							'Cannot switch to SOLO while multiple participants are in the battle'
+						);
+					}
+				}
 				if (existingBattle.type === 'SOLO') {
-					if (args.type !== undefined && args.type !== 'SOLO') {
-						throw new Error('SOLO battle type cannot be changed');
+					if (
+						args.type !== undefined &&
+						args.type !== 'SOLO' &&
+						args.type !== 'TIMED_MATCH'
+					) {
+						throw new Error('SOLO battles can only switch to TIMED_MATCH');
 					}
 					if (
+						switchedFromSoloToMultiplayer &&
+						existingBattle.status !== 'PENDING'
+					) {
+						throw new Error(
+							'SOLO battles can only switch to 2-player mode before they start'
+						);
+					}
+					if (
+						targetType === 'SOLO' &&
 						args.win_condition !== undefined &&
 						args.win_condition !== 'FIRST_TO_PERFECT'
 					) {
@@ -519,13 +554,14 @@ export const mutators = defineMutators({
 							'SOLO battles must use FIRST_TO_PERFECT win condition'
 						);
 					}
-					if (args.status === 'READY') {
+					if (targetType === 'SOLO' && args.status === 'READY') {
 						throw new Error('SOLO battles do not use READY status');
 					}
-					if (args.allow_time_extension === true) {
+					if (targetType === 'SOLO' && args.allow_time_extension === true) {
 						throw new Error('SOLO battles cannot enable time extensions');
 					}
 					if (
+						targetType === 'SOLO' &&
 						args.overtime_seconds !== undefined &&
 						args.overtime_seconds !== null &&
 						args.overtime_seconds > 0

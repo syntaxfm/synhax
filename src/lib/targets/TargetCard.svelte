@@ -1,6 +1,5 @@
 <script lang="ts">
 	import NewBattleButton from '$lib/battle_mode/NewBattleButton.svelte';
-	import NewSoloButton from '$lib/battle_mode/NewSoloButton.svelte';
 	import { type Rating, type Target } from '$sync/schema';
 	import type { Snippet } from 'svelte';
 
@@ -138,10 +137,7 @@
 		{#if action}
 			{@render action()}
 		{:else}
-			<div class="default-actions">
-				<NewBattleButton target_id={target.id} />
-				<NewSoloButton target_id={target.id} />
-			</div>
+			<NewBattleButton target_id={target.id} />
 		{/if}
 	</div>
 </article>
@@ -299,11 +295,6 @@
 	.action {
 		padding: 0 var(--card-padding) var(--card-padding);
 		margin-top: auto;
-
-		.default-actions {
-			display: grid;
-			gap: var(--pad-s);
-		}
 
 		:global(button),
 		:global(.button) {
