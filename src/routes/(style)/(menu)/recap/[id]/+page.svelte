@@ -226,12 +226,6 @@
 		</Header>
 
 		<section class="stack" style="--gap: 1rem;">
-			{#if isSoloBattle}
-				<p class="solo-copy">
-					Solo battle recap. Your score is measured against the target and
-					timer, not against an opponent.
-				</p>
-			{/if}
 			<BattleRecapGrid
 				participants={recapBattlers.map((participant) => {
 					const isWinner = isWinnerParticipant(participant);

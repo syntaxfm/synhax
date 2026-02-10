@@ -72,6 +72,10 @@
 	});
 
 	let soloStarting = $state(false);
+	let soloLockingIn = $state(false);
+	let soloPreparingFiles = $state(false);
+	let soloFilesReady = $state(false);
+	let soloFileError = $state('');
 	let soloStartError = $state('');
 	let modeSwitching = $state(false);
 	let battleModeError = $state('');
@@ -237,36 +241,25 @@
 
 	async function start_solo() {
 		if (!battle.data || !is_referee || !is_solo || soloStarting) return;
+		// Can only start from READY state (no FS prompts here)
+		if (battle.data.status !== 'READY') {
+			soloStartError = 'Lock in first to start the battle.';
+			return;
+		}
+		if (!soloFilesReady) {
+			soloStartError =
+				'Solo files are not prepared. Please re-prepare your local battle files and try again.';
+			console.error(
+				'[start_solo] soloFilesReady is false; user must re-prepare files'
+			);
+			return;
+		}
 		soloStarting = true;
 		soloStartError = '';
+		soloFileError = '';
 
 		if (!folder_name || !my_solo_hax) {
 			soloStartError = 'Battle files are not ready yet. Refresh and try again.';
-			soloStarting = false;
-			return;
-		}
-
-		const hasAccess =
-			files.status === 'ACCESS' && files.synhax_directory_handle
-				? true
-				: await files.restore_directory_handle();
-		if (!hasAccess || !files.synhax_directory_handle) {
-			soloStartError =
-				'Grant folder access so Synhax can save your code files locally.';
-			soloStarting = false;
-			return;
-		}
-
-		try {
-			await files.create_hax_directory(
-				folder_name,
-				my_solo_hax.html ?? '',
-				my_solo_hax.css ?? '',
-				battle.data.id
-			);
-		} catch (error) {
-			soloStartError = 'Unable to prepare your local battle files.';
-			console.error('Failed to set up solo files:', error);
 			soloStarting = false;
 			return;
 		}
@@ -285,6 +278,83 @@
 			console.error('Failed to start solo battle:', error);
 		} finally {
 			soloStarting = false;
+		}
+	}
+
+	async function prepare_solo_files(): Promise<boolean> {
+		if (
+			soloPreparingFiles ||
+			!battle.data ||
+			!is_solo ||
+			!(is_participant || is_referee)
+		) {
+			return false;
+		}
+
+		soloPreparingFiles = true;
+		soloFileError = '';
+		soloStartError = '';
+		soloFilesReady = false;
+
+		if (!folder_name || !my_solo_hax) {
+			soloFileError = 'Battle files are not ready yet. Refresh and try again.';
+			soloPreparingFiles = false;
+			return false;
+		}
+
+		const hasAccess =
+			files.status === 'ACCESS' && files.synhax_directory_handle
+				? true
+				: await files.restore_directory_handle();
+		if (!hasAccess || !files.synhax_directory_handle) {
+			soloFileError =
+				'Connect a folder so Synhax can prepare your local battle files.';
+			soloPreparingFiles = false;
+			return false;
+		}
+
+		try {
+			await files.create_hax_directory(
+				folder_name,
+				my_solo_hax.html ?? '',
+				my_solo_hax.css ?? '',
+				battle.data.id
+			);
+			await files.load_hax_directory(folder_name, battle.data.id);
+			soloFilesReady = true;
+			return true;
+		} catch (error) {
+			soloFileError = 'Unable to prepare your local battle files.';
+			console.error('Failed to set up solo files:', error);
+			return false;
+		} finally {
+			soloPreparingFiles = false;
+		}
+	}
+
+	async function lock_in_solo() {
+		if (!battle.data || !is_referee || !is_solo || soloLockingIn) return;
+		soloLockingIn = true;
+		soloStartError = '';
+		soloFileError = '';
+		try {
+			if (!soloFilesReady) {
+				const ok = await prepare_solo_files();
+				if (!ok) return;
+			}
+
+			const mutation = z.mutate(
+				mutators.battles.update({
+					id: battle.data.id,
+					status: 'READY' as const
+				})
+			);
+			await mutation.server;
+		} catch (error) {
+			soloStartError = 'Could not lock in. Please try again.';
+			console.error('Failed to lock in solo battle:', error);
+		} finally {
+			soloLockingIn = false;
 		}
 	}
 
@@ -532,20 +602,27 @@
 			<div class="stack" style="align-items: center; --gap: 0.75rem;">
 				<button
 					class="go_button big_button"
-					onclick={start_solo}
-					disabled={soloStarting}
+					onclick={lock_in_solo}
+					disabled={soloLockingIn ||
+						soloPreparingFiles ||
+						soloStarting ||
+						!folder_name ||
+						!my_solo_hax}
 				>
-					{soloStarting ? 'Starting...' : 'Start Battle'}
+					{soloLockingIn || soloPreparingFiles ? 'Locking In...' : 'Lock In'}
 				</button>
+				<p class="help-text" style="text-align: center;">
+					Lock in to prepare your local battle files and move the battle to
+					READY.
+				</p>
 				{#if files.status !== 'ACCESS'}
 					<p class="help-text" style="text-align: center;">
-						Synhax needs access to a folder on your computer to save your code
-						files locally.
+						You'll be prompted to grant folder access.
 					</p>
 				{/if}
-				<p class="muted" style="text-align: center;">
-					No overtime and no pauses. Timer starts immediately.
-				</p>
+				{#if soloFileError}
+					<p class="error-message">{soloFileError}</p>
+				{/if}
 				{#if soloStartError}
 					<p class="error-message">{soloStartError}</p>
 				{/if}
@@ -571,7 +648,56 @@
 		{/if}
 
 		<!-- READY state controls -->
-		{#if battle.data?.status === 'READY' && !is_solo}
+		{#if battle.data?.status === 'READY' && is_solo}
+			<div class="stack" style="align-items: center; --gap: 1rem;">
+				{#if is_referee}
+					{#if folder_name}
+						<div class="solo-ready-callout">
+							<p class="solo-ready-callout__title">Open your text editor now</p>
+							<p class="solo-ready-callout__body">
+								Open the <code>{folder_name}</code> folder before starting the battle.
+								The clock will start immediately.
+							</p>
+						</div>
+					{/if}
+					<button
+						class="go_button big_button"
+						onclick={start_solo}
+						disabled={soloStarting || !soloFilesReady}
+					>
+						{soloStarting ? 'Starting...' : 'Start Battle'}
+					</button>
+					<p class="muted" style="text-align: center;">
+						You're locked in. Timer starts immediately.
+					</p>
+					<p class="help-text" style="text-align: center;">
+						Starting the battle will not prompt for folder access.
+					</p>
+					{#if !soloFilesReady}
+						<button
+							class="button"
+							onclick={prepare_solo_files}
+							disabled={soloPreparingFiles ||
+								soloStarting ||
+								!folder_name ||
+								!my_solo_hax}
+						>
+							{soloPreparingFiles ? 'Preparing Files...' : 'Re-prepare Files'}
+						</button>
+						<p class="help-text" style="text-align: center;">
+							If you refreshed this page, use this to reload your local battle
+							files.
+						</p>
+					{/if}
+					{#if soloFileError}
+						<p class="error-message">{soloFileError}</p>
+					{/if}
+					{#if soloStartError}
+						<p class="error-message">{soloStartError}</p>
+					{/if}
+				{/if}
+			</div>
+		{:else if battle.data?.status === 'READY' && !is_solo}
 			<div class="stack" style="align-items: center; --gap: 1rem;">
 				{#if is_referee}
 					<button class="go_button big_button" onclick={start}>
@@ -691,6 +817,29 @@
 	.help-text {
 		color: var(--fg-muted);
 		font-size: var(--font-size-sm);
+	}
+
+	.solo-ready-callout {
+		width: min(560px, 100%);
+		padding: 0.9rem 1rem;
+		border-radius: var(--br-m);
+		border: 1px solid rgb(255 255 255 / 0.18);
+		background: hsl(from var(--yellow) h s 12%);
+		color: hsl(from var(--yellow) h s 75%);
+		box-shadow: 0 8px 24px rgb(0 0 0 / 0.35);
+	}
+
+	.solo-ready-callout__title {
+		margin: 0;
+		font-weight: 800;
+		letter-spacing: 0.02em;
+		font-size: 1.05rem;
+	}
+
+	.solo-ready-callout__body {
+		margin: 0.35rem 0 0;
+		font-size: 0.95rem;
+		line-height: 1.35;
 	}
 
 	.error-message {

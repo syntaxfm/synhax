@@ -318,8 +318,8 @@ export const mutators = defineMutators({
 				if (!isAdmin(ctx) && battle.referee_id !== ctx.userID) {
 					throw new Error('Only the solo owner can start this challenge');
 				}
-				if (battle.status !== 'PENDING') {
-					throw new Error('Solo challenge can only start from PENDING status');
+				if (battle.status !== 'READY') {
+					throw new Error('Solo challenge can only start from READY status');
 				}
 
 				const durationSeconds = Math.min(
@@ -564,9 +564,6 @@ export const mutators = defineMutators({
 						throw new Error(
 							'SOLO battles must use FIRST_TO_PERFECT win condition'
 						);
-					}
-					if (targetType === 'SOLO' && args.status === 'READY') {
-						throw new Error('SOLO battles do not use READY status');
 					}
 					if (targetType === 'SOLO' && args.allow_time_extension === true) {
 						throw new Error('SOLO battles cannot enable time extensions');
