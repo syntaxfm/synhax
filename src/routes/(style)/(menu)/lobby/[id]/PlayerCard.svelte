@@ -85,11 +85,11 @@
 				>
 					<span class="status-text">
 						{#if is_ready}
-							Locked In
+							Ready
 						{:else if needs_file_setup}
 							Invited
 						{:else}
-							Warming Up
+							Joined
 						{/if}
 					</span>
 				</div>
@@ -103,7 +103,7 @@
 	{#if is_me}
 		<div class="cluster" style="justify-content: center;">
 			{#if !is_ready && !needs_file_setup}
-				<button class="battle-button" onclick={onlockin}>Lock In</button>
+				<button class="battle-button" onclick={onlockin}>Ready Up</button>
 			{/if}
 			<button class="battle-button battle-button--ghost" onclick={onleave}>
 				Leave

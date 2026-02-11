@@ -34,7 +34,8 @@ export const battle_status_enum = pgEnum('battle_status', [
 export const visibility_enum = pgEnum('visibility', ['PUBLIC', 'PRIVATE']);
 export const battle_type_enum = pgEnum('battle_type', [
 	'TIME_TRIAL',
-	'TIMED_MATCH'
+	'TIMED_MATCH',
+	'SOLO'
 ]);
 export const win_condition_enum = pgEnum('win_condition', [
 	'VOTING', // Traditional: battle ends, then voting determines winner
@@ -226,7 +227,10 @@ export const battles = pgTable(
 	(t) => [
 		index('battles_status_idx').on(t.status),
 		index('battles_visibility_idx').on(t.visibility),
-		index('battles_target_idx').on(t.target_id)
+		index('battles_target_idx').on(t.target_id),
+		uniqueIndex('battles_unique_solo_attempt_per_target')
+			.on(t.referee_id, t.target_id)
+			.where(sql`${t.type} = 'SOLO'`)
 	]
 );
 

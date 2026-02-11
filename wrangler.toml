@@ -11,7 +11,7 @@ directory = ".svelte-kit/cloudflare"
 
 [[hyperdrive]]
 binding = "HYPERDRIVE"
-id = "7b4ec959f560438b92c0b0e5c90bd59b"
+id = "84259142fc264c3b9aba32a4701615d7"
 localConnectionString = "postgresql://postgres:password@127.0.0.1/synhax"
 
 # wrangler.toml (wrangler v3.88.0^)

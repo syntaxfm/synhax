@@ -98,6 +98,54 @@ export const queries = defineQueries({
 				.related('target')
 		),
 
+		/** Get the current user's solo challenge attempt for a target */
+		mySoloAttemptForTarget: defineQuery(
+			type({ targetId: 'string' }),
+			({ args, ctx }) => {
+				const userID = ctx.userID === 'anon' ? '__anon__' : ctx.userID;
+				return zql.battles
+					.where(({ and, cmp }) =>
+						and(
+							cmp('type', 'SOLO'),
+							cmp('target_id', args.targetId),
+							cmp('referee_id', userID)
+						)
+					)
+					.one()
+					.related('target')
+					.related('participants', (q) => q.related('user').related('hax'));
+			}
+		),
+
+		/** Get all of the current user's solo challenges */
+		mySoloChallenges: defineQuery(({ ctx }) => {
+			const userID = ctx.userID === 'anon' ? '__anon__' : ctx.userID;
+			return zql.battles
+				.where(({ and, cmp }) =>
+					and(cmp('type', 'SOLO'), cmp('referee_id', userID))
+				)
+				.related('target')
+				.related('participants', (q) => q.related('user').related('hax'))
+				.orderBy('created_at', 'desc');
+		}),
+
+		/** Get public completed SOLO battles for a target to build leaderboard */
+		soloLeaderboardByTarget: defineQuery(
+			type({ targetId: 'string' }),
+			({ args }) =>
+				zql.battles
+					.where(({ and, cmp }) =>
+						and(
+							cmp('type', 'SOLO'),
+							cmp('status', 'COMPLETED'),
+							cmp('visibility', 'PUBLIC'),
+							cmp('target_id', args.targetId)
+						)
+					)
+					.related('participants', (q) => q.related('user').related('hax'))
+					.orderBy('created_at', 'asc')
+		),
+
 		/** Get a battle by zero_room_id with full relations */
 		byRoomId: defineQuery(type({ zeroRoomId: 'string' }), ({ args }) =>
 			zql.battles

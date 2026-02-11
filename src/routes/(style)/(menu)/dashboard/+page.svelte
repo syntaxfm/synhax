@@ -5,13 +5,21 @@
 
 	// Get user's battle history
 	const myBattles = z.createQuery(queries.battleParticipants.myHistory());
+	const mySoloChallenges = z.createQuery(queries.battles.mySoloChallenges());
 
 	// Derive battles from participants, sorted by most recent first
 	const battles = $derived.by(() => {
 		return myBattles.data
 			.filter((p) => p.battle !== null)
 			.map((p) => p.battle!)
+			.filter((battle) => battle.type !== 'SOLO')
 			.sort((a, b) => (b.created_at ?? 0) - (a.created_at ?? 0));
+	});
+
+	const soloBattles = $derived.by(() => {
+		return [...mySoloChallenges.data].sort(
+			(a, b) => (b.created_at ?? 0) - (a.created_at ?? 0)
+		);
 	});
 </script>
 
@@ -20,24 +28,45 @@
 </svelte:head>
 
 <div class="dashboard">
-	{#if battles.length > 0}
-		<section class="section battle-surface">
-			<header class="section-header">
-				<h2>My Battles</h2>
-				<p>Continue your existing battles or view recaps.</p>
-			</header>
+	<section class="section battle-surface">
+		<header class="section-header">
+			<h2>My Battles</h2>
+			<p>Continue your existing battles or view recaps.</p>
+		</header>
+		{#if battles.length > 0}
 			<div class="layout-card">
 				{#each battles as battle (battle.id)}
 					<BattleCard {battle} />
 				{/each}
 			</div>
-		</section>
-	{/if}
+		{:else}
+			<p class="muted">
+				No battles yet. Start a solo battle from a target below, or invite a
+				friend!
+			</p>
+		{/if}
+	</section>
+
+	<section class="section battle-surface">
+		<header class="section-header">
+			<h2>My Solo Battles</h2>
+			<p>Continue your active runs or review completed solo recaps.</p>
+		</header>
+		{#if soloBattles.length > 0}
+			<div class="layout-card">
+				{#each soloBattles as battle (battle.id)}
+					<BattleCard {battle} />
+				{/each}
+			</div>
+		{:else}
+			<p class="muted">No solo battles yet. Start one from any target card.</p>
+		{/if}
+	</section>
 
 	<section class="section battle-surface">
 		<header class="section-header">
 			<h2>Latest Targets</h2>
-			<p>Jump into a new battle or practice.</p>
+			<p>Pick a target and start a battle to practice your CSS skills.</p>
 		</header>
 		<LatestTargets />
 	</section>

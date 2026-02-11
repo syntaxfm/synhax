@@ -82,7 +82,7 @@
 		const has_access =
 			files.status === 'ACCESS' || (await files.restore_directory_handle());
 		if (!has_access) {
-			alert('File access is required to set up your battle files.');
+			alert('Grant folder access so Synhax can save your code files locally.');
 			return;
 		}
 
@@ -138,7 +138,7 @@
 		const has_access =
 			files.status === 'ACCESS' || (await files.restore_directory_handle());
 		if (!has_access) {
-			alert('File access is required to join this battle.');
+			alert('Grant folder access so Synhax can save your code files locally.');
 			return;
 		}
 
@@ -235,13 +235,13 @@
 			onclick={join_battle}
 			disabled={active_participants.length >= 2}
 		>
-			Join Battle
+			Join as Player
 		</button>
 	{:else if needs_file_setup}
 		<div class="stack invited-notice">
 			<p>You've been invited to this battle!</p>
 			<button class="battle-button" onclick={setup_files}>
-				Set Up Files & Accept
+				Accept Invite
 			</button>
 		</div>
 	{/if}

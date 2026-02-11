@@ -289,7 +289,7 @@ const battlesTable = {
 		type: {
 			type: 'string',
 			optional: false,
-			customType: null as unknown as 'TIME_TRIAL' | 'TIMED_MATCH'
+			customType: null as unknown as 'TIME_TRIAL' | 'TIMED_MATCH' | 'SOLO'
 		},
 		win_condition: {
 			type: 'string',
@@ -385,7 +385,7 @@ const haxTable = {
 		type: {
 			type: 'string',
 			optional: false,
-			customType: null as unknown as 'BATTLE' | 'SOLO'
+			customType: null as unknown as 'SOLO' | 'BATTLE'
 		},
 		submitted_at: {
 			type: 'number',

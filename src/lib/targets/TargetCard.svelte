@@ -36,10 +36,10 @@
 		);
 
 		return {
-			difficulty: totals.difficulty / target.ratings.length,
-			creativity: totals.creativity / target.ratings.length,
-			fun: totals.fun / target.ratings.length,
-			coolness: totals.coolness / target.ratings.length
+			difficulty: totals.difficulty / ratings.length,
+			creativity: totals.creativity / ratings.length,
+			fun: totals.fun / ratings.length,
+			coolness: totals.coolness / ratings.length
 		};
 	});
 

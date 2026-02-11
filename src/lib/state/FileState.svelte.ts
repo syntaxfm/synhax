@@ -259,8 +259,9 @@ export class FileState {
 	) {
 		// Create new directory
 		if (!this.synhax_directory_handle) {
-			this.set_error('No synhax directory handle available.');
-			return;
+			const message = 'No synhax directory handle available.';
+			this.set_error(message);
+			throw new Error(message);
 		}
 
 		const resolved = await this.resolve_project_directory_handle(
@@ -269,8 +270,9 @@ export class FileState {
 			true
 		);
 		if (!resolved) {
-			this.set_error('Project folder unavailable.');
-			return;
+			const message = 'Project folder unavailable.';
+			this.set_error(message);
+			throw new Error(message);
 		}
 
 		const project_handle = resolved.handle;
@@ -295,7 +297,9 @@ export class FileState {
 		);
 
 		if (!validation.success) {
-			throw new Error(`Project validation failed: ${resolved.name}`);
+			const message = `Project validation failed: ${resolved.name}`;
+			this.set_error(message);
+			throw new Error(message);
 		}
 		this.project_directory_handle = project_handle;
 	}

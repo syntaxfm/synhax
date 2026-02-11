@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Table from '$lib/ui/Table.svelte';
 	import { z, queries } from '$lib/zero.svelte';
+	import { formatBattleStatus } from '$lib/constants';
 	import type { ColumnDef } from '@tanstack/svelte-table';
 	import { get_user_avatar_url } from '$lib/user/utils';
 	import { onMount } from 'svelte';
@@ -140,11 +141,11 @@
 					const timeRemaining = formatTimeRemaining(row.ends_at);
 					const urgency = getTimeUrgency(row.ends_at);
 					if (timeRemaining) {
-						return `<span class="status-badge ${statusClass} with-time ${urgency}">ACTIVE · ${timeRemaining}</span>`;
+						return `<span class="status-badge ${statusClass} with-time ${urgency}">${formatBattleStatus('ACTIVE')} · ${timeRemaining}</span>`;
 					}
 				}
 
-				return `<span class="status-badge ${statusClass}">${status || 'Unknown'}</span>`;
+				return `<span class="status-badge ${statusClass}">${formatBattleStatus(status) || 'Unknown'}</span>`;
 			}
 		},
 		{
