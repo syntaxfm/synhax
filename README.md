@@ -1,363 +1,194 @@
-# SynHax
+# Synhax Battle Mode
 
-A css / html battles app (maybe eventually frameworks and javascript too). Users will compete to find elegant solutions to UI problems called "targets" users can submit their solutions called "hacks" either as a one off submission OR as apart of a competitive "battle". Battles can be observed in real time and interacted with as users are coding. It is designed to be like a video game. something like mario party. entertaining
+Synhax is a real-time UI battle platform for HTML and CSS. Players compete by
+recreating a visual target, while the app tracks progress with live diff scoring
+and synced state.
 
-1. users logged in from github
+This repository contains the full app: frontend, auth, realtime sync layer, API
+endpoints, and database schema.
 
-2. users have profile that contains a theme selector
+## What The Platform Does
 
-3. targets. targets are css and html competitions that have a "target" which is either, html/css code, and image, or a video showing a ui element that the user will try to replicate. targets may reference battles (see below) or individual (submissions)
+- Hosts design recreation challenges called **targets** (code, image, or video
+  based)
+- Lets users run **solo** or **2-player** timed battles
+- Tracks each submission as a **hax** (user HTML + CSS)
+- Computes a live **diff score** (0-100) against the target
+- Supports a lobby -> battle -> recap game flow
+- Includes admin tools for managing users, targets, battles, and hax records
 
-4. battles. battles are a timed competition where multiple users will face off to complete a target in one of while being first to submit (no edits allowed after submission) aka time trial, or how far can you get in under a certain amount of time. that time can be configured and there would be an option to give everyone more time if needed. the person who would control that would be the "referee".
+## Roles
 
-5. a battle can be created by a user. one user signed up for a battle will be the referee.
+- **Player**: joins battles, edits code, submits results
+- **Referee/Host**: manages lobby settings, starts battles, controls battle flow
+- **Admin (`syntax`)**: manages private targets, admin pages, and media upload
+  tooling
 
-6. users can be competitors, viewers, OR the referee. the user who creates a battle will be the referee, only the referee and can upgrade a viewers in the lobby to competitors.
+## Battle Modes
 
-7. for now only users that have the role of "syntax" can create targets. and for a battle to be created, a target must exist.
+- **SOLO**: one player against the timer
+- **TIMED_MATCH**: two players in a head-to-head match
+- **Win condition**: currently optimized for `FIRST_TO_PERFECT` (first to 100%
+  diff score)
 
-8. hax. hax are user submissions for a target. they can be completed on a user's own time while taking as much time as wanted, or they can be done via a battle where competitors compete to finish a hack based on time trial complete in under a certain amount of time.
+## How A Battle Works
 
-9. rating. ratings are when a user reviews a target. a user can only rate a target once. it can be done in the post hack submission OR post battle screen.
+1. A user starts from a target card in the dashboard.
+2. A battle record, participant row, and hax row are created.
+3. In the lobby, the host configures mode, timing, visibility, and lock-in.
+4. During battle, each player output is rendered in a sandboxed iframe.
+5. A diff engine compares player output to the target and persists score
+   updates.
+6. On completion, users can view recap data and target ratings.
 
-10. judging. after a battle has been finished registered users can vote on users anonymously after voting they can lock in their vote to see who wrote what. after locking in, you CANNOT change. The syntax team can then use these votes in our video edit to show the winner.
+## Realtime + Data Architecture
 
-11. reveal. referee can "reveal" winners in a mario party like ceremony where awards are distributed. the reveal will only happen when the ref clicks reveal on the recap page. will initiate a screen take over for all battlers, viewers, referee
+Synhax uses Zero for synced queries/mutations and Drizzle/Postgres for storage.
 
-## Screens
+- **Client sync entry**: `src/lib/zero.svelte.ts`
+- **Read layer**: `src/lib/queries.ts`
+- **Write layer**: `src/lib/mutators.ts`
+- **Query endpoint**: `src/routes/api/query/+server.ts`
+- **Mutation endpoint**: `src/routes/api/mutate/+server.ts`
+- **Database schema**: `src/db/schema.ts`
 
-### / - Start Screen
+Zero context is passed from authenticated request state:
 
-### /battle/code/id/ Battle - Battler
+- Query context: `{ userID, userRole }`
+- Mutation context: `{ userID, userRole }`
 
-- WHEN user is battler for specific battle
-- SEE own code and executed node
-- CAN interact rendered app
-- CAN submit solution
+Permissions are enforced in query/mutator definitions (not with Zero
+`definePermissions`).
 
-### /battle/ref/id/ Battle - Referee
+## Local File Editing Model
 
-- WHEN user is referee
-- SEE code and executed code of all users working
-- SEE target inspo
-- WHEN public
-- SEE and copy public url
-- CAN make battle public
-- WHEN battle is over
-- CAN add overtime
-- CAN complete battle
+The platform is built around the browser File System Access API.
 
-- WHEN user is NOT referee
+- Players grant access to a local folder
+- Synhax creates/loads battle files (`index.html`, `styles.css`)
+- Local file changes are polled and synced into `hax` + `hax_history`
 
-- CANNOT access
+Important:
 
-### /battle/watch/id/ Battle - Audience
+- Chrome/Edge-style File System Access support is required
+- `https` or `localhost` is required for file system permissions
 
-- WHEN battle is public
-- SEE code and executed code of all users working
-- WHEN logged in, CAN vote once per category per battle
+Implementation: `src/lib/state/FileState.svelte.ts`
 
-### /dashboard/
+## Target Types
 
-- SEE list of targets with name, inspo image
-- WHEN target selected
-- SEE Number of hacks completed, completion %, [TARGET_ATTRIBUTES]
+- `CODE`: structured target HTML/CSS (with optional starter code)
+- `IMAGE`: static visual reference
+- `VIDEO`: video reference
 
-### /battle/id/recap/ - Battle Recap
+Admin target creation/editing lives at:
 
-- SEE Awards "accuracy", "real coder", "performance", "vibe"
-- SEE each user's submission
-- CAN Download final code
-- CAN Click to open UIs to try
-- CAN Vote Results show in realtime
-- CAN rate [TARGET_ATTRIBUTES]
-- FOR Time Trial -> SEE completed time
+- `src/routes/(style)/(menu)/admin/targets/TargetForm.svelte`
 
-### /settings/
+## Tailwind In Battle Submissions
 
-- WHEN user is ID
-- CAN Change Theme
-- CAN Logout
-- CAN change ~~character~~
-- WHEN user is NOT ID
-- CANNOT access
+Battle previews support Tailwind CSS v4 from CDN in sandboxed output.
 
-### /profile/ (PHW)
+- Add `@import "tailwindcss";` in battle CSS to enable it
+- Tailwind is injected only when that import is detected
 
-- SEE History of battles
-- SEE History of Hax
-- SEE Awards _PHW_
-- SEE Friends \_PHW
+Implementation: `src/utils/code.ts`
 
-### /battle/init/
+## Tech Stack
 
-- AESTHETIC from Pokemon battle / smash bros battle
-- AUTO creates a unique ID for battle
-- AUTO sets referee role to user
-- CAN set all [BATTLE_SETTINGS]
-
-### /battle/lobby/id/
-
-- AESTHETIC from Pokemon battle / smash bros battle
-- AUTO creates a unique ID for battle
-- AUTO sets referee role to user
-- CAN set all [BATTLE_SETTINGS]
-
-### /target/id
-
-- MUST Upload TARGET_INSPO
-- MUST Upload Image of Inspo (can be automattic in the future)
-- MUST Name Target
-
-### /admin _PHW_
-
-- Big tables of users, battles, hacks, targets ect, no functionality needed for hackweek
-
-## App Flow
-
-### ANON
-
--> /
--> /battle/watch/id/
-
-### USER
-
--> /dashboard
---> /battle/init
---> /settings
---> /battle/lobby/id
---> /target/init
---> /battle/id/recap/
---> /profile (PHW)
--> /battle/watch/id/
-
-## Tech Choices
-
-- SvelteKit
-- Svelte 5
-- Zero Sync for realtime, syncing data
-- Postgres
-- Drizzle - orm for postgres
-- Github Oauth
-- Web Awesome for UI elements
-- CSS Variables for theming and all CSS
-- Better Auth with Github OAuth via Drizzle
-
-- - With admin tools, access controls with roles
-
-- File System API for editing files locally
-
-RENDER
-
-- Rendered preview of users hax code
-
-## Battle Features
-
-### Tailwind CSS Support
-
-Battles support **Tailwind CSS v4** with full client-side JIT compilation. You can use any Tailwind class in your HTML, including arbitrary values.
-
-**Examples:**
-- Standard classes: `bg-blue-500`, `text-white`, `p-4`, `rounded-lg`
-- Arbitrary colors: `bg-[#efefef]`, `text-[#333]`
-- Arbitrary spacing: `p-[23px]`, `m-[1.5rem]`
-- Arbitrary dimensions: `w-[347px]`, `h-[89px]`
-- Arbitrary borders: `border-[3px]`, `rounded-[12px]`
-
-The Tailwind CDN automatically compiles these classes in the browser, so no build step is required. All Tailwind v4 features work out of the box, including plugins for forms, typography, aspect-ratio, and container-queries.
-
-## Tables
-
-all have basic created_at, updated_at, id
-
--USER-
-
-- user_id: string - github id
-- roles: [USER_ROLES]
-- awards: [-AWARD-]
-- avatar: string
-- bio: string
-- theme: string (based on highlightjs themes)
-
-USER_ROLES
-
-- anon - NON LOGGED IN. anon users can watch battles without voting
-- syntax - for syntax team members aka super admins
-- normal - regular users
-
--AWARD-
-
-- user_id: -USER- | null
-- battle_id: -BATTLE-
-- award_type: USER_AWARD
-  unique (battle_id, award_type)
-
-USER_AWARD(PHW)
-
-- accurate
-- real world
-- best overall
-
--USER_RELATIONSHIPS-
-
-- user_id: -USER-
-- related_user_id: -USER-
-- type: [FOLLOW | FRIEND]
-- created_at: date
-  unique(user_id, related_user_id, type) so no dupes
-  check(user_id <> related_user_id) so no self-links
-
--BATTLE-
-
-- date: date
-- referee: -USER-
-- settings: BATTLE_SETTINGS
-- target_id: -TARGET-
-- status: BATTLE_STATUS
-- public_token: string
-
-BATTLE_SETTINGS
-
-- Type: [TIME_TRIAL, TIMED_MATCH]
-- Total Time: Number
-- Overtime? Boolean | null
-- Visibility: [PUBLIC | PRIVATE]
-- rating: number
-
-BATTLE_STATUS
-[PENDING, ACTIVE, COMPLETED]
-
--BATTLE_PARTICIPANTS-
-
-- battle_id: -BATTLE-
-- user_id: -USER-
-- role: [BATTLER | VIEWER]
-- status: [PENDING | READY | ACTIVE | DROPPED | FINISHED]   # replaces is_ready
-- joined_at: date
-- last_seen_at: date
-- finished_at: date | null
-  constraints:
-- unique(battle_id, user_id)             # user has one participation row per battle
-- index(battle_id, role)
-- index(battle_id, status)
-
--BATTLE_VOTES-
-
-battle_id: -BATTLE-
-voter_id: -USER-
-nominee_hax_id: -HAX-
-award_type: USER_AWARD
-unique(battle_id, voter_id, award_type)
-rule(nominee_hax_id must belong to battle_id)
-
--HAX-
-
-- target_id: -TARGET-
-- battle_id: -BATTLE- | null
-- user_id: -USER-
-- html: string
-- css: string
-- type: BATTLE | SOLO
-
--TARGET-
-
-- name: string
-- image: string
-- type: [TARGET_TYPE]
-- inpso: string - url to image/video (html inspo to think more on later. find host for video/images )
-- archived_at: date
-
-TARGET_TYPE
-
-- code (css & html)
-- image
-- video
-
-TARGET_ATTRIBUTES
-
-- difficulty
-- creativity
-- fun
-- coolness
-
--RATING-
-
-- user_id: -USER-
-- target_id: -TARGET-
-- difficulty: number
-- creativity: number
-- fun: number
-- coolness: number
-
-### Future Ideas
-
-#### Battles
-
-- Send others users bombs or something that modifies their code to fuck with them while they are coding
-
-- Friending System
-
-- Individual submissions, hackweek version include ONLY battles a means of submitting
+- SvelteKit 2 + Svelte 5
+- Zero (`@rocicorp/zero`) + `zero-svelte`
+- Drizzle ORM + Postgres
+- Better Auth (GitHub OAuth + JWT/bearer support)
+- Cloudflare deployment target (Workers + Hyperdrive support)
+- Sentry client instrumentation with telemetry tunnel endpoint
+
+## Route Map
+
+- `/` - login/start screen
+- `/dashboard` - targets + your battles
+- `/lobby/:id` - pre-battle setup and lock-in
+- `/battle/:id/code` - active coding/battle view
+- `/battle/:id/code/breakout` - detached output window
+- `/ref/:id` - referee control view
+- `/recap/:id` - post-battle recap
+- `/history` - player battle history
+- `/settings` - local folder + account controls
+- `/admin/*` - admin-only management screens
 
 ## Environment Variables
 
-- `ZERO_UPSTREAM_DB`: Postgres connection string used for both application runtime and Drizzle migrations. Replaces the former `DB_URL` variable (now deprecated).
+These are the key variables used by this app:
 
-### Setup
+- `ZERO_UPSTREAM_DB` - Postgres connection string (runtime + Drizzle CLI)
+- `PUBLIC_SERVER` - Zero server URL used by the client sync layer
+- `GITHUB_CLIENT_ID` - GitHub OAuth client id
+- `GITHUB_CLIENT_SECRET` - GitHub OAuth client secret
+- `IV_API_KEY` - API key for admin media upload proxy endpoints
 
-1. Local dev: add to `.env` (not committed):
-   ```bash
-   ZERO_UPSTREAM_DB=postgres://user:pass@host:5432/dbname
-   ```
-2. SvelteKit server code imports it via `$env/static/private` (see `src/db/index.ts`). Restart the dev server after changes.
-3. Cloudflare Workers: store as a secret (recommended):
-   ```bash
-   wrangler secret put ZERO_UPSTREAM_DB
-   ```
-4. Drizzle CLI + migrations use `process.env.ZERO_UPSTREAM_DB` (see `drizzle.config.ts`).
+Cloudflare-specific:
 
-Remove any legacy `DB_URL` definitions from local `.env` and Cloudflare secrets to avoid confusion. Only `ZERO_UPSTREAM_DB` is now used.
+- `HYPERDRIVE` binding can provide the runtime DB connection string
 
-## Sentry
+## Local Development
 
-Error and performance monitoring is integrated with Sentry.
+1. Install dependencies:
 
-### Config Files
-
-- `sentry.server.config.ts`: Initializes Sentry for server/runtime using `SENTRY_DSN`.
-- `sentry.client.config.ts`: Initializes Sentry in the browser using `PUBLIC_SENTRY_DSN`.
-
-These are auto-loaded by the Sentry SDK (import side effects) when bundled.
-
-### Env Vars
-
-Add to `.env` (do not commit real values):
-
-```
-SENTRY_DSN=... # private
-PUBLIC_SENTRY_DSN=... # optional public (omit if not capturing browser errors)
+```bash
+pnpm install
 ```
 
-### Source Maps (optional CI)
+2. Configure environment variables (`.env` or platform env).
 
-Provide the following in your CI environment to enable source map upload via the Vite plugin:
+3. Push schema to Postgres:
 
-```
-SENTRY_AUTH_TOKEN=your_auth_token
-SENTRY_ORG=scott-tolinski-projects
-SENTRY_PROJECT=javascript-svelte
+```bash
+pnpm push
 ```
 
-The plugin is inert locally unless those vars are set.
+4. Start Zero cache dev server (terminal 1):
 
-### Server Error Capture
+```bash
+pnpm sync
+```
 
-Unhandled server errors are captured in `src/hooks.server.ts` via `handleError`.
+5. Start app dev server on port `7777` (terminal 2):
 
-### Testing
+```bash
+pnpm dev
+```
 
-Trigger a test error in a route load/function to verify it appears in Sentry.
+6. Open `http://localhost:7777`
 
-### Adjust Sampling
+## Useful Scripts
 
-Modify `tracesSampleRate` / `profilesSampleRate` in the config files as needed for production.
+- `pnpm dev` - run SvelteKit dev server
+- `pnpm sync` - run Zero cache dev server
+- `pnpm push` - push Drizzle schema changes to DB
+- `pnpm sync-generate` - regenerate Zero schema from Drizzle schema
+- `pnpm check` - typecheck with `svelte-check`
+- `pnpm lint` - Prettier check
+- `pnpm format` - Prettier write
+- `pnpm build` - production build
+
+## Data Model (High Level)
+
+Core tables:
+
+- `user`
+- `targets`
+- `battles`
+- `battle_participants`
+- `hax`
+- `hax_history`
+- `ratings`
+- `battle_votes`
+- `awards`
+
+Schema source: `src/db/schema.ts`
+
+## Development Notes
+
+- App routes are client-rendered (`ssr = false`)
+- Admin access is role-based (`syntax`)
+- Tasks in this repo are tracked with Dex (`.dex/`)
