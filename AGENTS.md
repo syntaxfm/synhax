@@ -127,3 +127,6 @@ return mutator.fn({ args, tx, ctx: { userId, userRole } });
 - The context is populated from `locals.user` (set by BetterAuth in hooks)
 - Anonymous users have `userID: 'anon'` and `userRole: undefined`
 - Admin role is `'syntax'`
+
+<!-- This section is maintained by the coding agent via lore (https://github.com/BYK/opencode-lore) -->
+<!-- End lore-managed section -->
