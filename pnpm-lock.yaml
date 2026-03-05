@@ -21,6 +21,9 @@ importers:
       '@aws-sdk/s3-request-presigner':
         specifier: ^3.1003.0
         version: 3.1003.0
+      '@better-auth/drizzle-adapter':
+        specifier: ^1.5.3
+        version: 1.5.3(@better-auth/core@1.5.3(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(@cloudflare/workers-types@4.20260305.1)(better-call@1.3.2(zod@4.3.6))(jose@6.2.0)(kysely@0.28.11)(nanostores@1.1.1))(@better-auth/utils@0.3.1)(drizzle-orm@0.45.1(@cloudflare/workers-types@4.20260305.1)(@opentelemetry/api@1.9.0)(@types/pg@8.18.0)(kysely@0.28.11)(pg@8.20.0)(postgres@3.4.8))
       '@drop-in/graffiti':
         specifier: ^4.18.0
         version: 4.18.0(svelte@5.53.7)
@@ -47,7 +50,7 @@ importers:
         version: 2.2.0
       better-auth:
         specifier: ^1.5.3
-        version: 1.5.3(@cloudflare/workers-types@4.20260305.1)(@sveltejs/kit@2.53.4(@opentelemetry/api@1.9.0)(@sveltejs/vite-plugin-svelte@6.2.4(svelte@5.53.7)(vite@7.3.1(@types/node@25.3.3)(tsx@4.21.0)(yaml@2.8.2)))(svelte@5.53.7)(typescript@5.9.3)(vite@7.3.1(@types/node@25.3.3)(tsx@4.21.0)(yaml@2.8.2)))(drizzle-kit@0.31.9)(drizzle-orm@0.45.1(@cloudflare/workers-types@4.20260305.1)(@opentelemetry/api@1.9.0)(@types/pg@8.18.0)(kysely@0.28.11)(pg@8.20.0)(postgres@3.4.8))(pg@8.20.0)(svelte@5.53.7)
+        version: 1.5.3(@better-auth/drizzle-adapter@1.5.3(@better-auth/core@1.5.3(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(@cloudflare/workers-types@4.20260305.1)(better-call@1.3.2(zod@4.3.6))(jose@6.2.0)(kysely@0.28.11)(nanostores@1.1.1))(@better-auth/utils@0.3.1)(drizzle-orm@0.45.1(@cloudflare/workers-types@4.20260305.1)(@opentelemetry/api@1.9.0)(@types/pg@8.18.0)(kysely@0.28.11)(pg@8.20.0)(postgres@3.4.8)))(@cloudflare/workers-types@4.20260305.1)(@sveltejs/kit@2.53.4(@opentelemetry/api@1.9.0)(@sveltejs/vite-plugin-svelte@6.2.4(svelte@5.53.7)(vite@7.3.1(@types/node@25.3.3)(tsx@4.21.0)(yaml@2.8.2)))(svelte@5.53.7)(typescript@5.9.3)(vite@7.3.1(@types/node@25.3.3)(tsx@4.21.0)(yaml@2.8.2)))(drizzle-kit@0.31.9)(drizzle-orm@0.45.1(@cloudflare/workers-types@4.20260305.1)(@opentelemetry/api@1.9.0)(@types/pg@8.18.0)(kysely@0.28.11)(pg@8.20.0)(postgres@3.4.8))(pg@8.20.0)(svelte@5.53.7)
       bits-ui:
         specifier: ^2.16.3
         version: 2.16.3(@internationalized/date@3.12.0)(@sveltejs/kit@2.53.4(@opentelemetry/api@1.9.0)(@sveltejs/vite-plugin-svelte@6.2.4(svelte@5.53.7)(vite@7.3.1(@types/node@25.3.3)(tsx@4.21.0)(yaml@2.8.2)))(svelte@5.53.7)(typescript@5.9.3)(vite@7.3.1(@types/node@25.3.3)(tsx@4.21.0)(yaml@2.8.2)))(svelte@5.53.7)
@@ -393,6 +396,13 @@ packages:
     peerDependenciesMeta:
       '@cloudflare/workers-types':
         optional: true
+
+  '@better-auth/drizzle-adapter@1.5.3':
+    resolution: {integrity: sha512-dib9V1vpwDu+TKLC+L+8Q5bLNS0uE3JCT4pGotw52pnpiQF8msoMK4eEfri19f8DtNltpb2F2yzyIsTugBBYNQ==}
+    peerDependencies:
+      '@better-auth/core': 1.5.3
+      '@better-auth/utils': ^0.3.0
+      drizzle-orm: '>=0.41.0'
 
   '@better-auth/kysely-adapter@1.5.3':
     resolution: {integrity: sha512-eAm1KPrlPXkH/qXUXnGBcHPDgCX153b6BSlc2QJ2IeqmiWym9D/6XORqBIZOl71JiP0Cifzocr2GLpnz0gt31Q==}
@@ -5379,6 +5389,12 @@ snapshots:
     optionalDependencies:
       '@cloudflare/workers-types': 4.20260305.1
 
+  '@better-auth/drizzle-adapter@1.5.3(@better-auth/core@1.5.3(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(@cloudflare/workers-types@4.20260305.1)(better-call@1.3.2(zod@4.3.6))(jose@6.2.0)(kysely@0.28.11)(nanostores@1.1.1))(@better-auth/utils@0.3.1)(drizzle-orm@0.45.1(@cloudflare/workers-types@4.20260305.1)(@opentelemetry/api@1.9.0)(@types/pg@8.18.0)(kysely@0.28.11)(pg@8.20.0)(postgres@3.4.8))':
+    dependencies:
+      '@better-auth/core': 1.5.3(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(@cloudflare/workers-types@4.20260305.1)(better-call@1.3.2(zod@4.3.6))(jose@6.2.0)(kysely@0.28.11)(nanostores@1.1.1)
+      '@better-auth/utils': 0.3.1
+      drizzle-orm: 0.45.1(@cloudflare/workers-types@4.20260305.1)(@opentelemetry/api@1.9.0)(@types/pg@8.18.0)(kysely@0.28.11)(pg@8.20.0)(postgres@3.4.8)
+
   '@better-auth/kysely-adapter@1.5.3(@better-auth/core@1.5.3(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(@cloudflare/workers-types@4.20260305.1)(better-call@1.3.2(zod@4.3.6))(jose@6.2.0)(kysely@0.28.11)(nanostores@1.1.1))(@better-auth/utils@0.3.1)(kysely@0.28.11)':
     dependencies:
       '@better-auth/core': 1.5.3(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(@cloudflare/workers-types@4.20260305.1)(better-call@1.3.2(zod@4.3.6))(jose@6.2.0)(kysely@0.28.11)(nanostores@1.1.1)
@@ -8065,7 +8081,7 @@ snapshots:
     dependencies:
       safe-buffer: 5.1.2
 
-  better-auth@1.5.3(@cloudflare/workers-types@4.20260305.1)(@sveltejs/kit@2.53.4(@opentelemetry/api@1.9.0)(@sveltejs/vite-plugin-svelte@6.2.4(svelte@5.53.7)(vite@7.3.1(@types/node@25.3.3)(tsx@4.21.0)(yaml@2.8.2)))(svelte@5.53.7)(typescript@5.9.3)(vite@7.3.1(@types/node@25.3.3)(tsx@4.21.0)(yaml@2.8.2)))(drizzle-kit@0.31.9)(drizzle-orm@0.45.1(@cloudflare/workers-types@4.20260305.1)(@opentelemetry/api@1.9.0)(@types/pg@8.18.0)(kysely@0.28.11)(pg@8.20.0)(postgres@3.4.8))(pg@8.20.0)(svelte@5.53.7):
+  better-auth@1.5.3(@better-auth/drizzle-adapter@1.5.3(@better-auth/core@1.5.3(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(@cloudflare/workers-types@4.20260305.1)(better-call@1.3.2(zod@4.3.6))(jose@6.2.0)(kysely@0.28.11)(nanostores@1.1.1))(@better-auth/utils@0.3.1)(drizzle-orm@0.45.1(@cloudflare/workers-types@4.20260305.1)(@opentelemetry/api@1.9.0)(@types/pg@8.18.0)(kysely@0.28.11)(pg@8.20.0)(postgres@3.4.8)))(@cloudflare/workers-types@4.20260305.1)(@sveltejs/kit@2.53.4(@opentelemetry/api@1.9.0)(@sveltejs/vite-plugin-svelte@6.2.4(svelte@5.53.7)(vite@7.3.1(@types/node@25.3.3)(tsx@4.21.0)(yaml@2.8.2)))(svelte@5.53.7)(typescript@5.9.3)(vite@7.3.1(@types/node@25.3.3)(tsx@4.21.0)(yaml@2.8.2)))(drizzle-kit@0.31.9)(drizzle-orm@0.45.1(@cloudflare/workers-types@4.20260305.1)(@opentelemetry/api@1.9.0)(@types/pg@8.18.0)(kysely@0.28.11)(pg@8.20.0)(postgres@3.4.8))(pg@8.20.0)(svelte@5.53.7):
     dependencies:
       '@better-auth/core': 1.5.3(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(@cloudflare/workers-types@4.20260305.1)(better-call@1.3.2(zod@4.3.6))(jose@6.2.0)(kysely@0.28.11)(nanostores@1.1.1)
       '@better-auth/kysely-adapter': 1.5.3(@better-auth/core@1.5.3(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(@cloudflare/workers-types@4.20260305.1)(better-call@1.3.2(zod@4.3.6))(jose@6.2.0)(kysely@0.28.11)(nanostores@1.1.1))(@better-auth/utils@0.3.1)(kysely@0.28.11)
@@ -8082,6 +8098,7 @@ snapshots:
       nanostores: 1.1.1
       zod: 4.3.6
     optionalDependencies:
+      '@better-auth/drizzle-adapter': 1.5.3(@better-auth/core@1.5.3(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(@cloudflare/workers-types@4.20260305.1)(better-call@1.3.2(zod@4.3.6))(jose@6.2.0)(kysely@0.28.11)(nanostores@1.1.1))(@better-auth/utils@0.3.1)(drizzle-orm@0.45.1(@cloudflare/workers-types@4.20260305.1)(@opentelemetry/api@1.9.0)(@types/pg@8.18.0)(kysely@0.28.11)(pg@8.20.0)(postgres@3.4.8))
       '@sveltejs/kit': 2.53.4(@opentelemetry/api@1.9.0)(@sveltejs/vite-plugin-svelte@6.2.4(svelte@5.53.7)(vite@7.3.1(@types/node@25.3.3)(tsx@4.21.0)(yaml@2.8.2)))(svelte@5.53.7)(typescript@5.9.3)(vite@7.3.1(@types/node@25.3.3)(tsx@4.21.0)(yaml@2.8.2))
       drizzle-kit: 0.31.9
       drizzle-orm: 0.45.1(@cloudflare/workers-types@4.20260305.1)(@opentelemetry/api@1.9.0)(@types/pg@8.18.0)(kysely@0.28.11)(pg@8.20.0)(postgres@3.4.8)

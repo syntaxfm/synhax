@@ -54,6 +54,7 @@
 		"@awesome.me/webawesome": "3.3.1",
 		"@aws-sdk/client-s3": "^3.1003.0",
 		"@aws-sdk/s3-request-presigner": "^3.1003.0",
+		"@better-auth/drizzle-adapter": "^1.5.3",
 		"@drop-in/graffiti": "^4.18.0",
 		"@rocicorp/zero": "^0.25.13",
 		"@sentry/sveltekit": "^10.42.0",
