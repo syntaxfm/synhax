@@ -27,16 +27,32 @@ export async function POST({ request }: RequestEvent) {
 
 	const endpoint = getSentryEndpoint(SENTRY_DSN);
 
-	const response = await fetch(endpoint, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/x-sentry-envelope'
-		},
-		body: envelope
-	});
+	try {
+		const response = await fetch(endpoint, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/x-sentry-envelope'
+			},
+			body: envelope
+		});
 
-	return new Response(response.body, {
-		status: response.status,
-		statusText: response.statusText
-	});
+		if (!response.ok) {
+			console.error(
+				'[telemetry] Sentry returned:',
+				response.status,
+				response.statusText
+			);
+			const errorBody = await response.text();
+			console.error('[telemetry] Error body:', errorBody);
+		}
+
+		return new Response(response.body, {
+			status: response.status,
+			statusText: response.statusText,
+			headers: response.headers
+		});
+	} catch (error) {
+		console.error('[telemetry] Failed to forward to Sentry:', error);
+		return new Response('Failed to forward telemetry', { status: 502 });
+	}
 }
