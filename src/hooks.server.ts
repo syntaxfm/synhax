@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/sveltekit';
-import type { HandleServerError, Handle, RequestEvent } from '@sveltejs/kit';
+import type { HandleServerError, Handle } from '@sveltejs/kit';
 import { svelteKitHandler } from 'better-auth/svelte-kit';
 import { building, dev } from '$app/environment';
 import { sequence } from '@sveltejs/kit/hooks';
@@ -230,22 +230,6 @@ type RuntimeEnv = {
 	DATABASE_URL?: string;
 };
 
-type RuntimeAuth = ReturnType<typeof createAuthInstance>;
-
-let runtimeAuth: RuntimeAuth | null = null;
-
-function resolveConnectionString(platformEnv?: RuntimeEnv) {
-	return (
-		platformEnv?.DB_URL ??
-		platformEnv?.ZERO_UPSTREAM_DB ??
-		platformEnv?.DATABASE_URL ??
-		process.env.DB_URL ??
-		process.env.ZERO_UPSTREAM_DB ??
-		process.env.DATABASE_URL ??
-		ZERO_UPSTREAM_DB
-	);
-}
-
 function createAuthInstance(connectionString: string) {
 	const sql = postgres(connectionString, {
 		prepare: false, // Better with external poolers (e.g. Supabase pooler)
@@ -254,7 +238,7 @@ function createAuthInstance(connectionString: string) {
 	});
 
 	const db = drizzle(sql, { schema });
-	return betterAuth({
+	const auth = betterAuth({
 		database: drizzleAdapter(db, {
 			provider: 'pg',
 			schema
@@ -316,15 +300,20 @@ function createAuthInstance(connectionString: string) {
 			bearer()
 		]
 	});
+
+	return { auth, sql };
 }
 
-function getRuntimeAuth(event: RequestEvent): RuntimeAuth {
-	if (runtimeAuth) {
-		return runtimeAuth;
-	}
-
-	const platformEnv = event.platform?.env as RuntimeEnv | undefined;
-	const connectionString = resolveConnectionString(platformEnv);
+export const handle: Handle = async ({ event, resolve }) => {
+	const env = event.platform?.env as RuntimeEnv | undefined;
+	const connectionString =
+		env?.DB_URL ??
+		env?.ZERO_UPSTREAM_DB ??
+		env?.DATABASE_URL ??
+		process.env.DB_URL ??
+		process.env.ZERO_UPSTREAM_DB ??
+		process.env.DATABASE_URL ??
+		ZERO_UPSTREAM_DB;
 
 	if (!connectionString) {
 		throw new Error(
@@ -332,13 +321,7 @@ function getRuntimeAuth(event: RequestEvent): RuntimeAuth {
 		);
 	}
 
-	runtimeAuth = createAuthInstance(connectionString);
-
-	return runtimeAuth;
-}
-
-export const handle: Handle = async ({ event, resolve }) => {
-	const auth = getRuntimeAuth(event);
+	const { auth, sql } = createAuthInstance(connectionString);
 
 	const authHandle: Handle = async ({ event, resolve }) => {
 		return svelteKitHandler({ event, resolve, auth, building });
@@ -409,5 +392,9 @@ export const handle: Handle = async ({ event, resolve }) => {
 		sessionHandle
 	);
 
-	return chain({ event, resolve });
+	try {
+		return await chain({ event, resolve });
+	} finally {
+		await sql.end();
+	}
 };
