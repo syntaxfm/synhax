@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/sveltekit';
-import type { HandleServerError, Handle } from '@sveltejs/kit';
+import type { HandleServerError, Handle, RequestEvent } from '@sveltejs/kit';
 import { svelteKitHandler } from 'better-auth/svelte-kit';
 import { building, dev } from '$app/environment';
 import { sequence } from '@sveltejs/kit/hooks';
@@ -27,6 +27,133 @@ const sentryInitHandle = Sentry.initCloudflareSentryHandle({
 
 const sentryHandle = Sentry.sentryHandle();
 
+const REDACTED = '[redacted]';
+
+function truncateText(value: string, max = 1200): string {
+	if (value.length <= max) {
+		return value;
+	}
+
+	return `${value.slice(0, max)}...`;
+}
+
+function sanitizeBetterAuthText(value: string): string {
+	let sanitized = value;
+
+	sanitized = sanitized.replace(/params:\s[\s\S]*$/i, `params: ${REDACTED}`);
+	sanitized = sanitized.replace(
+		/(codeVerifier|accessToken|refreshToken|idToken|password|token)"?\s*[:=]\s*"[^"]*"/gi,
+		`$1": "${REDACTED}"`
+	);
+
+	return truncateText(sanitized);
+}
+
+function sanitizeBetterAuthArg(arg: unknown): unknown {
+	if (arg instanceof Error) {
+		const details = extractBetterAuthError(arg);
+		return {
+			name: details.name,
+			message: details.message,
+			code: details.code,
+			table: details.table,
+			column: details.column,
+			constraint: details.constraint,
+			cause: details.cause
+		};
+	}
+
+	if (typeof arg === 'string') {
+		return sanitizeBetterAuthText(arg);
+	}
+
+	if (!arg || typeof arg !== 'object') {
+		return arg;
+	}
+
+	if (Array.isArray(arg)) {
+		return arg.map(sanitizeBetterAuthArg);
+	}
+
+	const output: Record<string, unknown> = {};
+	for (const [key, value] of Object.entries(arg as Record<string, unknown>)) {
+		const lowerKey = key.toLowerCase();
+		if (
+			lowerKey.includes('token') ||
+			lowerKey.includes('password') ||
+			lowerKey.includes('cookie') ||
+			lowerKey.includes('secret') ||
+			lowerKey.includes('codeverifier')
+		) {
+			output[key] = REDACTED;
+			continue;
+		}
+
+		if (typeof value === 'string') {
+			output[key] = sanitizeBetterAuthText(value);
+			continue;
+		}
+
+		if (
+			typeof value === 'number' ||
+			typeof value === 'boolean' ||
+			value === null
+		) {
+			output[key] = value;
+			continue;
+		}
+
+		output[key] = Array.isArray(value) ? '[array]' : `[${typeof value}]`;
+	}
+
+	return output;
+}
+
+function extractBetterAuthError(error: Error) {
+	const record = error as unknown as Record<string, unknown>;
+	const cause = record.cause;
+
+	const details: {
+		name: string;
+		message: string;
+		stack?: string;
+		cause?: string;
+		code?: string;
+		detail?: string;
+		table?: string;
+		column?: string;
+		constraint?: string;
+	} = {
+		name: error.name,
+		message: sanitizeBetterAuthText(error.message)
+	};
+
+	if (typeof error.stack === 'string') {
+		details.stack = sanitizeBetterAuthText(error.stack);
+	}
+
+	if (cause instanceof Error) {
+		details.cause = sanitizeBetterAuthText(cause.message);
+	} else if (typeof cause === 'string') {
+		details.cause = sanitizeBetterAuthText(cause);
+	}
+
+	for (const key of [
+		'code',
+		'detail',
+		'table',
+		'column',
+		'constraint'
+	] as const) {
+		const value = record[key];
+		if (typeof value === 'string' && value.length > 0) {
+			details[key] = sanitizeBetterAuthText(value);
+		}
+	}
+
+	return details;
+}
+
 function captureBetterAuthLog(
 	level: 'debug' | 'info' | 'warn' | 'error',
 	message: string,
@@ -48,13 +175,42 @@ function captureBetterAuthLog(
 		}
 		return typeof arg;
 	});
+	const sanitizedArgs = args.map(sanitizeBetterAuthArg);
+	const firstError = args.find((arg): arg is Error => arg instanceof Error);
+	const sanitizedMessage = sanitizeBetterAuthText(message);
 
-	Sentry.withScope((scope) => {
+	Sentry.withScope((scope: any) => {
 		scope.setTag('source', 'better-auth');
 		scope.setTag('log_level', level);
-		scope.setFingerprint(['better-auth', message]);
+		scope.setFingerprint(['better-auth', sanitizedMessage]);
 		scope.setExtra('argTypes', argTypes);
-		Sentry.captureMessage(`[Better Auth] ${message}`, 'error');
+		scope.setExtra('args', sanitizedArgs);
+
+		if (firstError) {
+			const details = extractBetterAuthError(firstError);
+			scope.setContext('better_auth_error', details);
+			if (details.code) {
+				scope.setTag('error_code', details.code);
+			}
+
+			const capturedError = new Error(
+				details.message || `[Better Auth] ${sanitizedMessage}`
+			);
+			capturedError.name = details.name || 'BetterAuthError';
+			if (details.stack) {
+				capturedError.stack = details.stack;
+			}
+
+			Sentry.captureException(capturedError, {
+				mechanism: {
+					type: 'better-auth.logger',
+					handled: true
+				}
+			});
+			return;
+		}
+
+		Sentry.captureMessage(`[Better Auth] ${sanitizedMessage}`, 'error');
 	});
 }
 
@@ -68,29 +224,37 @@ const myErrorHandler: HandleServerError = ({ error, event }) => {
 
 export const handleError = Sentry.handleErrorWithSentry(myErrorHandler);
 
-export const handle: Handle = async ({ event, resolve }) => {
-	const env = event.platform?.env as
-		| { DATABASE_URL?: string; HYPERDRIVE?: { connectionString: string } }
-		| undefined;
-	const connectionString =
-		env?.HYPERDRIVE?.connectionString || ZERO_UPSTREAM_DB;
+type RuntimeEnv = {
+	DB_URL?: string;
+	ZERO_UPSTREAM_DB?: string;
+	DATABASE_URL?: string;
+};
 
-	// Fail loudly if no connection string
-	if (!connectionString) {
-		throw new Error(
-			'No database connection string found. Check HYPERDRIVE binding or DATABASE_URL env var.'
-		);
-	}
-	// Create per-request connection (correct for Cloudflare Workers)
-	// Hyperdrive handles global connection pooling
+type RuntimeAuth = ReturnType<typeof createAuthInstance>;
+
+let runtimeAuth: RuntimeAuth | null = null;
+
+function resolveConnectionString(platformEnv?: RuntimeEnv) {
+	return (
+		platformEnv?.DB_URL ??
+		platformEnv?.ZERO_UPSTREAM_DB ??
+		platformEnv?.DATABASE_URL ??
+		process.env.DB_URL ??
+		process.env.ZERO_UPSTREAM_DB ??
+		process.env.DATABASE_URL ??
+		ZERO_UPSTREAM_DB
+	);
+}
+
+function createAuthInstance(connectionString: string) {
 	const sql = postgres(connectionString, {
-		prepare: true, // Required for Hyperdrive query caching
-		max: 5, // Respect Workers' 6-connection limit
-		fetch_types: false // Skip if not using array types (reduces roundtrips)
+		prepare: false, // Better with external poolers (e.g. Supabase pooler)
+		max: 5,
+		fetch_types: false
 	});
 
 	const db = drizzle(sql, { schema });
-	const auth = betterAuth({
+	return betterAuth({
 		database: drizzleAdapter(db, {
 			provider: 'pg',
 			schema
@@ -99,23 +263,27 @@ export const handle: Handle = async ({ event, resolve }) => {
 			level: dev ? 'debug' : 'warn',
 			log(level, message, ...args) {
 				captureBetterAuthLog(level, message, args);
+				const logArgs = dev ? args : args.map(sanitizeBetterAuthArg);
+				const safeMessage =
+					typeof message === 'string'
+						? sanitizeBetterAuthText(message)
+						: String(message);
 
 				if (level === 'error') {
-					console.error(`[Better Auth] ${message}`, ...args);
+					console.error(`[Better Auth] ${safeMessage}`, ...logArgs);
 					return;
 				}
 
 				if (level === 'warn') {
-					console.warn(`[Better Auth] ${message}`, ...args);
+					console.warn(`[Better Auth] ${safeMessage}`, ...logArgs);
 					return;
 				}
 
 				if (dev) {
-					console.log(`[Better Auth] ${message}`, ...args);
+					console.log(`[Better Auth] ${safeMessage}`, ...logArgs);
 				}
 			}
 		},
-		// Email/password auth only in development mode
 		...(dev && {
 			emailAndPassword: {
 				enabled: true
@@ -148,6 +316,29 @@ export const handle: Handle = async ({ event, resolve }) => {
 			bearer()
 		]
 	});
+}
+
+function getRuntimeAuth(event: RequestEvent): RuntimeAuth {
+	if (runtimeAuth) {
+		return runtimeAuth;
+	}
+
+	const platformEnv = event.platform?.env as RuntimeEnv | undefined;
+	const connectionString = resolveConnectionString(platformEnv);
+
+	if (!connectionString) {
+		throw new Error(
+			'No database connection string found. Set DB_URL (recommended) or ZERO_UPSTREAM_DB.'
+		);
+	}
+
+	runtimeAuth = createAuthInstance(connectionString);
+
+	return runtimeAuth;
+}
+
+export const handle: Handle = async ({ event, resolve }) => {
+	const auth = getRuntimeAuth(event);
 
 	const authHandle: Handle = async ({ event, resolve }) => {
 		return svelteKitHandler({ event, resolve, auth, building });
@@ -218,10 +409,5 @@ export const handle: Handle = async ({ event, resolve }) => {
 		sessionHandle
 	);
 
-	try {
-		return await chain({ event, resolve });
-	} finally {
-		// Explicit connection cleanup (optional but safer)
-		await sql.end();
-	}
+	return chain({ event, resolve });
 };

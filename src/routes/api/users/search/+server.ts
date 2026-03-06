@@ -1,20 +1,22 @@
 import type { RequestEvent } from '@sveltejs/kit';
 import { json, error } from '@sveltejs/kit';
-import { db } from '$db';
+import { createDb } from '$db';
 import { user } from '$db/schema';
 import { ilike, or, ne, and } from 'drizzle-orm';
 
 /**
  * Server-side user search endpoint
  * Returns only public user fields: id, name, username, avatar, image
- * 
+ *
  * GET /api/users/search?q=searchterm
  */
-export async function GET({ url, locals }: RequestEvent) {
+export async function GET({ url, locals, platform }: RequestEvent) {
 	// Must be authenticated
 	if (!locals.user?.id) {
 		throw error(401, 'Authentication required');
 	}
+
+	const db = createDb(platform);
 
 	const query = url.searchParams.get('q')?.trim() ?? '';
 

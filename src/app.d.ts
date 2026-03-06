@@ -14,9 +14,10 @@ declare global {
 		// interface PageState {}
 		interface Platform {
 			env?: {
-				HYPERDRIVE?: {
-					connectionString: string;
-				};
+				DB_URL?: string;
+				ZERO_UPSTREAM_DB?: string;
+				DATABASE_URL?: string;
+				[key: string]: unknown;
 			};
 		}
 	}

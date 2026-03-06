@@ -100,7 +100,7 @@ Implementation: `src/utils/code.ts`
 - Zero (`@rocicorp/zero`) + `zero-svelte`
 - Drizzle ORM + Postgres
 - Better Auth (GitHub OAuth + JWT/bearer support)
-- Cloudflare deployment target (Workers + Hyperdrive support)
+- Cloudflare deployment target (Workers)
 - Sentry client instrumentation with telemetry tunnel endpoint
 
 ## Route Map
@@ -120,15 +120,13 @@ Implementation: `src/utils/code.ts`
 
 These are the key variables used by this app:
 
-- `ZERO_UPSTREAM_DB` - Postgres connection string (runtime + Drizzle CLI)
+- `DB_URL` - runtime Postgres connection string for Cloudflare Workers
+- `ZERO_UPSTREAM_DB` - Postgres connection string fallback (local/dev + Drizzle
+  CLI)
 - `PUBLIC_SERVER` - Zero server URL used by the client sync layer
 - `GITHUB_CLIENT_ID` - GitHub OAuth client id
 - `GITHUB_CLIENT_SECRET` - GitHub OAuth client secret
 - `IV_API_KEY` - API key for admin media upload proxy endpoints
-
-Cloudflare-specific:
-
-- `HYPERDRIVE` binding can provide the runtime DB connection string
 
 ## Local Development
 

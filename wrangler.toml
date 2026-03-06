@@ -8,12 +8,6 @@ keep_vars = true
 binding = "ASSETS"
 directory = ".svelte-kit/cloudflare"
 
-
-[[hyperdrive]]
-binding = "HYPERDRIVE"
-id = "84259142fc264c3b9aba32a4701615d7"
-localConnectionString = "postgresql://postgres:password@127.0.0.1/synhax"
-
 # wrangler.toml (wrangler v3.88.0^)
 [observability.logs]
 enabled = true
