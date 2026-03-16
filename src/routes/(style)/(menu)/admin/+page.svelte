@@ -15,13 +15,24 @@
 	);
 	const haxCount = $derived(hax.data?.length ?? 0);
 
-	const scoreBucketDefs = [
-		{ label: '0-19', min: 0, max: 19 },
-		{ label: '20-39', min: 20, max: 39 },
-		{ label: '40-59', min: 40, max: 59 },
-		{ label: '60-79', min: 60, max: 79 },
-		{ label: '80-100', min: 80, max: 100 }
-	] as const;
+	type ScoreBucketDef = {
+		label: string;
+		min: number;
+		max: number;
+	};
+
+	const scoreBucketDefs: ScoreBucketDef[] = [
+		{ label: '0-39', min: 0, max: 39 },
+		...Array.from({ length: 12 }, (_, index) => {
+			const min = 40 + index * 5;
+			const max = min === 95 ? 100 : min + 4;
+			return {
+				label: `${min}-${max}`,
+				min,
+				max
+			};
+		})
+	];
 
 	const targetStats = $derived.by(() => {
 		const allTargets = targets.data ?? [];
@@ -29,12 +40,18 @@
 		const allHax = hax.data ?? [];
 
 		const soloBattles = allBattles.filter((battle) => battle.type === 'SOLO');
-		const soloBattleIds = new Set(soloBattles.map((battle) => battle.id));
+		const soloBattleIds = soloBattles.reduce<Record<string, boolean>>(
+			(acc, battle) => {
+				acc[battle.id] = true;
+				return acc;
+			},
+			{}
+		);
 		const soloHaxWithScore = allHax.filter(
 			(entry) =>
 				typeof entry.diff_score === 'number' &&
 				!!entry.battle_id &&
-				soloBattleIds.has(entry.battle_id)
+				!!soloBattleIds[entry.battle_id]
 		);
 
 		const attemptsByTarget: Record<string, number> = {};
@@ -145,21 +162,24 @@
 						</header>
 
 						<div
-							class="bucket-list"
+							class="distribution-wrap"
 							aria-label={`Score distribution for ${target.name}`}
 						>
-							{#each target.buckets as bucket (bucket.label)}
-								<div class="bucket-row">
-									<span class="bucket-label">{bucket.label}</span>
-									<div class="bucket-track">
-										<div
-											class="bucket-fill"
-											style={`width: ${target.maxBucketCount > 0 ? (bucket.count / target.maxBucketCount) * 100 : 0}%`}
-										></div>
+							<p class="axis-label">% completed</p>
+							<div class="distribution-chart">
+								{#each target.buckets as bucket (bucket.label)}
+									<div class="band">
+										<p class="band-count">{bucket.count}</p>
+										<div class="band-track">
+											<div
+												class="band-fill"
+												style={`height: ${target.maxBucketCount > 0 ? (bucket.count / target.maxBucketCount) * 100 : 0}%`}
+											></div>
+										</div>
+										<p class="band-label">{bucket.label}</p>
 									</div>
-									<span class="bucket-count">{bucket.count}</span>
-								</div>
-							{/each}
+								{/each}
+							</div>
 						</div>
 					</article>
 				{/each}
@@ -259,40 +279,73 @@
 		color: var(--fg-5);
 	}
 
-	.bucket-list {
+	.distribution-wrap {
+		display: grid;
+		grid-template-columns: auto 1fr;
+		gap: var(--pad-s);
+		align-items: end;
+	}
+
+	.axis-label {
+		margin: 0;
+		font-size: 0.65rem;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: var(--fg-5);
+		writing-mode: vertical-rl;
+		text-orientation: mixed;
+		transform: rotate(180deg);
+	}
+
+	.distribution-chart {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(18px, 1fr));
+		gap: 6px;
+		align-items: end;
+	}
+
+	.band {
 		display: flex;
 		flex-direction: column;
-		gap: 8px;
-	}
-
-	.bucket-row {
-		display: grid;
-		grid-template-columns: 54px 1fr 28px;
-		gap: var(--pad-s);
 		align-items: center;
+		gap: 4px;
 	}
 
-	.bucket-label,
-	.bucket-count {
-		font-size: 0.7rem;
+	.band-count {
+		margin: 0;
+		font-size: 0.6rem;
+		line-height: 1;
 		color: var(--fg-5);
+		min-height: 0.7rem;
 	}
 
-	.bucket-count {
-		text-align: right;
-	}
-
-	.bucket-track {
-		height: 8px;
-		border-radius: 999px;
+	.band-track {
+		height: 82px;
+		width: 100%;
+		min-width: 10px;
+		display: flex;
+		align-items: end;
+		border-radius: var(--br-xs);
 		overflow: hidden;
 		background: var(--surface-0);
 		border: 1px solid var(--border-subtle);
 	}
 
-	.bucket-fill {
-		height: 100%;
-		background: linear-gradient(90deg, var(--blue), var(--green));
-		border-radius: 999px;
+	.band-fill {
+		width: 100%;
+		background: linear-gradient(180deg, var(--blue), var(--green));
+		border-radius: 2px;
+		min-height: 1px;
+	}
+
+	.band-label {
+		margin: 0;
+		height: 56px;
+		font-size: 0.58rem;
+		line-height: 1;
+		color: var(--fg-5);
+		writing-mode: vertical-rl;
+		text-orientation: mixed;
+		transform: rotate(180deg);
 	}
 </style>
