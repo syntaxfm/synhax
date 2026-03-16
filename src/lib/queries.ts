@@ -88,6 +88,24 @@ export const queries = defineQueries({
 				.related('target')
 		),
 
+		/** Get a battle by ID for referee-only views */
+		byIdForReferee: defineQuery(type({ id: 'string' }), ({ args, ctx }) => {
+			let q = zql.battles.where('id', args.id);
+			if (ctx.userRole !== 'syntax') {
+				q = q.where('referee_id', ctx.userID);
+			}
+
+			return q
+				.one()
+				.related('referee')
+				.related('participants', (participantQuery) =>
+					participantQuery
+						.related('user')
+						.related('hax', (haxQuery) => haxQuery.related('votes'))
+				)
+				.related('target');
+		}),
+
 		/** Get a battle by ID with participants and their hax (for code page with live scores) */
 		byIdSimple: defineQuery(type({ id: 'string' }), ({ args }) =>
 			zql.battles

@@ -53,7 +53,9 @@
 	}
 
 	let battle = $derived(
-		z.createQuery(queries.battles.byId({ id: page?.params?.id || '' }))
+		z.createQuery(
+			queries.battles.byIdForReferee({ id: page?.params?.id || '' })
+		)
 	);
 
 	const battlers = $derived.by(() => {
@@ -323,6 +325,8 @@
 			</svg>
 		</button>
 	{/if}
+{:else if battle.details.type === 'complete'}
+	<p>This referee view is private. Sorry.</p>
 {:else}
 	<p>Loading battle...</p>
 {/if}
