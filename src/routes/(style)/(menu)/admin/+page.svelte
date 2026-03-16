@@ -29,8 +29,12 @@
 		const allHax = hax.data ?? [];
 
 		const soloBattles = allBattles.filter((battle) => battle.type === 'SOLO');
+		const soloBattleIds = new Set(soloBattles.map((battle) => battle.id));
 		const soloHaxWithScore = allHax.filter(
-			(entry) => entry.type === 'SOLO' && typeof entry.diff_score === 'number'
+			(entry) =>
+				typeof entry.diff_score === 'number' &&
+				!!entry.battle_id &&
+				soloBattleIds.has(entry.battle_id)
 		);
 
 		const attemptsByTarget: Record<string, number> = {};
