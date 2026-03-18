@@ -7,6 +7,7 @@ export type PublicSoloShareData = {
 	battleName: string;
 	targetName: string;
 	targetImage: string;
+	renderedPreviewUrl: string | null;
 	userName: string;
 	userUsername: string | null;
 	diffScore: number | null;
@@ -100,7 +101,8 @@ export async function getPublicSoloShareData(
 	const [haxRow] = await db
 		.select({
 			diffScore: hax.diff_score,
-			diffScoreUpdatedAt: hax.diff_score_updated_at
+			diffScoreUpdatedAt: hax.diff_score_updated_at,
+			renderedPreviewUrl: hax.rendered_preview_url
 		})
 		.from(hax)
 		.where(
@@ -122,6 +124,7 @@ export async function getPublicSoloShareData(
 			battleRow.name ?? `${battleRow.targetName ?? 'Untitled'} Solo Challenge`,
 		targetName: battleRow.targetName,
 		targetImage: battleRow.targetImage,
+		renderedPreviewUrl: haxRow?.renderedPreviewUrl ?? null,
 		userName: battleRow.userName,
 		userUsername: battleRow.userUsername,
 		diffScore: toScore(haxRow?.diffScore),

@@ -163,7 +163,7 @@
 	}
 
 	function update_time_limit(event: Event) {
-		if (!battle.data || !is_referee) return;
+		if (!battle.data || !is_referee || is_solo) return;
 		const input = event.target as HTMLInputElement;
 		const new_time = parseFloat(input.value);
 		if (!isNaN(new_time)) {
@@ -266,8 +266,7 @@
 
 		const mutation = z.mutate(
 			mutators.battles.start_solo({
-				id: battle.data.id,
-				total_time_seconds: battle.data.total_time_seconds || 600
+				id: battle.data.id
 			})
 		);
 		try {
@@ -532,7 +531,15 @@
 					</div>
 				{/if}
 
-				{#if battle.data?.type === 'TIMED_MATCH' || is_solo}
+				{#if is_solo}
+					<div class="cluster">
+						<span>Time Limit:</span>
+						<strong>15 minutes</strong>
+					</div>
+					<p class="help-text">
+						Solo mode uses a fixed 15-minute timer. Overtime is disabled.
+					</p>
+				{:else if battle.data?.type === 'TIMED_MATCH'}
 					<div class="cluster">
 						<label for="time-limit">Time Limit:</label>
 						<input
@@ -546,26 +553,19 @@
 						/>
 						<span>minutes</span>
 					</div>
-
-					{#if is_solo}
-						<p class="help-text">
-							Solo mode uses a strict timer. No overtime is available.
-						</p>
-					{:else}
-						<div class="cluster">
-							<ToggleButton
-								toggle={battle.data.allow_time_extension ?? true}
-								ontoggle={toggle_time_extension}
-								on_text="Allow Overtime"
-								off_text="Auto-End"
-							/>
-							<span class="help-text">
-								{(battle.data.allow_time_extension ?? true)
-									? 'Host can extend time when battle ends'
-									: 'Battle auto-ends and goes to recap'}
-							</span>
-						</div>
-					{/if}
+					<div class="cluster">
+						<ToggleButton
+							toggle={battle.data.allow_time_extension ?? true}
+							ontoggle={toggle_time_extension}
+							on_text="Allow Overtime"
+							off_text="Auto-End"
+						/>
+						<span class="help-text">
+							{(battle.data.allow_time_extension ?? true)
+								? 'Host can extend time when battle ends'
+								: 'Battle auto-ends and goes to recap'}
+						</span>
+					</div>
 				{/if}
 			</section>
 		{/if}

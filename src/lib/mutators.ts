@@ -37,6 +37,7 @@ const userAwardEnum = type.enumerated(...user_award_enum.enumValues);
 const targetTypeEnum = type.enumerated(...target_type_enum.enumValues);
 
 const AUTH_ERROR = 'Authentication required';
+const SOLO_BATTLE_DURATION_SECONDS = 15 * 60;
 
 function assertAuthenticated(ctx: ZeroContext) {
 	if (!ctx.userID || ctx.userID === 'anon') {
@@ -202,7 +203,6 @@ export const mutators = defineMutators({
 				hax_id: 'string',
 				zero_room_id: 'string',
 				target_id: 'string',
-				'total_time_seconds?': 'number',
 				'name?': 'string'
 			}),
 			async ({ tx, args, ctx }) => {
@@ -237,10 +237,7 @@ export const mutators = defineMutators({
 				const starterHtml = targetCode.starter_html || HTML_TEMPLATE;
 				const starterCss = targetCode.starter_css || CSS_TEMPLATE;
 				const now = Date.now();
-				const totalTimeSeconds = Math.max(
-					60,
-					Math.round(args.total_time_seconds ?? 600)
-				);
+				const totalTimeSeconds = SOLO_BATTLE_DURATION_SECONDS;
 				try {
 					await tx.mutate.battles.insert({
 						id: args.battle_id,
@@ -297,8 +294,7 @@ export const mutators = defineMutators({
 		),
 		start_solo: defineMutator(
 			type({
-				id: 'string',
-				'total_time_seconds?': 'number'
+				id: 'string'
 			}),
 			async ({ tx, args, ctx }) => {
 				assertAuthenticated(ctx);
@@ -322,15 +318,7 @@ export const mutators = defineMutators({
 					throw new Error('Solo challenge can only start from READY status');
 				}
 
-				const durationSeconds = Math.min(
-					7200,
-					Math.max(
-						60,
-						Math.round(
-							args.total_time_seconds ?? battle.total_time_seconds ?? 600
-						)
-					)
-				);
+				const durationSeconds = SOLO_BATTLE_DURATION_SECONDS;
 				const now = Date.now();
 				const participants = (await tx.run(
 					zql.battle_participants.where('battle_id', args.id)
@@ -467,6 +455,14 @@ export const mutators = defineMutators({
 				}
 				const refereeId = isAdmin(ctx) ? args.referee_id : ctx.userID;
 				const now = Date.now();
+				const totalTimeSeconds =
+					args.type === 'SOLO'
+						? SOLO_BATTLE_DURATION_SECONDS
+						: args.total_time_seconds;
+				const overtimeSeconds =
+					args.type === 'SOLO' ? 0 : args.overtime_seconds;
+				const allowTimeExtension =
+					args.type === 'SOLO' ? false : (args.allow_time_extension ?? true);
 				await tx.mutate.battles.insert({
 					id: args.id,
 					name: args.name,
@@ -475,14 +471,14 @@ export const mutators = defineMutators({
 					referee_id: refereeId,
 					type: args.type,
 					win_condition: args.win_condition ?? 'FIRST_TO_PERFECT',
-					total_time_seconds: args.total_time_seconds,
-					overtime_seconds: args.overtime_seconds,
+					total_time_seconds: totalTimeSeconds,
+					overtime_seconds: overtimeSeconds,
 					status: args.status ?? 'PENDING',
 					visibility: args.visibility ?? 'PRIVATE',
 					starts_at: args.starts_at,
 					ends_at: args.ends_at,
 					date: now,
-					allow_time_extension: args.allow_time_extension ?? true,
+					allow_time_extension: allowTimeExtension,
 					created_at: now,
 					updated_at: now
 				});
@@ -577,6 +573,21 @@ export const mutators = defineMutators({
 						throw new Error('SOLO battles cannot have overtime');
 					}
 				}
+				if (
+					targetType === 'SOLO' &&
+					args.total_time_seconds !== undefined &&
+					Math.round(args.total_time_seconds) !== SOLO_BATTLE_DURATION_SECONDS
+				) {
+					throw new Error('SOLO battles always use a 15 minute timer');
+				}
+				const totalTimeSeconds =
+					targetType === 'SOLO'
+						? SOLO_BATTLE_DURATION_SECONDS
+						: args.total_time_seconds;
+				const overtimeSeconds =
+					targetType === 'SOLO' ? 0 : args.overtime_seconds;
+				const allowTimeExtension =
+					targetType === 'SOLO' ? false : args.allow_time_extension;
 				if (battleAccess === 'winner') {
 					const disallowedWinnerFieldUpdate =
 						args.name !== undefined ||
@@ -634,12 +645,12 @@ export const mutators = defineMutators({
 					visibility: args.visibility,
 					type: args.type,
 					win_condition: args.win_condition,
-					total_time_seconds: args.total_time_seconds,
-					overtime_seconds: args.overtime_seconds,
+					total_time_seconds: totalTimeSeconds,
+					overtime_seconds: overtimeSeconds,
 					starts_at: args.starts_at,
 					ends_at: args.ends_at,
 					paused_at: args.paused_at,
-					allow_time_extension: args.allow_time_extension,
+					allow_time_extension: allowTimeExtension,
 					revealed_at: args.revealed_at,
 					winner_hax_id: args.winner_hax_id,
 					updated_at: Date.now()
