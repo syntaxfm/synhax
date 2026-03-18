@@ -22,12 +22,16 @@
 	};
 
 	const scoreBucketDefs: ScoreBucketDef[] = [
-		{ label: '0-39', min: 0, max: 39 },
-		...Array.from({ length: 12 }, (_, index) => {
-			const min = 40 + index * 5;
-			const max = min === 95 ? 100 : min + 4;
+		{ label: '0-70', min: 0, max: 70 },
+		{ label: '71-79', min: 71, max: 79 },
+		{ label: '80-84', min: 80, max: 84 },
+		{ label: '85-89', min: 85, max: 89 },
+		{ label: '90-94', min: 90, max: 94 },
+		...Array.from({ length: 6 }, (_, index) => {
+			const min = 95 + index;
+			const max = min;
 			return {
-				label: `${min}-${max}`,
+				label: `${min}`,
 				min,
 				max
 			};
@@ -75,9 +79,10 @@
 
 				const buckets = scoreBucketDefs.map((bucket) => ({
 					label: bucket.label,
-					count: scores.filter(
-						(score) => score >= bucket.min && score <= bucket.max
-					).length
+					count: scores.filter((score) => {
+						const wholePercent = Math.floor(score);
+						return wholePercent >= bucket.min && wholePercent <= bucket.max;
+					}).length
 				}));
 
 				const maxBucketCount = buckets.reduce(
