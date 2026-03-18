@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import AppFrame from '$lib/battle_mode/AppFrame.svelte';
 	import CodeFrame from '$lib/battle_mode/CodeFrame.svelte';
 	import DiffEngine from '$lib/battle_mode/DiffEngine.svelte';
@@ -33,12 +34,14 @@
 		participants = [],
 		target = null,
 		showOutcomeLabel = true,
-		showDiff = false
+		showDiff = false,
+		children
 	}: {
 		participants?: RecapParticipant[];
 		target?: BattleTarget | null;
 		showOutcomeLabel?: boolean;
 		showDiff?: boolean;
+		children?: Snippet;
 	} = $props();
 
 	const formatScore = (score: number) =>
@@ -107,7 +110,9 @@
 </script>
 
 <svelte:head>
-	{@html `<style>${sentinel}</style>`}
+	<style>
+		{sentinel}
+	</style>
 </svelte:head>
 
 <div
@@ -165,7 +170,11 @@
 				{#if showDiff}
 					<details class="compare-details">
 						<summary class="status-badge">Diff</summary>
-						<DiffView diffCanvasSrc={leftDiffCanvasSrc} showScale={true} label="" />
+						<DiffView
+							diffCanvasSrc={leftDiffCanvasSrc}
+							showScale={true}
+							label=""
+						/>
 					</details>
 					<details class="compare-details">
 						<summary class="status-badge">Overlay</summary>
@@ -258,7 +267,11 @@
 				{#if showDiff}
 					<details class="compare-details">
 						<summary class="status-badge">Diff</summary>
-						<DiffView diffCanvasSrc={rightDiffCanvasSrc} showScale={true} label="" />
+						<DiffView
+							diffCanvasSrc={rightDiffCanvasSrc}
+							showScale={true}
+							label=""
+						/>
 					</details>
 					<details class="compare-details">
 						<summary class="status-badge">Overlay</summary>
@@ -280,6 +293,10 @@
 					/>
 				</div>
 			</div>
+		</article>
+	{:else if children}
+		<article class="stack battler-card right neutral" style="--gap: 1rem;">
+			{@render children()}
 		</article>
 	{/if}
 </div>

@@ -6,6 +6,7 @@
 	import Header from '$lib/battle_mode/Header.svelte';
 	import { z, queries, mutators } from '$lib/zero.svelte';
 	import { BATTLE_RATINGS } from '$lib/constants';
+	import { copyToClipboard } from '$utils/clipboard';
 
 	type WinnerParticipant = {
 		id: string;
@@ -68,6 +69,35 @@
 	);
 
 	const isSoloBattle = $derived(battle.data?.type === 'SOLO');
+	const origin = $derived(page.url.origin);
+	const battleId = $derived(battle.data?.id ?? '');
+	const socialShareUrl = $derived(
+		battleId ? `${origin}/share/solo/${battleId}` : ''
+	);
+	const shareOnXUrl = $derived(
+		socialShareUrl
+			? `https://twitter.com/intent/tweet?url=${encodeURIComponent(socialShareUrl)}`
+			: 'https://twitter.com/intent/tweet'
+	);
+	const socialShareText = $derived(
+		socialShareUrl ? `Check out my solo battle recap: ${socialShareUrl}` : ''
+	);
+	const shareOnBlueskyUrl = $derived(
+		socialShareText
+			? `https://bsky.app/intent/compose?text=${encodeURIComponent(socialShareText)}`
+			: 'https://bsky.app/intent/compose'
+	);
+	const canShowSoloShareControls = $derived(
+		isSoloBattle &&
+			battle.data?.visibility === 'PUBLIC' &&
+			battle.data?.status === 'COMPLETED' &&
+			(battle.data?.participants?.some(
+				(participant) => participant.hax && participant.user
+			) ??
+				false)
+	);
+
+	let copiedShareLink = $state(false);
 
 	const isParticipant = $derived(
 		battle.data?.participants?.some(
@@ -203,6 +233,20 @@
 			alert('Failed to submit rating. Please try again.');
 		});
 	}
+
+	async function copyUrl(url: string) {
+		try {
+			await copyToClipboard(url);
+			copiedShareLink = true;
+			setTimeout(() => {
+				if (copiedShareLink) {
+					copiedShareLink = false;
+				}
+			}, 1200);
+		} catch (error) {
+			console.error('Failed to copy URL:', error);
+		}
+	}
 </script>
 
 <svelte:head>
@@ -245,7 +289,47 @@
 				})}
 				target={battleData.target}
 				showOutcomeLabel={!isSoloBattle}
-			/>
+			>
+				{#if isSoloBattle && (canShowSoloShareControls || battleData.visibility !== 'PUBLIC')}
+					<section class="stack leaderboard" style="--gap: 0.75rem;">
+						<p>Share your result</p>
+						{#if canShowSoloShareControls}
+							<div class="cluster" style="--gap: 0.5rem; flex-wrap: wrap;">
+								<button
+									type="button"
+									class="button"
+									onclick={() => copyUrl(socialShareUrl)}
+								>
+									Copy share link
+								</button>
+								<a
+									class="button"
+									href={shareOnXUrl}
+									target="_blank"
+									rel="noreferrer noopener"
+								>
+									Share on X
+								</a>
+								<a
+									class="button"
+									href={shareOnBlueskyUrl}
+									target="_blank"
+									rel="noreferrer noopener"
+								>
+									Share on Bluesky
+								</a>
+							</div>
+							{#if copiedShareLink}
+								<p class="muted solo-copy">Share link copied.</p>
+							{/if}
+						{:else if battleData.visibility !== 'PUBLIC'}
+							<p class="muted solo-copy">
+								Solo sharing is disabled until this battle is public.
+							</p>
+						{/if}
+					</section>
+				{/if}
+			</BattleRecapGrid>
 		</section>
 
 		{#if isSoloBattle}
