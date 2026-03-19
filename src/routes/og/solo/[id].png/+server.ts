@@ -5,25 +5,103 @@ type ImageResponseLike = {
 	arrayBuffer(): Promise<ArrayBuffer>;
 };
 
+type OgFont = {
+	name: string;
+	data: ArrayBuffer;
+	weight: number;
+	style: 'normal';
+};
+
 type ImageResponseCtor = new (
 	markup: string,
-	options: { width: number; height: number }
+	options: {
+		width: number;
+		height: number;
+		fonts?: OgFont[];
+	}
 ) => ImageResponseLike;
+
+type WorkersOgModule = {
+	ImageResponse: ImageResponseCtor;
+	loadGoogleFont: (args: {
+		family: string;
+		weight?: number;
+		text?: string;
+	}) => Promise<ArrayBuffer>;
+};
 
 let imageResponseCtorPromise: Promise<ImageResponseCtor | null> | null = null;
 let wasmReadyPromise: Promise<void> | null = null;
+let ogFontPromise: Promise<OgFont[] | null> | null = null;
+
+async function loadWorkersOgModule(): Promise<WorkersOgModule | null> {
+	return import('workers-og')
+		.then((module) => module as WorkersOgModule)
+		.catch((error) => {
+			console.error('Failed to load workers-og, using SVG fallback:', error);
+			return null;
+		});
+}
 
 async function loadImageResponseCtor(): Promise<ImageResponseCtor | null> {
 	if (!imageResponseCtorPromise) {
-		imageResponseCtorPromise = import('workers-og')
-			.then((module) => module.ImageResponse as ImageResponseCtor)
+		imageResponseCtorPromise = loadWorkersOgModule().then(
+			(module) => module?.ImageResponse ?? null
+		);
+	}
+
+	return imageResponseCtorPromise;
+}
+
+async function loadOgFonts(): Promise<OgFont[] | null> {
+	if (!ogFontPromise) {
+		ogFontPromise = loadWorkersOgModule()
+			.then(async (module) => {
+				if (!module) {
+					return null;
+				}
+
+				const [regular, semibold, bold, black] = await Promise.all([
+					module.loadGoogleFont({ family: 'Inter', weight: 400 }),
+					module.loadGoogleFont({ family: 'Inter', weight: 600 }),
+					module.loadGoogleFont({ family: 'Inter', weight: 700 }),
+					module.loadGoogleFont({ family: 'Inter', weight: 900 })
+				]);
+
+				return [
+					{
+						name: 'Inter',
+						data: regular,
+						weight: 400,
+						style: 'normal' as const
+					},
+					{
+						name: 'Inter',
+						data: semibold,
+						weight: 600,
+						style: 'normal' as const
+					},
+					{
+						name: 'Inter',
+						data: bold,
+						weight: 700,
+						style: 'normal' as const
+					},
+					{
+						name: 'Inter',
+						data: black,
+						weight: 900,
+						style: 'normal' as const
+					}
+				];
+			})
 			.catch((error) => {
-				console.error('Failed to load workers-og, using SVG fallback:', error);
+				console.error('Failed to load OG fonts, using defaults:', error);
 				return null;
 			});
 	}
 
-	return imageResponseCtorPromise;
+	return ogFontPromise;
 }
 
 async function ensureWasmReady(ctor: ImageResponseCtor): Promise<void> {
@@ -100,7 +178,7 @@ function buildMarkup(args: {
 	resultImageUrl: string | null;
 }) {
 	return `
-<div style="display:flex; width:1200px; height:630px; background:#05070f; color:#f9fbff; position:relative; font-family:Arial, Helvetica, sans-serif; overflow:hidden;">
+<div style="display:flex; width:1200px; height:630px; background:#05070f; color:#f9fbff; position:relative; font-family:Inter, sans-serif; overflow:hidden;">
 	<div style="display:flex; position:absolute; inset:0; background-image:url('${escapeHtml(args.patternImageUrl)}'); background-repeat:repeat; background-size:348px 348px; opacity:0.2;"></div>
 	<div style="display:flex; position:absolute; inset:0; background:linear-gradient(130deg, rgba(7, 10, 22, 0.92) 0%, rgba(7, 10, 22, 0.96) 62%, rgba(7, 10, 22, 0.9) 100%);"></div>
 	<div style="display:flex; position:relative; width:100%; padding:56px; justify-content:space-between; align-items:stretch; gap:36px;">
@@ -201,11 +279,13 @@ function buildFallbackSvg(args: {
 
 async function renderPng(
 	markup: string,
-	ctor: ImageResponseCtor
+	ctor: ImageResponseCtor,
+	fonts: OgFont[] | null
 ): Promise<ArrayBuffer> {
 	const imageResponse = new ctor(markup, {
 		width: 1200,
-		height: 630
+		height: 630,
+		fonts: fonts ?? undefined
 	});
 
 	return imageResponse.arrayBuffer();
@@ -273,7 +353,7 @@ export const GET: RequestHandler = async (event) => {
 			: data.userName;
 
 	const patternImageUrl = `${origin}/bg-pattern.png`;
-	const logoImageUrl = `${origin}/synhax-logo-yellow.svg`;
+	const logoImageUrl = `${origin}/synhax-logo-yellow.png`;
 	const deterministicResultAssetUrl = data.haxId
 		? `https://assets.break-code.com/assets/raw/synhax/solo-preview-${data.haxId}/original.png`
 		: '';
@@ -295,13 +375,16 @@ export const GET: RequestHandler = async (event) => {
 		resultImageUrl
 	});
 
-	const imageCtor = await loadImageResponseCtor();
+	const [imageCtor, ogFonts] = await Promise.all([
+		loadImageResponseCtor(),
+		loadOgFonts()
+	]);
 
 	if (imageCtor) {
 		await ensureWasmReady(imageCtor);
 
 		try {
-			const pngBuffer = await renderPng(markup, imageCtor);
+			const pngBuffer = await renderPng(markup, imageCtor, ogFonts);
 			const pngResponse = new Response(pngBuffer, {
 				headers: {
 					'Content-Type': 'image/png',
