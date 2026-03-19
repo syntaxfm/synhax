@@ -74,13 +74,15 @@
 	const socialShareUrl = $derived(
 		battleId ? `${origin}/share/solo/${battleId}` : ''
 	);
+	const socialShareText = $derived(
+		socialShareUrl
+			? `I completed Syntax Target ${battle.data?.target?.name} with a score of ${Math.round(battle.data?.participants?.[0]?.hax?.diff_score)}% \n\nCheck out my solo battle recap: ${socialShareUrl}`
+			: ''
+	);
 	const shareOnXUrl = $derived(
 		socialShareUrl
-			? `https://twitter.com/intent/tweet?url=${encodeURIComponent(socialShareUrl)}`
+			? `https://twitter.com/intent/tweet?text=${encodeURIComponent(socialShareText)}`
 			: 'https://twitter.com/intent/tweet'
-	);
-	const socialShareText = $derived(
-		socialShareUrl ? `Check out my solo battle recap: ${socialShareUrl}` : ''
 	);
 	const shareOnBlueskyUrl = $derived(
 		socialShareText
