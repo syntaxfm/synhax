@@ -56,15 +56,10 @@ function toScore(value: unknown): number | null {
 	return null;
 }
 
-type SoloShareContext = {
-	platform?: App.Platform;
-};
-
 export async function getPublicSoloShareData(
-	{ platform }: SoloShareContext,
 	battleId: string
 ): Promise<PublicSoloShareData | null> {
-	const db = createDb(platform);
+	const db = createDb();
 
 	const [battleRow] = await db
 		.select({

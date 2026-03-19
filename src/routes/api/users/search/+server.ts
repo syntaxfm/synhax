@@ -10,13 +10,13 @@ import { ilike, or, ne, and } from 'drizzle-orm';
  *
  * GET /api/users/search?q=searchterm
  */
-export async function GET({ url, locals, platform }: RequestEvent) {
+export async function GET({ url, locals }: RequestEvent) {
 	// Must be authenticated
 	if (!locals.user?.id) {
 		throw error(401, 'Authentication required');
 	}
 
-	const db = createDb(platform);
+	const db = createDb();
 
 	const query = url.searchParams.get('q')?.trim() ?? '';
 

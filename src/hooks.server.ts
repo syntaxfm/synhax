@@ -4,11 +4,8 @@ import { svelteKitHandler } from 'better-auth/svelte-kit';
 import { building, dev } from '$app/environment';
 import { sequence } from '@sveltejs/kit/hooks';
 import postgres from 'postgres';
-import {
-	GITHUB_CLIENT_ID,
-	GITHUB_CLIENT_SECRET,
-	ZERO_UPSTREAM_DB
-} from '$env/static/private';
+import { GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET } from '$env/static/private';
+import { env } from '$env/dynamic/private';
 import * as schema from './db/schema';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
@@ -224,12 +221,6 @@ const myErrorHandler: HandleServerError = ({ error, event }) => {
 
 export const handleError = Sentry.handleErrorWithSentry(myErrorHandler);
 
-type RuntimeEnv = {
-	DB_URL?: string;
-	ZERO_UPSTREAM_DB?: string;
-	DATABASE_URL?: string;
-};
-
 function createAuthInstance(connectionString: string) {
 	const sql = postgres(connectionString, {
 		prepare: false, // Better with external poolers (e.g. Supabase pooler)
@@ -305,23 +296,11 @@ function createAuthInstance(connectionString: string) {
 }
 
 export const handle: Handle = async ({ event, resolve }) => {
-	const env = event.platform?.env as RuntimeEnv | undefined;
-	const connectionString =
-		env?.DB_URL ??
-		env?.ZERO_UPSTREAM_DB ??
-		env?.DATABASE_URL ??
-		process.env.DB_URL ??
-		process.env.ZERO_UPSTREAM_DB ??
-		process.env.DATABASE_URL ??
-		ZERO_UPSTREAM_DB;
-
-	if (!connectionString) {
-		throw new Error(
-			'No database connection string found. Set DB_URL (recommended) or ZERO_UPSTREAM_DB.'
-		);
+	if (!env.DB_URL) {
+		throw new Error('Missing DB_URL environment variable.');
 	}
 
-	const { auth, sql } = createAuthInstance(connectionString);
+	const { auth, sql } = createAuthInstance(env.DB_URL);
 
 	const authHandle: Handle = async ({ event, resolve }) => {
 		return svelteKitHandler({ event, resolve, auth, building });

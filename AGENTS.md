@@ -1,3 +1,8 @@
+## Codebase Rules
+
+env vars should always be imported via the appropriate svelte kit import path. for example import { env } from '$env/dynamic/public'; then used env.VAR_NAME rather than process.env.
+
+
 ## Issue Tracking with Dex
 
 **IMPORTANT**: This project uses **Dex** for ALL issue tracking. Do NOT use

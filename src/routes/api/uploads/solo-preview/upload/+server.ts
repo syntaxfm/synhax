@@ -9,7 +9,7 @@ const APP_ID = 'synhax';
 const MAX_IMAGE_BYTES = 6 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp']);
 
-export const POST: RequestHandler = async ({ request, locals, platform }) => {
+export const POST: RequestHandler = async ({ request, locals }) => {
 	try {
 		if (!locals.user) {
 			return json({ error: 'Unauthorized' }, { status: 401 });
@@ -35,7 +35,7 @@ export const POST: RequestHandler = async ({ request, locals, platform }) => {
 			return json({ error: 'Image file is too large' }, { status: 413 });
 		}
 
-		const db = createDb(platform);
+		const db = createDb();
 		const [ownedHax] = await db
 			.select({ id: hax.id })
 			.from(hax)

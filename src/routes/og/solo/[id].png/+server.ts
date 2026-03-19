@@ -334,7 +334,7 @@ export const GET: RequestHandler = async (event) => {
 		}
 	}
 
-	const data = await getPublicSoloShareData(event, event.params.id);
+	const data = await getPublicSoloShareData(event.params.id);
 
 	if (!data) {
 		return new Response('Not found', {

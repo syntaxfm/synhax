@@ -1,50 +1,25 @@
-import { ZERO_UPSTREAM_DB } from '$env/static/private';
+import { env } from '$env/dynamic/private';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 
-type RuntimeEnv = {
-	DB_URL?: string;
-	ZERO_UPSTREAM_DB?: string;
-	DATABASE_URL?: string;
-};
-
-let cachedDb: ReturnType<typeof drizzle> | null = null;
-
-function resolveConnectionString(platform?: App.Platform) {
-	const runtimeEnv = platform?.env as RuntimeEnv | undefined;
-
-	return (
-		runtimeEnv?.DB_URL ??
-		runtimeEnv?.ZERO_UPSTREAM_DB ??
-		runtimeEnv?.DATABASE_URL ??
-		process.env.DB_URL ??
-		process.env.ZERO_UPSTREAM_DB ??
-		process.env.DATABASE_URL ??
-		ZERO_UPSTREAM_DB
-	);
-}
-
-export const createDb = (platform?: App.Platform) => {
-	if (cachedDb) {
-		return cachedDb;
-	}
-
-	const connectionString = resolveConnectionString(platform);
+function requireConnectionString() {
+	const connectionString = env.DB_URL;
 
 	if (!connectionString) {
-		throw new Error(
-			'No database connection string found. Set DB_URL (recommended) or ZERO_UPSTREAM_DB.'
-		);
+		throw new Error('Missing DB_URL environment variable.');
 	}
 
-	const client = postgres(connectionString, {
+	return connectionString;
+}
+
+export const createDb = () => {
+	const client = postgres(requireConnectionString(), {
 		prepare: false,
-		max: 5,
+		max: 1,
 		fetch_types: false
 	});
 
-	cachedDb = drizzle(client);
-	return cachedDb;
+	return drizzle(client);
 };
 
 // Backwards compatibility: keep `db` export lazily initialized.
