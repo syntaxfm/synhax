@@ -157,6 +157,7 @@
 			.sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0))
 			.slice(0, 2);
 	});
+
 	function isWinnerParticipant(participant: WinnerParticipant) {
 		return Boolean(winner && participant.id === winner.id);
 	}
@@ -184,6 +185,7 @@
 					) ?? participants[0];
 				if (!participant) return null;
 				const score = participant.hax?.diff_score ?? 0;
+
 				const completionMs = Math.max(
 					1,
 					Math.round((leaderboardBattle.total_time_seconds ?? 15 * 60) * 1000)
