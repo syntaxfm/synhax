@@ -357,6 +357,8 @@ export const mutators = defineMutators({
 					status?: string | null;
 					referee_id?: string;
 					starts_at?: number | null;
+					total_time_seconds?: number | null;
+					ends_at?: number | null;
 					winner_hax_id?: string | null;
 				} | null;
 				if (!battle?.id) {
@@ -404,10 +406,22 @@ export const mutators = defineMutators({
 				}
 
 				const now = Date.now();
+				const durationMs = Math.max(
+					1,
+					Math.round(
+						(battle.total_time_seconds ?? SOLO_BATTLE_DURATION_SECONDS) * 1000
+					)
+				);
+				const scheduledEndsAt =
+					battle.ends_at ??
+					(battle.starts_at ? battle.starts_at + durationMs : null);
+				const effectiveFinishedAt = scheduledEndsAt
+					? Math.min(now, scheduledEndsAt)
+					: now;
 				await tx.mutate.battle_participants.update({
 					id: participant.id,
 					status: 'FINISHED',
-					finished_at: now,
+					finished_at: effectiveFinishedAt,
 					updated_at: now
 				});
 
@@ -415,7 +429,7 @@ export const mutators = defineMutators({
 					id: args.id,
 					status: 'COMPLETED',
 					winner_hax_id: battle.winner_hax_id ?? battleHax.id,
-					ends_at: now,
+					ends_at: effectiveFinishedAt,
 					updated_at: now
 				});
 			}

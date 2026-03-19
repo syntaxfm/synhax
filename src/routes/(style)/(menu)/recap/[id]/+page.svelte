@@ -98,12 +98,25 @@
 	);
 
 	let copiedShareLink = $state(false);
+	let soloPreviewUploadStarted = $state(false);
+	let soloPreviewUploadInFlight = $state(false);
 
 	const isParticipant = $derived(
 		battle.data?.participants?.some(
 			(participant) => participant.user_id === z.userID
 		) ?? false
 	);
+
+	const ownSoloParticipant = $derived.by(() => {
+		if (!isSoloBattle) return null;
+		return (
+			battle.data?.participants?.find(
+				(participant) => participant.user_id === z.userID && participant.hax?.id
+			) ?? null
+		);
+	});
+	const ownSoloHaxId = $derived(ownSoloParticipant?.hax?.id ?? '');
+	const ownsSoloHax = $derived(Boolean(isSoloBattle && ownSoloParticipant));
 
 	const battlers = $derived.by(() => {
 		const participants = battle.data?.participants ?? [];
@@ -172,9 +185,18 @@
 				if (!participant) return null;
 				const score = participant.hax?.diff_score ?? 0;
 				const completionMs =
-					participant.finished_at && leaderboardBattle.starts_at
-						? Math.max(0, participant.finished_at - leaderboardBattle.starts_at)
-						: null;
+					leaderboardBattle.starts_at !== null &&
+					leaderboardBattle.starts_at !== undefined &&
+					leaderboardBattle.ends_at !== null &&
+					leaderboardBattle.ends_at !== undefined
+						? Math.max(
+								0,
+								leaderboardBattle.ends_at - leaderboardBattle.starts_at
+							)
+						: leaderboardBattle.total_time_seconds !== null &&
+							  leaderboardBattle.total_time_seconds !== undefined
+							? leaderboardBattle.total_time_seconds * 1000
+							: null;
 				return {
 					battleId: leaderboardBattle.id,
 					userId: participant.user_id,
@@ -247,6 +269,66 @@
 			console.error('Failed to copy URL:', error);
 		}
 	}
+
+	async function uploadSoloPreview(pngDataUrl: string) {
+		if (
+			!isSoloBattle ||
+			!ownsSoloHax ||
+			!ownSoloHaxId ||
+			soloPreviewUploadStarted ||
+			soloPreviewUploadInFlight
+		) {
+			return;
+		}
+
+		soloPreviewUploadStarted = true;
+		soloPreviewUploadInFlight = true;
+
+		try {
+			const imageBlob = await fetch(pngDataUrl).then((response) =>
+				response.blob()
+			);
+			const file = new File([imageBlob], `solo-preview-${ownSoloHaxId}.png`, {
+				type: 'image/png'
+			});
+			const formData = new FormData();
+			formData.append('file', file);
+			formData.append('hax_id', ownSoloHaxId);
+
+			const uploadRes = await fetch('/api/uploads/solo-preview/upload', {
+				method: 'POST',
+				body: formData
+			});
+
+			if (!uploadRes.ok) {
+				const error = await uploadRes
+					.json()
+					.catch(() => ({ error: 'Failed to upload preview image' }));
+				throw new Error(error.error ?? 'Failed to upload preview image');
+			}
+
+			const payload = (await uploadRes.json()) as {
+				success?: boolean;
+			};
+			if (!payload.success) {
+				throw new Error('Upload response missing success state');
+			}
+
+			const mutation = z.mutate(
+				mutators.hax.update({
+					id: ownSoloHaxId,
+					user_id: z.userID,
+					updated_at: Date.now()
+				})
+			);
+			await mutation.server;
+		} catch (error) {
+			console.error('Failed to upload solo preview image:', error);
+			soloPreviewUploadStarted = false;
+		} finally {
+			soloPreviewUploadInFlight = false;
+		}
+	}
 </script>
 
 <svelte:head>
@@ -289,6 +371,7 @@
 				})}
 				target={battleData.target}
 				showOutcomeLabel={!isSoloBattle}
+				onResultPreviewReady={uploadSoloPreview}
 			>
 				{#if isSoloBattle && (canShowSoloShareControls || battleData.visibility !== 'PUBLIC')}
 					<section class="stack leaderboard" style="--gap: 0.75rem;">

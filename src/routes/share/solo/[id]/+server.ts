@@ -76,7 +76,8 @@ export const GET: RequestHandler = async (event) => {
 	const shareUrl = `${origin}/share/solo/${data.battleId}`;
 	const scoreLabel = formatScore(data.diffScore);
 	const durationLabel = formatDuration(data.completionMs);
-	const scoreVersion = data.diffScoreUpdatedAt ?? data.completedAt ?? 0;
+	const scoreVersion =
+		data.haxUpdatedAt ?? data.diffScoreUpdatedAt ?? data.completedAt ?? 0;
 	const ogImageUrl = `${origin}/og/solo/${data.battleId}.png?v=${scoreVersion}`;
 
 	const playerLabel =

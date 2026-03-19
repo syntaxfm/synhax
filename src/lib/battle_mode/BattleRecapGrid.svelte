@@ -7,6 +7,7 @@
 	import OverlayCompare from '$lib/battle_mode/OverlayCompare.svelte';
 	import { FRAME_HEIGHT, FRAME_WIDTH } from '$lib/constants';
 	import { parseTargetCode, usesTailwind } from '$utils/code';
+	import { captureElement } from '$utils/diff';
 	import sentinel from '../../routes/(style)/(app)/battle/sentinel-dark.css?raw';
 
 	type RecapTone = 'win' | 'loss' | 'neutral';
@@ -35,12 +36,14 @@
 		target = null,
 		showOutcomeLabel = true,
 		showDiff = false,
+		onResultPreviewReady,
 		children
 	}: {
 		participants?: RecapParticipant[];
 		target?: BattleTarget | null;
 		showOutcomeLabel?: boolean;
 		showDiff?: boolean;
+		onResultPreviewReady?: (pngDataUrl: string) => void;
 		children?: Snippet;
 	} = $props();
 
@@ -76,6 +79,30 @@
 	// Diff canvas data URLs
 	let leftDiffCanvasSrc: string | null = $state(null);
 	let rightDiffCanvasSrc: string | null = $state(null);
+	let resultPreviewEmitted = $state(false);
+	let resultPreviewCaptureInFlight = $state(false);
+
+	const RESULT_PREVIEW_MAX_ATTEMPTS = 6;
+	const RESULT_PREVIEW_RETRY_DELAY_MS = 250;
+
+	const delay = (ms: number) =>
+		new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+	function looksLikePlaceholderFrame(root: HTMLElement) {
+		const body = root.querySelector('body');
+		if (!body) {
+			return true;
+		}
+
+		const text = (body.textContent ?? '').replace(/\s+/g, ' ').trim();
+		const normalized = text.toLowerCase();
+		const hasLetsBattle =
+			normalized.includes("let's battle!") ||
+			normalized.includes('lets battle!');
+		const elementCount = body.querySelectorAll('*').length;
+
+		return hasLetsBattle && text.length < 120 && elementCount < 20;
+	}
 
 	function handleLeftDiffCanvasUpdate(canvas: HTMLCanvasElement | null) {
 		if (canvas) {
@@ -89,10 +116,90 @@
 		}
 	}
 
+	async function emitResultPreviewOnce() {
+		if (
+			resultPreviewEmitted ||
+			resultPreviewCaptureInFlight ||
+			!onResultPreviewReady
+		) {
+			return;
+		}
+
+		if (!leftIframeElement?.contentDocument) {
+			return;
+		}
+
+		resultPreviewCaptureInFlight = true;
+
+		try {
+			for (
+				let attempt = 1;
+				attempt <= RESULT_PREVIEW_MAX_ATTEMPTS;
+				attempt += 1
+			) {
+				const frameRoot = leftIframeElement?.contentDocument?.documentElement;
+				if (!frameRoot) {
+					await delay(RESULT_PREVIEW_RETRY_DELAY_MS);
+					continue;
+				}
+
+				if (looksLikePlaceholderFrame(frameRoot)) {
+					await delay(RESULT_PREVIEW_RETRY_DELAY_MS);
+					continue;
+				}
+
+				try {
+					const captured = await captureElement(frameRoot);
+					await captured.decode?.().catch(() => {});
+
+					const width = captured.naturalWidth || captured.width;
+					const height = captured.naturalHeight || captured.height;
+					if (!width || !height) {
+						throw new Error('Captured preview had invalid dimensions');
+					}
+
+					const canvas = document.createElement('canvas');
+					canvas.width = width;
+					canvas.height = height;
+					const ctx = canvas.getContext('2d');
+					if (!ctx) {
+						throw new Error('Could not create preview canvas context');
+					}
+
+					ctx.drawImage(captured, 0, 0, width, height);
+					onResultPreviewReady(canvas.toDataURL('image/png'));
+					resultPreviewEmitted = true;
+					return;
+				} catch (error) {
+					console.error(
+						`[BattleRecapGrid] Failed to capture result preview (attempt ${attempt}/${RESULT_PREVIEW_MAX_ATTEMPTS}):`,
+						error
+					);
+				}
+
+				if (attempt < RESULT_PREVIEW_MAX_ATTEMPTS) {
+					await delay(RESULT_PREVIEW_RETRY_DELAY_MS);
+				}
+			}
+
+			console.error(
+				'[BattleRecapGrid] Result preview capture exhausted all retry attempts'
+			);
+		} catch (error) {
+			console.error(
+				'[BattleRecapGrid] Failed to capture result preview:',
+				error
+			);
+		} finally {
+			resultPreviewCaptureInFlight = false;
+		}
+	}
+
 	function handleLeftLoad() {
 		if (showDiff) {
 			leftDiffEngine?.triggerCompare();
 		}
+		void emitResultPreviewOnce();
 	}
 
 	function handleRightLoad() {
