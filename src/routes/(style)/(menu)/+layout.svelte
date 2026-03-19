@@ -26,6 +26,7 @@
 
 	const hideSidebarByDefault = $derived(
 		page.url.pathname.startsWith('/recap') ||
+			page.url.pathname.startsWith('/share') ||
 			page.url.pathname.startsWith('/ref')
 	);
 
