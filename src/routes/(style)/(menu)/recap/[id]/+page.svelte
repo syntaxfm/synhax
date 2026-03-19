@@ -184,19 +184,10 @@
 					) ?? participants[0];
 				if (!participant) return null;
 				const score = participant.hax?.diff_score ?? 0;
-				const completionMs =
-					leaderboardBattle.starts_at !== null &&
-					leaderboardBattle.starts_at !== undefined &&
-					leaderboardBattle.ends_at !== null &&
-					leaderboardBattle.ends_at !== undefined
-						? Math.max(
-								0,
-								leaderboardBattle.ends_at - leaderboardBattle.starts_at
-							)
-						: leaderboardBattle.total_time_seconds !== null &&
-							  leaderboardBattle.total_time_seconds !== undefined
-							? leaderboardBattle.total_time_seconds * 1000
-							: null;
+				const completionMs = Math.max(
+					1,
+					Math.round((leaderboardBattle.total_time_seconds ?? 15 * 60) * 1000)
+				);
 				return {
 					battleId: leaderboardBattle.id,
 					userId: participant.user_id,
@@ -429,7 +420,7 @@
 								<th>Rank</th>
 								<th>User</th>
 								<th>Score</th>
-								<th>Time</th>
+								<th>Time Limit</th>
 								<th>Tie-break</th>
 							</tr>
 						</thead>
