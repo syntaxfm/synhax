@@ -163,7 +163,7 @@
 	}
 
 	function update_time_limit(event: Event) {
-		if (!battle.data || !is_referee || is_solo) return;
+		if (!battle.data || !is_referee) return;
 		const input = event.target as HTMLInputElement;
 		const new_time = parseFloat(input.value);
 		if (!isNaN(new_time)) {
