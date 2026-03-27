@@ -536,9 +536,19 @@
 						<span>Time Limit:</span>
 						<strong>15 minutes</strong>
 					</div>
-					<p class="help-text">
-						Solo mode uses a fixed 15-minute timer. Overtime is disabled.
-					</p>
+					<div class="cluster">
+						<label for="time-limit">Time Limit:</label>
+						<input
+							defaultValue={battle.data.total_time_seconds / 60 || 10}
+							id="time-limit"
+							type="number"
+							placeholder="Enter time limit"
+							required
+							step="any"
+							onchange={update_time_limit}
+						/>
+						<span>minutes</span>
+					</div>
 				{:else if battle.data?.type === 'TIMED_MATCH'}
 					<div class="cluster">
 						<label for="time-limit">Time Limit:</label>
