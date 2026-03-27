@@ -318,7 +318,7 @@ export const mutators = defineMutators({
 					throw new Error('Solo challenge can only start from READY status');
 				}
 
-				const durationSeconds = SOLO_BATTLE_DURATION_SECONDS;
+				const durationSeconds = battle.total_time_seconds as number;
 				const now = Date.now();
 				const participants = (await tx.run(
 					zql.battle_participants.where('battle_id', args.id)
@@ -587,17 +587,21 @@ export const mutators = defineMutators({
 						throw new Error('SOLO battles cannot have overtime');
 					}
 				}
-				if (
-					targetType === 'SOLO' &&
-					args.total_time_seconds !== undefined &&
-					Math.round(args.total_time_seconds) !== SOLO_BATTLE_DURATION_SECONDS
-				) {
-					throw new Error('SOLO battles always use a 15 minute timer');
-				}
+				// if (
+				// 	targetType === 'SOLO' &&
+				// 	args.total_time_seconds !== undefined &&
+				// 	Math.round(args.total_time_seconds) !== SOLO_BATTLE_DURATION_SECONDS
+				// ) {
+				// 	throw new Error('SOLO battles always use a 15 minute timer');
+				// }
 				const totalTimeSeconds =
 					targetType === 'SOLO'
-						? SOLO_BATTLE_DURATION_SECONDS
+						? args.total_time_seconds
 						: args.total_time_seconds;
+				// const totalTimeSeconds =
+				// 	targetType === 'SOLO'
+				// 		? SOLO_BATTLE_DURATION_SECONDS
+				// 		: args.total_time_seconds;
 				const overtimeSeconds =
 					targetType === 'SOLO' ? 0 : args.overtime_seconds;
 				const allowTimeExtension =

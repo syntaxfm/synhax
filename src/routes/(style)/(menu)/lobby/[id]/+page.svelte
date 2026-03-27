@@ -163,10 +163,12 @@
 	}
 
 	function update_time_limit(event: Event) {
+		console.log(event);
 		if (!battle.data || !is_referee) return;
 		const input = event.target as HTMLInputElement;
 		const new_time = parseFloat(input.value);
 		if (!isNaN(new_time)) {
+			console.log(new_time);
 			z.mutate(
 				mutators.battles.update({
 					id: battle.data.id,
@@ -534,7 +536,7 @@
 				{#if is_solo}
 					<div class="cluster">
 						<span>Time Limit:</span>
-						<strong>15 minutes</strong>
+						<strong>{battle.data.total_time_seconds / 60 || 10}</strong>
 					</div>
 					<div class="cluster">
 						<label for="time-limit">Time Limit:</label>
