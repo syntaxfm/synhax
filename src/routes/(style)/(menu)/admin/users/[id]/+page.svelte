@@ -73,7 +73,6 @@
 				{#if userData.username}
 					<p class="username">@{userData.username}</p>
 				{/if}
-				<p class="email">{userData.email}</p>
 
 				<div class="badges">
 					{#if userData.role}
